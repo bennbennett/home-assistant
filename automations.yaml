@@ -1,0 +1,617 @@
+- id: hockey_checklist_midnight_reset
+  alias: Reset Hockey Checklist at Midnight
+  description: Reset all hockey checklist items to off every day at midnight
+  triggers:
+  - platform: time
+    at: 00:00:00
+  conditions: []
+  actions:
+  - service: input_boolean.turn_off
+    target:
+      entity_id:
+      - input_boolean.hockey_1
+      - input_boolean.hockey_2
+      - input_boolean.hockey_3
+      - input_boolean.hockey_4
+      - input_boolean.hockey_5
+      - input_boolean.hockey_6
+      - input_boolean.hockey_jersey
+      - input_boolean.hockey_7
+      - input_boolean.hockey_8
+  mode: single
+- id: reset_school_checklist_at_midnight
+  alias: Reset School Checklist at Midnight
+  description: Reset all school checklist items to off every day at midnight
+  triggers:
+  - platform: time
+    at: 00:00:00
+  conditions: []
+  actions:
+  - service: input_boolean.turn_off
+    target:
+      entity_id:
+      - input_boolean.school_snack
+      - input_boolean.school_lunch
+      - input_boolean.school_water
+      - input_boolean.school_jacket
+      - input_boolean.school_binder
+      - input_boolean.school_chromebook
+      - input_boolean.school_homework
+  mode: single
+- id: close_calendar_popup_after_event_created
+  alias: Close Calendar Popup After Event Created
+  description: Closes the calendar popup when event is created
+  triggers:
+  - platform: state
+    entity_id: input_boolean.calendar_event_created
+    to: 'on'
+  conditions: []
+  actions:
+  - service: browser_mod.close_popup
+    data: {}
+  - delay:
+      milliseconds: 100
+  - service: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.calendar_event_created
+  mode: single
+- id: fp2_front_house_off_after_5m_no_presence
+  alias: FP2 Front House Dim to 20% After 10m No Presence
+  description: 'At 10m of no presence (16:00–23:00): if not already dimmed and brightness
+    > 20%, snapshot state then dim to 20%.'
+  triggers:
+  - platform: state
+    entity_id: binary_sensor.front_house
+    to: 'off'
+    for: 00:10:00
+  conditions:
+  - condition: time
+    after: '16:00:00'
+    before: '23:00:00'
+  - condition: state
+    entity_id: light.front_house
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.front_house_is_dimmed
+    state: 'off'
+  - condition: template
+    value_template: '{{ state_attr(''light.front_house'',''brightness'')|int(0) >
+      51 }}'
+  actions:
+  - action: scene.create
+    data:
+      scene_id: front_house_pre_dim
+      snapshot_entities:
+      - light.front_house
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.front_house_is_dimmed
+  - action: light.turn_on
+    target:
+      entity_id: light.front_house
+    data:
+      brightness_pct: 20
+      transition: 10
+  - action: logbook.log
+    data:
+      name: FP2 Front House
+      message: 10m no presence → dim to 20% (10s).
+      entity_id: light.front_house
+  mode: single
+- id: fp2_front_house_on_presence_restore
+  alias: FP2 Front House On Presence (Restore Pre-Dim)
+  description: 'On presence (16:00–23:00): if light was auto-dimmed, restore pre-dim
+    state.'
+  triggers:
+  - platform: state
+    entity_id: binary_sensor.front_house
+    to: 'on'
+  conditions:
+  - condition: time
+    after: '16:00:00'
+    before: '23:00:00'
+  - condition: state
+    entity_id: input_boolean.front_house_is_dimmed
+    state: 'on'
+  actions:
+  - action: scene.turn_on
+    target:
+      entity_id: scene.front_house_pre_dim
+    data:
+      transition: 10
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.front_house_is_dimmed
+  - action: logbook.log
+    data:
+      name: FP2 Front House
+      message: Presence → restored pre-dim state (10s).
+      entity_id: light.front_house
+  mode: single
+- id: hourly_adaptive_temp_all_rooms
+  alias: Hourly Adaptive Temperature - All Rooms (2min)
+  description: >-
+    Every hour, apply Adaptive Lighting color temperature to lights that are currently ON.
+    Covers: Front House, Master Bedroom, Toby's Room.
+    Only affects lights already on - never turns on lights that are off.
+  triggers:
+  - platform: time_pattern
+    minutes: '0'
+  conditions: []
+  actions:
+  - variables:
+      kelvin: '{{ state_attr(''switch.adaptive_lighting_living_room'',''color_temp_kelvin'') | int }}'
+  # === FRONT HOUSE LIGHTS ===
+  - if:
+      - condition: state
+        entity_id: light.living_room_color
+        state: 'on'
+    then:
+      - action: light.turn_on
+        target:
+          entity_id: light.living_room_color
+        data:
+          color_temp_kelvin: '{{ kelvin }}'
+          brightness: '{{ state_attr(''light.living_room_color'', ''brightness'') | default(128) | int }}'
+          transition: 120
+  - if:
+      - condition: state
+        entity_id: light.kitchen_color
+        state: 'on'
+    then:
+      - action: light.turn_on
+        target:
+          entity_id: light.kitchen_color
+        data:
+          color_temp_kelvin: '{{ kelvin }}'
+          brightness: '{{ state_attr(''light.kitchen_color'', ''brightness'') | default(128) | int }}'
+          transition: 120
+  - if:
+      - condition: state
+        entity_id: light.kitchen_color_1
+        state: 'on'
+    then:
+      - action: light.turn_on
+        target:
+          entity_id: light.kitchen_color_1
+        data:
+          color_temp_kelvin: '{{ kelvin }}'
+          brightness: '{{ state_attr(''light.kitchen_color_1'', ''brightness'') | default(128) | int }}'
+          transition: 120
+  - if:
+      - condition: state
+        entity_id: light.dining_room_color_1
+        state: 'on'
+    then:
+      - action: light.turn_on
+        target:
+          entity_id: light.dining_room_color_1
+        data:
+          color_temp_kelvin: '{{ kelvin }}'
+          brightness: '{{ state_attr(''light.dining_room_color_1'', ''brightness'') | default(128) | int }}'
+          transition: 120
+  - if:
+      - condition: state
+        entity_id: light.dining_room_color_2
+        state: 'on'
+    then:
+      - action: light.turn_on
+        target:
+          entity_id: light.dining_room_color_2
+        data:
+          color_temp_kelvin: '{{ kelvin }}'
+          brightness: '{{ state_attr(''light.dining_room_color_2'', ''brightness'') | default(128) | int }}'
+          transition: 120
+  - if:
+      - condition: state
+        entity_id: light.extended_color_light_1
+        state: 'on'
+    then:
+      - action: light.turn_on
+        target:
+          entity_id: light.extended_color_light_1
+        data:
+          color_temp_kelvin: '{{ kelvin }}'
+          brightness: '{{ state_attr(''light.extended_color_light_1'', ''brightness'') | default(128) | int }}'
+          transition: 120
+  # === MASTER BEDROOM LIGHTS ===
+  - if:
+      - condition: state
+        entity_id: light.hue_color_lamp_1
+        state: 'on'
+    then:
+      - action: light.turn_on
+        target:
+          entity_id: light.hue_color_lamp_1
+        data:
+          color_temp_kelvin: '{{ kelvin }}'
+          brightness: '{{ state_attr(''light.hue_color_lamp_1'', ''brightness'') | default(128) | int }}'
+          transition: 120
+  - if:
+      - condition: state
+        entity_id: light.hue_color_lamp_1_2
+        state: 'on'
+    then:
+      - action: light.turn_on
+        target:
+          entity_id: light.hue_color_lamp_1_2
+        data:
+          color_temp_kelvin: '{{ kelvin }}'
+          brightness: '{{ state_attr(''light.hue_color_lamp_1_2'', ''brightness'') | default(128) | int }}'
+          transition: 120
+  - if:
+      - condition: state
+        entity_id: light.hue_color_lamp_1_3
+        state: 'on'
+    then:
+      - action: light.turn_on
+        target:
+          entity_id: light.hue_color_lamp_1_3
+        data:
+          color_temp_kelvin: '{{ kelvin }}'
+          brightness: '{{ state_attr(''light.hue_color_lamp_1_3'', ''brightness'') | default(128) | int }}'
+          transition: 120
+  # === TOBY'S ROOM LIGHTS ===
+  - if:
+      - condition: state
+        entity_id: light.toby_s_room_color
+        state: 'on'
+    then:
+      - action: light.turn_on
+        target:
+          entity_id: light.toby_s_room_color
+        data:
+          color_temp_kelvin: '{{ kelvin }}'
+          brightness: '{{ state_attr(''light.toby_s_room_color'', ''brightness'') | default(128) | int }}'
+          transition: 120
+  - if:
+      - condition: state
+        entity_id: light.toby_s_room_color_2
+        state: 'on'
+    then:
+      - action: light.turn_on
+        target:
+          entity_id: light.toby_s_room_color_2
+        data:
+          color_temp_kelvin: '{{ kelvin }}'
+          brightness: '{{ state_attr(''light.toby_s_room_color_2'', ''brightness'') | default(128) | int }}'
+          transition: 120
+  - action: logbook.log
+    data:
+      name: Hourly Adaptive Temp
+      message: 'Applied color temperature ({{ kelvin }}K) to lights that were ON.'
+      entity_id: automation.hourly_adaptive_temp_all_rooms
+  mode: single
+- id: fp2_front_house_off_after_20m_no_presence
+  alias: FP2 Front House OFF After 20m No Presence
+  description: 'At 20m of no presence (16:00–23:00): turn OFF with 10s transition.
+    Uses pre-dim snapshot for later restore.'
+  triggers:
+  - platform: state
+    entity_id: binary_sensor.front_house
+    to: 'off'
+    for: 00:20:00
+  conditions:
+  - condition: time
+    after: '16:00:00'
+    before: '23:00:00'
+  actions:
+  - action: light.turn_off
+    target:
+      entity_id: light.front_house
+    data:
+      transition: 10
+  - action: logbook.log
+    data:
+      name: FP2 Front House
+      message: 20m no presence → OFF (10s).
+      entity_id: light.front_house
+  mode: single
+- id: fp2_front_house_clear_dim_flag_on_off
+  alias: FP2 Clear Dim Flag When Light Turned Off
+  description: Clear the dimmed flag when front house light is turned off (manual
+    or otherwise).
+  triggers:
+  - platform: state
+    entity_id: light.front_house
+    to: 'off'
+  conditions: []
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.front_house_is_dimmed
+  mode: single
+- id: fp2_front_house_clear_dim_flag_at_11pm
+  alias: FP2 Clear Dim Flag at 11pm
+  description: Clear the dimmed flag at 11pm so lights stay in their current state
+    (no restore after automation window closes).
+  triggers:
+  - platform: time
+    at: '23:00:00'
+  conditions: []
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.front_house_is_dimmed
+  - action: logbook.log
+    data:
+      name: FP2 Front House
+      message: 11pm - dim flag cleared, lights stay as-is.
+      entity_id: light.front_house
+  mode: single
+- id: styrbar_petra_lamp_on
+  alias: Styrbar - Petra Lamp On
+  description: Turn on Petra's Lamp when Styrbar top button is pressed
+  triggers:
+  - platform: device
+    domain: zha
+    device_id: a275a281d2542eb6767ac885b1a72cca
+    type: remote_button_short_press
+    subtype: turn_on
+  actions:
+  - target:
+      entity_id: light.hue_color_lamp_1_3
+    action: light.turn_on
+  mode: single
+- id: styrbar_petra_lamp_off
+  alias: Styrbar - Petra Lamp Off
+  description: Turn off Petra's Lamp when Styrbar bottom button is pressed
+  triggers:
+  - platform: device
+    domain: zha
+    device_id: a275a281d2542eb6767ac885b1a72cca
+    type: remote_button_short_press
+    subtype: turn_off
+  actions:
+  - target:
+      entity_id: light.hue_color_lamp_1_3
+    action: light.turn_off
+  mode: single
+- id: styrbar_petra_lamp_bright_up
+  alias: Styrbar - Petra Lamp Brightness Up
+  description: Increase Petra's Lamp brightness when Styrbar right arrow is pressed
+  triggers:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: a275a281d2542eb6767ac885b1a72cca
+      command: press
+      cluster_id: 5
+      endpoint_id: 1
+      args:
+      - 256
+      - 13
+      - 0
+  actions:
+  - target:
+      entity_id: light.hue_color_lamp_1_3
+    data:
+      brightness_step_pct: 20
+    action: light.turn_on
+  mode: single
+- id: styrbar_petra_lamp_bright_down
+  alias: Styrbar - Petra Lamp Brightness Down
+  description: Decrease Petra's Lamp brightness when Styrbar left arrow is pressed
+  triggers:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: a275a281d2542eb6767ac885b1a72cca
+      command: press
+      cluster_id: 5
+      endpoint_id: 1
+      args:
+      - 257
+      - 13
+      - 0
+  actions:
+  - target:
+      entity_id: light.hue_color_lamp_1_3
+    data:
+      brightness_step_pct: -20
+    action: light.turn_on
+  mode: single
+- id: tradfri_toby_lamp_on
+  alias: Tradfri - Toby Lamp On
+  description: Turn on Toby's Lamp when Tradfri on button is pressed
+  triggers:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: 2506d7072d98b35bd7cf46cac9d435ed
+      command: 'on'
+  actions:
+  - target:
+      entity_id: light.dimmable_light_1
+    action: light.turn_on
+  mode: single
+- id: tradfri_toby_lamp_off
+  alias: Tradfri - Toby Lamp Off
+  description: Turn off Toby's Lamp when Tradfri off button is pressed
+  triggers:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: 2506d7072d98b35bd7cf46cac9d435ed
+      command: 'off'
+  actions:
+  - target:
+      entity_id: light.dimmable_light_1
+    action: light.turn_off
+  mode: single
+- id: tradfri_toby_lamp_bright_up
+  alias: Tradfri - Toby Lamp Brightness Up
+  description: Increase Toby's Lamp brightness on long press on
+  triggers:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: 2506d7072d98b35bd7cf46cac9d435ed
+      command: move_with_on_off
+  actions:
+  - target:
+      entity_id: light.dimmable_light_1
+    data:
+      brightness_step_pct: 20
+    action: light.turn_on
+  mode: single
+- id: tradfri_toby_lamp_bright_down
+  alias: Tradfri - Toby Lamp Brightness Down
+  description: Decrease Toby's Lamp brightness on long press off
+  triggers:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: 2506d7072d98b35bd7cf46cac9d435ed
+      command: move
+  actions:
+  - target:
+      entity_id: light.dimmable_light_1
+    data:
+      brightness_step_pct: -20
+    action: light.turn_on
+  mode: single
+- id: 3d_printer_print_complete_notification
+  alias: 3D Printer - Notify When Print Complete
+  description: Send notification to Pixel 7 when a 3D print finishes
+  triggers:
+  - platform: state
+    entity_id: sensor.centauri_carbon_print_status
+    from: printing
+    to: complete
+  - platform: state
+    entity_id: sensor.centauri_carbon_print_status
+    from: printing
+    to: idle
+  actions:
+  - action: notify.mobile_app_pixel_10
+    data:
+      title: "3D Print Complete"
+      message: "{{ states('sensor.centauri_carbon_file_name') }} has finished printing!"
+      data:
+        channel: 3D Printer
+        importance: high
+        ttl: 0
+        priority: high
+  mode: single
+- id: 3d_printer_led_strip_on
+  alias: 3D Printer - LED Strip On During Print
+  description: Turn on The Abyss LED strip when 3D printer starts printing
+  triggers:
+  - platform: state
+    entity_id: sensor.centauri_carbon_print_status
+    to: printing
+  - platform: state
+    entity_id: sensor.centauri_carbon_print_status
+    to: preheating
+  - platform: state
+    entity_id: sensor.centauri_carbon_print_status
+    to: homing
+  - platform: state
+    entity_id: sensor.centauri_carbon_print_status
+    to: leveling
+  conditions: []
+  actions:
+  - action: light.turn_on
+    target:
+      entity_id: light.the_abyss
+  - action: logbook.log
+    data:
+      name: 3D Printer LED
+      message: 'Print started ({{ states(''sensor.centauri_carbon_print_status'') }}) - LED strip ON'
+      entity_id: light.the_abyss
+  mode: single
+- id: 3d_printer_led_strip_off
+  alias: 3D Printer - LED Strip Off When Idle
+  description: Turn off The Abyss LED strip when 3D printer finishes or becomes idle
+  triggers:
+  - platform: state
+    entity_id: sensor.centauri_carbon_print_status
+    to: idle
+  - platform: state
+    entity_id: sensor.centauri_carbon_print_status
+    to: complete
+  conditions: []
+  actions:
+  - action: light.turn_off
+    target:
+      entity_id: light.the_abyss
+  - action: logbook.log
+    data:
+      name: 3D Printer LED
+      message: 'Print ended ({{ states(''sensor.centauri_carbon_print_status'') }}) - LED strip OFF'
+      entity_id: light.the_abyss
+  mode: single
+- id: weekday_morning_kitchen_dining_lights
+  alias: Weekday Morning - Kitchen/Dining Lights On
+  description: Turn on kitchen and dining room lights at 6:15 AM weekdays at 15% brightness with adaptive color temp
+  triggers:
+  - platform: time
+    at: '06:15:00'
+  conditions:
+  - condition: time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+  actions:
+  - variables:
+      kelvin: '{{ state_attr(''switch.adaptive_lighting_living_room'',''color_temp_kelvin'') | int }}'
+  - action: light.turn_on
+    target:
+      entity_id: light.dining_kitchen_zone
+    data:
+      brightness_pct: 15
+      color_temp_kelvin: '{{ kelvin }}'
+  - action: logbook.log
+    data:
+      name: Weekday Morning Lights
+      message: 'Kitchen/Dining lights ON at 15% ({{ kelvin }}K)'
+      entity_id: light.dining_kitchen_zone
+  mode: single
+
+- id: mealie_google_keep_shopping_list_sync
+  alias: "Mealie to Google Keep Shopping List Sync"
+  description: "Syncs Mealie shopping list to Google Keep"
+  mode: single
+  triggers:
+  - trigger: time_pattern
+    minutes: "/20"
+  - trigger: state
+    entity_id: input_button.sync_shopping_list
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: todo.mealie_shopping_list
+      state: unavailable
+  actions:
+  - action: todo.get_items
+    target:
+      entity_id:
+      - todo.mealie_shopping_list
+      - todo.google_keep_shopping_list
+    data:
+      status:
+      - needs_action
+    response_variable: all_items
+  - variables:
+      mealie_items: "{{ all_items['todo.mealie_shopping_list']['items'] | map(attribute='summary') | list }}"
+      keep_items: "{{ all_items['todo.google_keep_shopping_list']['items'] | map(attribute='summary') | list }}"
+      items_to_add: "{{ mealie_items | reject('in', keep_items) | list }}"
+  - repeat:
+      for_each: "{{ items_to_add }}"
+      sequence:
+      - action: todo.add_item
+        target:
+          entity_id: todo.google_keep_shopping_list
+        data:
+          item: "{{ repeat.item }}"
+  - condition: template
+    value_template: "{{ items_to_add | length > 0 }}"
+  - action: notify.mobile_app_pixel_10
+    data:
+      title: "Shopping List Updated"
+      message: "Added {{ items_to_add | length }} items from Mealie"

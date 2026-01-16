@@ -1,0 +1,62 @@
+# Calendar View
+title: Calendar
+path: calendar
+panel: true
+cards:
+  - type: vertical-stack
+    cards:
+      - type: custom:decluttering-card
+        template: mobile_top_nav
+      - type: custom:decluttering-card
+        template: mobile_container
+        variables:
+          - cards:
+              # Weather
+              - type: markdown
+                content: |
+                  ## Weather
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: transparent;
+                      box-shadow: none;
+                      padding: 16px 0 0 0;
+                      margin: 0;
+                    }
+                    h2 {
+                      font-size: 20px;
+                      font-weight: 600;
+                      margin: 0;
+                      color: #111827;
+                    }
+              
+              - type: weather-forecast
+                entity: weather.home
+                show_forecast: true
+                forecast_type: daily
+              
+              # Calendar
+              - type: markdown
+                content: |
+                  ## Events
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: transparent;
+                      box-shadow: none;
+                      padding: 16px 0 0 0;
+                      margin: 0;
+                    }
+                    h2 {
+                      font-size: 20px;
+                      font-weight: 600;
+                      margin: 0;
+                      color: #111827;
+                    }
+              
+              - type: calendar
+                entities:
+                  - calendar.home_calendar
+                  - calendar.meals
+                  - calendar.holidays_in_united_states
+                initial_view: dayGridMonth

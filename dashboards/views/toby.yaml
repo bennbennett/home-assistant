@@ -1,0 +1,597 @@
+title: Toby
+path: toby
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 80px 1fr
+      grid-template-rows: 1fr
+      margin: 0
+      padding: 0
+      grid-gap: 0
+    cards:
+      # Left Menu (column 1)
+      - type: custom:decluttering-card
+        template: side_menu
+        view_layout:
+          grid-column: 1
+
+      # Main content area in column 2
+      - type: vertical-stack
+        view_layout:
+          grid-column: 2
+        card_mod:
+          style: |
+            :host {
+              padding: 16px 8px !important;
+              margin: 0 !important;
+            }
+        cards:
+          # Title Section
+          - type: custom:mushroom-title-card
+            title: Toby's Activities
+            subtitle: Select an activity or tool
+
+          # Activities Grid - 3 columns for now, expandable later
+          - type: grid
+            columns: 3
+            square: true
+            cards:
+              # Timer Card
+              - type: custom:button-card
+                template: room_card
+                name: Timer
+                icon: mdi:timer
+                variables:
+                  color: "#ef4444"
+                tap_action:
+                  action: navigate
+                  navigation_path: /tablet-dashboard/toby-timer
+                styles:
+                  card:
+                    - margin: 8px
+                  name:
+                    - color: "[[[ return variables.color ]]]"
+
+              # Swimming Card
+              - type: custom:button-card
+                template: room_card
+                name: Swimming
+                icon: mdi:pool
+                variables:
+                  color: "#06b6d4"
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Swimming Checklist
+                      size: normal
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Swimming Lesson Checklist
+                            subtitle: Check off items as you pack them
+                          
+                          # Swimming Equipment Section
+                          - type: custom:mushroom-title-card
+                            title: Swimming Equipment
+                            subtitle: ""
+                          - type: vertical-stack
+                            cards:
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.swimming_bag
+                                name: Swim bag
+                                icon: mdi:bag-carry-on
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.swimming_shirt
+                                name: Swim shirt
+                                icon: mdi:tshirt-crew
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.swimming_trunks
+                                name: Swim trunks
+                                icon: mdi:swim
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.swimming_goggles
+                                name: Goggles
+                                icon: mdi:glasses
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.swimming_towel
+                                name: Towel
+                                icon: mdi:paper-roll
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.swimming_sunscreen
+                                name: Sunscreen
+                                icon: mdi:sun-thermometer
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.swimming_wet_bag
+                                name: Wet clothes bag
+                                icon: mdi:water
+                                tap_action:
+                                  action: toggle
+                          
+                          # Change of Clothes Section
+                          - type: custom:mushroom-title-card
+                            title: Change of Clothes
+                            subtitle: ""
+                          - type: vertical-stack
+                            cards:
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.swimming_underwear
+                                name: Underwear
+                                icon: mdi:underwear-outline
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.swimming_shirt_change
+                                name: Shirt
+                                icon: mdi:tshirt-crew-outline
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.swimming_shorts
+                                name: Shorts
+                                icon: mdi:human-pants
+                                tap_action:
+                                  action: toggle
+                          
+                          # Food & Drink Section
+                          - type: custom:mushroom-title-card
+                            title: Food & Drink
+                            subtitle: ""
+                          - type: vertical-stack
+                            cards:
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.swimming_water
+                                name: Water bottle
+                                icon: mdi:bottle-water
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.swimming_snack
+                                name: Snack
+                                icon: mdi:food-apple
+                                tap_action:
+                                  action: toggle
+                          
+                          # Progress indicator
+                          - type: custom:mushroom-template-card
+                            primary: >
+                              {% set total = 12 %}
+                              {% set checked = [
+                                states('input_boolean.swimming_bag'),
+                                states('input_boolean.swimming_shirt'),
+                                states('input_boolean.swimming_trunks'),
+                                states('input_boolean.swimming_goggles'),
+                                states('input_boolean.swimming_towel'),
+                                states('input_boolean.swimming_sunscreen'),
+                                states('input_boolean.swimming_wet_bag'),
+                                states('input_boolean.swimming_underwear'),
+                                states('input_boolean.swimming_shirt_change'),
+                                states('input_boolean.swimming_shorts'),
+                                states('input_boolean.swimming_water'),
+                                states('input_boolean.swimming_snack')
+                              ] | select('eq', 'on') | list | count %}
+                              Progress: {{ checked }}/{{ total }} items packed
+                            secondary: >
+                              {% set total = 12 %}
+                              {% set checked = [
+                                states('input_boolean.swimming_bag'),
+                                states('input_boolean.swimming_shirt'),
+                                states('input_boolean.swimming_trunks'),
+                                states('input_boolean.swimming_goggles'),
+                                states('input_boolean.swimming_towel'),
+                                states('input_boolean.swimming_sunscreen'),
+                                states('input_boolean.swimming_wet_bag'),
+                                states('input_boolean.swimming_underwear'),
+                                states('input_boolean.swimming_shirt_change'),
+                                states('input_boolean.swimming_shorts'),
+                                states('input_boolean.swimming_water'),
+                                states('input_boolean.swimming_snack')
+                              ] | select('eq', 'on') | list | count %}
+                              {% if checked == total %}
+                              🎉 All ready for swimming! Great job!
+                              {% elif checked > total * 0.75 %}
+                              📋 Almost there! Just a few more items.
+                              {% elif checked > total * 0.5 %}
+                              ⏳ Good progress! Keep going.
+                              {% elif checked > 0 %}
+                              🏊 Getting started! Pack the remaining items.
+                              {% else %}
+                              📝 Ready to start packing for swimming?
+                              {% endif %}
+                            icon: >
+                              {% set total = 12 %}
+                              {% set checked = [
+                                states('input_boolean.swimming_bag'),
+                                states('input_boolean.swimming_shirt'),
+                                states('input_boolean.swimming_trunks'),
+                                states('input_boolean.swimming_goggles'),
+                                states('input_boolean.swimming_towel'),
+                                states('input_boolean.swimming_sunscreen'),
+                                states('input_boolean.swimming_wet_bag'),
+                                states('input_boolean.swimming_underwear'),
+                                states('input_boolean.swimming_shirt_change'),
+                                states('input_boolean.swimming_shorts'),
+                                states('input_boolean.swimming_water'),
+                                states('input_boolean.swimming_snack')
+                              ] | select('eq', 'on') | list | count %}
+                              {% if checked == total %}
+                              mdi:check-circle
+                              {% else %}
+                              mdi:clipboard-check-outline
+                              {% endif %}
+                            icon_color: >
+                              {% set total = 12 %}
+                              {% set checked = [
+                                states('input_boolean.swimming_bag'),
+                                states('input_boolean.swimming_shirt'),
+                                states('input_boolean.swimming_trunks'),
+                                states('input_boolean.swimming_goggles'),
+                                states('input_boolean.swimming_towel'),
+                                states('input_boolean.swimming_sunscreen'),
+                                states('input_boolean.swimming_wet_bag'),
+                                states('input_boolean.swimming_underwear'),
+                                states('input_boolean.swimming_shirt_change'),
+                                states('input_boolean.swimming_shorts'),
+                                states('input_boolean.swimming_water'),
+                                states('input_boolean.swimming_snack')
+                              ] | select('eq', 'on') | list | count %}
+                              {% if checked == total %}
+                              green
+                              {% elif checked > total * 0.5 %}
+                              orange
+                              {% else %}
+                              blue
+                              {% endif %}
+                styles:
+                  card:
+                    - margin: 8px
+                  name:
+                    - color: "[[[ return variables.color ]]]"
+
+              # Hockey Card
+              - type: custom:button-card
+                template: room_card
+                name: Hockey
+                icon: mdi:hockey-sticks
+                variables:
+                  color: "#8b5cf6"
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Hockey Checklist
+                      size: normal
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Hockey Practice Checklist
+                            subtitle: Check off items as you pack them
+
+                          # Hockey Equipment Section
+                          - type: custom:mushroom-title-card
+                            title: Hockey Equipment
+                            subtitle: ""
+                          - type: vertical-stack
+                            cards:
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.hockey_1
+                                name: Helmet
+                                icon: mdi:racing-helmet
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.hockey_2
+                                name: Stick
+                                icon: mdi:hockey-sticks
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.hockey_5
+                                name: Skates
+                                icon: mdi:skate
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.hockey_4
+                                name: Elbow Pads
+                                icon: mdi:arm-flex
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.hockey_3
+                                name: Shinguards
+                                icon: mdi:human-leg
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.hockey_6
+                                name: Chestplate
+                                icon: mdi:shield-half-full
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.hockey_jersey
+                                name: Jersey
+                                icon: mdi:tshirt-v
+                                tap_action:
+                                  action: toggle
+
+                          # Food & Drink Section
+                          - type: custom:mushroom-title-card
+                            title: Food & Drink
+                            subtitle: ""
+                          - type: vertical-stack
+                            cards:
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.hockey_7
+                                name: Water bottle
+                                icon: mdi:water-bottle
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.hockey_8
+                                name: Snack
+                                icon: mdi:food-apple
+                                tap_action:
+                                  action: toggle
+
+                          # Progress indicator
+                          - type: custom:mushroom-template-card
+                            primary: >
+                              {% set total = 9 %}
+                              {% set checked = [
+                                states('input_boolean.hockey_1'),
+                                states('input_boolean.hockey_2'),
+                                states('input_boolean.hockey_3'),
+                                states('input_boolean.hockey_4'),
+                                states('input_boolean.hockey_5'),
+                                states('input_boolean.hockey_6'),
+                                states('input_boolean.hockey_jersey'),
+                                states('input_boolean.hockey_7'),
+                                states('input_boolean.hockey_8')
+                              ] | select('eq', 'on') | list | count %}
+                              Progress: {{ checked }}/{{ total }} items packed
+                            secondary: >
+                              {% set total = 9 %}
+                              {% set checked = [
+                                states('input_boolean.hockey_1'),
+                                states('input_boolean.hockey_2'),
+                                states('input_boolean.hockey_3'),
+                                states('input_boolean.hockey_4'),
+                                states('input_boolean.hockey_5'),
+                                states('input_boolean.hockey_6'),
+                                states('input_boolean.hockey_jersey'),
+                                states('input_boolean.hockey_7'),
+                                states('input_boolean.hockey_8')
+                              ] | select('eq', 'on') | list | count %}
+                              {% if checked == total %}
+                              🏒 All ready for hockey! Great job!
+                              {% elif checked > total * 0.75 %}
+                              📋 Almost there! Just a few more items.
+                              {% elif checked > total * 0.5 %}
+                              ⏳ Good progress! Keep packing.
+                              {% elif checked > 0 %}
+                              🏒 Getting started! Pack the remaining gear.
+                              {% else %}
+                              📝 Ready to start packing for hockey?
+                              {% endif %}
+                            icon: >
+                              {% set total = 9 %}
+                              {% set checked = [
+                                states('input_boolean.hockey_1'),
+                                states('input_boolean.hockey_2'),
+                                states('input_boolean.hockey_3'),
+                                states('input_boolean.hockey_4'),
+                                states('input_boolean.hockey_5'),
+                                states('input_boolean.hockey_6'),
+                                states('input_boolean.hockey_jersey'),
+                                states('input_boolean.hockey_7'),
+                                states('input_boolean.hockey_8')
+                              ] | select('eq', 'on') | list | count %}
+                              {% if checked == total %}
+                              mdi:check-circle
+                              {% else %}
+                              mdi:clipboard-check-outline
+                              {% endif %}
+                            icon_color: >
+                              {% set total = 9 %}
+                              {% set checked = [
+                                states('input_boolean.hockey_1'),
+                                states('input_boolean.hockey_2'),
+                                states('input_boolean.hockey_3'),
+                                states('input_boolean.hockey_4'),
+                                states('input_boolean.hockey_5'),
+                                states('input_boolean.hockey_6'),
+                                states('input_boolean.hockey_jersey'),
+                                states('input_boolean.hockey_7'),
+                                states('input_boolean.hockey_8')
+                              ] | select('eq', 'on') | list | count %}
+                              {% if checked == total %}
+                              green
+                              {% elif checked > total * 0.5 %}
+                              orange
+                              {% else %}
+                              blue
+                              {% endif %}
+                styles:
+                  card:
+                    - margin: 8px
+                  name:
+                    - color: "[[[ return variables.color ]]]"
+
+              # School Card
+              - type: custom:button-card
+                template: room_card
+                name: School
+                icon: mdi:backpack
+                variables:
+                  color: "#3b82f6"
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: School Checklist
+                      size: normal
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: School Checklist
+                            subtitle: Check off items as you pack them
+
+                          # School Items Section
+                          - type: vertical-stack
+                            cards:
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.school_snack
+                                name: Snack
+                                icon: mdi:food-apple
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.school_lunch
+                                name: Lunch
+                                icon: mdi:lunchbox
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.school_water
+                                name: Water bottle
+                                icon: mdi:water-bottle
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.school_jacket
+                                name: Jacket
+                                icon: mdi:jacket
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.school_binder
+                                name: Binder
+                                icon: mdi:notebook
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.school_chromebook
+                                name: Chromebook
+                                icon: mdi:laptop
+                                tap_action:
+                                  action: toggle
+                              - type: custom:mushroom-entity-card
+                                entity: input_boolean.school_homework
+                                name: Homework
+                                icon: mdi:pencil
+                                tap_action:
+                                  action: toggle
+
+                          # Progress indicator
+                          - type: custom:mushroom-template-card
+                            primary: >
+                              {% set total = 7 %}
+                              {% set checked = [
+                                states('input_boolean.school_snack'),
+                                states('input_boolean.school_lunch'),
+                                states('input_boolean.school_water'),
+                                states('input_boolean.school_jacket'),
+                                states('input_boolean.school_binder'),
+                                states('input_boolean.school_chromebook'),
+                                states('input_boolean.school_homework')
+                              ] | select('eq', 'on') | list | count %}
+                              Progress: {{ checked }}/{{ total }} items packed
+                            secondary: >
+                              {% set total = 7 %}
+                              {% set checked = [
+                                states('input_boolean.school_snack'),
+                                states('input_boolean.school_lunch'),
+                                states('input_boolean.school_water'),
+                                states('input_boolean.school_jacket'),
+                                states('input_boolean.school_binder'),
+                                states('input_boolean.school_chromebook'),
+                                states('input_boolean.school_homework')
+                              ] | select('eq', 'on') | list | count %}
+                              {% if checked == total %}
+                              🎒 All ready for school! Great job!
+                              {% elif checked > total * 0.75 %}
+                              📋 Almost there! Just a few more items.
+                              {% elif checked > total * 0.5 %}
+                              ⏳ Good progress! Keep packing.
+                              {% elif checked > 0 %}
+                              📚 Getting started! Pack the remaining items.
+                              {% else %}
+                              📝 Ready to start packing for school?
+                              {% endif %}
+                            icon: >
+                              {% set total = 7 %}
+                              {% set checked = [
+                                states('input_boolean.school_snack'),
+                                states('input_boolean.school_lunch'),
+                                states('input_boolean.school_water'),
+                                states('input_boolean.school_jacket'),
+                                states('input_boolean.school_binder'),
+                                states('input_boolean.school_chromebook'),
+                                states('input_boolean.school_homework')
+                              ] | select('eq', 'on') | list | count %}
+                              {% if checked == total %}
+                              mdi:check-circle
+                              {% else %}
+                              mdi:clipboard-check-outline
+                              {% endif %}
+                            icon_color: >
+                              {% set total = 7 %}
+                              {% set checked = [
+                                states('input_boolean.school_snack'),
+                                states('input_boolean.school_lunch'),
+                                states('input_boolean.school_water'),
+                                states('input_boolean.school_jacket'),
+                                states('input_boolean.school_binder'),
+                                states('input_boolean.school_chromebook'),
+                                states('input_boolean.school_homework')
+                              ] | select('eq', 'on') | list | count %}
+                              {% if checked == total %}
+                              green
+                              {% elif checked > total * 0.5 %}
+                              orange
+                              {% else %}
+                              blue
+                              {% endif %}
+                styles:
+                  card:
+                    - margin: 8px
+                  name:
+                    - color: "[[[ return variables.color ]]]"
+
+              # When I'm Bored Card
+              - type: custom:button-card
+                template: room_card
+                name: When I'm Bored
+                icon: mdi:lightbulb
+                variables:
+                  color: "#6366f1"
+                tap_action:
+                  action: navigate
+                  navigation_path: /tablet-dashboard/toby-bored
+                styles:
+                  card:
+                    - margin: 8px
+                  name:
+                    - color: "[[[ return variables.color ]]]"

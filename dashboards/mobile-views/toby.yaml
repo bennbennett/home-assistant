@@ -1,0 +1,476 @@
+# Toby's View
+title: Toby
+path: toby
+panel: true
+cards:
+  - type: vertical-stack
+    cards:
+      - type: custom:decluttering-card
+        template: mobile_top_nav
+      - type: custom:decluttering-card
+        template: mobile_container
+        variables:
+          - cards:
+              # Activities Grid
+              - type: grid
+                columns: 2
+                square: false
+                cards:
+                  # Swimming Card
+                  - type: custom:button-card
+                    name: Swimming
+                    icon: mdi:pool
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#ecfdf5"  # Emerald-50
+                      accent_color: "#06b6d4"  # Cyan-500
+                    tap_action:
+                      action: fire-dom-event
+                      browser_mod:
+                        service: browser_mod.popup
+                        data:
+                          title: Swimming Checklist
+                          size: normal
+                          content:
+                            type: vertical-stack
+                            cards:
+                              - type: markdown
+                                content: |
+                                  ## Swimming Lesson Checklist
+                                  Check off items as you pack them
+                                card_mod:
+                                  style: |
+                                    ha-card {
+                                      background: transparent;
+                                      box-shadow: none;
+                                      padding: 16px 0 8px 0;
+                                      margin: 0;
+                                    }
+                              
+                              # Swimming Equipment Section
+                              - type: markdown
+                                content: |
+                                  ### Swimming Equipment
+                                card_mod:
+                                  style: |
+                                    ha-card {
+                                      background: transparent;
+                                      box-shadow: none;
+                                      padding: 8px 0 0 0;
+                                      margin: 0;
+                                    }
+                              - type: entities
+                                show_header_toggle: false
+                                entities:
+                                  - entity: input_boolean.swimming_bag
+                                    name: Swim bag
+                                    icon: mdi:bag-carry-on
+                                  - entity: input_boolean.swimming_shirt
+                                    name: Swim shirt
+                                    icon: mdi:tshirt-crew
+                                  - entity: input_boolean.swimming_trunks
+                                    name: Swim trunks
+                                    icon: mdi:swim
+                                  - entity: input_boolean.swimming_goggles
+                                    name: Goggles
+                                    icon: mdi:glasses
+                                  - entity: input_boolean.swimming_towel
+                                    name: Towel
+                                    icon: mdi:paper-roll
+                                  - entity: input_boolean.swimming_sunscreen
+                                    name: Sunscreen
+                                    icon: mdi:sun-thermometer
+                                  - entity: input_boolean.swimming_wet_bag
+                                    name: Wet clothes bag
+                                    icon: mdi:water
+                              
+                              # Change of Clothes Section
+                              - type: markdown
+                                content: |
+                                  ### Change of Clothes
+                                card_mod:
+                                  style: |
+                                    ha-card {
+                                      background: transparent;
+                                      box-shadow: none;
+                                      padding: 8px 0 0 0;
+                                      margin: 0;
+                                    }
+                              - type: entities
+                                show_header_toggle: false
+                                entities:
+                                  - entity: input_boolean.swimming_underwear
+                                    name: Underwear
+                                    icon: mdi:underwear-outline
+                                  - entity: input_boolean.swimming_shirt_change
+                                    name: Shirt
+                                    icon: mdi:tshirt-crew-outline
+                                  - entity: input_boolean.swimming_shorts
+                                    name: Shorts
+                                    icon: mdi:human-pants
+                              
+                              # Food & Drink Section
+                              - type: markdown
+                                content: |
+                                  ### Food & Drink
+                                card_mod:
+                                  style: |
+                                    ha-card {
+                                      background: transparent;
+                                      box-shadow: none;
+                                      padding: 8px 0 0 0;
+                                      margin: 0;
+                                    }
+                              - type: entities
+                                show_header_toggle: false
+                                entities:
+                                  - entity: input_boolean.swimming_water
+                                    name: Water bottle
+                                    icon: mdi:bottle-water
+                                  - entity: input_boolean.swimming_snack
+                                    name: Snack
+                                    icon: mdi:food-apple
+                              
+                              # Progress indicator
+                              - type: custom:button-card
+                                name: >
+                                  [[[ 
+                                    const total = 12;
+                                    const entities = [
+                                      'swimming_bag', 'swimming_shirt', 'swimming_trunks', 'swimming_goggles',
+                                      'swimming_towel', 'swimming_sunscreen', 'swimming_wet_bag', 'swimming_underwear',
+                                      'swimming_shirt_change', 'swimming_shorts', 'swimming_water', 'swimming_snack'
+                                    ];
+                                    const checked = entities.filter(e => states[`input_boolean.${e}`].state === 'on').length;
+                                    return `Progress: ${checked}/${total} items packed`;
+                                  ]]]
+                                entity: input_boolean.swimming_bag
+                                show_icon: true
+                                icon: >
+                                  [[[ 
+                                    const total = 12;
+                                    const entities = [
+                                      'swimming_bag', 'swimming_shirt', 'swimming_trunks', 'swimming_goggles',
+                                      'swimming_towel', 'swimming_sunscreen', 'swimming_wet_bag', 'swimming_underwear',
+                                      'swimming_shirt_change', 'swimming_shorts', 'swimming_water', 'swimming_snack'
+                                    ];
+                                    const checked = entities.filter(e => states[`input_boolean.${e}`].state === 'on').length;
+                                    return checked === total ? 'mdi:check-circle' : 'mdi:clipboard-check-outline';
+                                  ]]]
+                                styles:
+                                  card:
+                                    - background: "#f0f9ff"
+                                    - border-radius: 12px
+                                    - padding: 16px
+                                  icon:
+                                    - color: "#0ea5e9"
+                                  name:
+                                    - color: "#0c4a6e"
+                                    - font-weight: 600
+
+                  # Hockey Card
+                  - type: custom:button-card
+                    name: Hockey
+                    icon: mdi:hockey-sticks
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#faf5ff"  # Purple-50
+                      accent_color: "#8b5cf6"  # Purple-500
+                    tap_action:
+                      action: fire-dom-event
+                      browser_mod:
+                        service: browser_mod.popup
+                        data:
+                          title: Hockey Checklist
+                          size: normal
+                          content:
+                            type: vertical-stack
+                            cards:
+                              - type: markdown
+                                content: |
+                                  ## Hockey Practice Checklist
+                                  Check off items as you pack them
+                                card_mod:
+                                  style: |
+                                    ha-card {
+                                      background: transparent;
+                                      box-shadow: none;
+                                      padding: 16px 0 8px 0;
+                                      margin: 0;
+                                    }
+                              
+                              # Hockey Equipment
+                              - type: entities
+                                show_header_toggle: false
+                                entities:
+                                  - entity: input_boolean.hockey_1
+                                    name: Helmet
+                                    icon: mdi:head
+                                  - entity: input_boolean.hockey_2
+                                    name: Stick
+                                    icon: mdi:hockey-sticks
+                                  - entity: input_boolean.hockey_3
+                                    name: Shinguards
+                                    icon: mdi:seat-legroom-normal
+                                  - entity: input_boolean.hockey_4
+                                    name: Elbow Pads
+                                    icon: mdi:arm-flex
+                                  - entity: input_boolean.hockey_5
+                                    name: Skates
+                                    icon: mdi:roller-skate
+                                  - entity: input_boolean.hockey_6
+                                    name: Chestplate
+                                    icon: mdi:account
+                                  - entity: input_boolean.hockey_7
+                                    name: Water
+                                    icon: mdi:water
+                                  - entity: input_boolean.hockey_8
+                                    name: Snack
+                                    icon: mdi:food-apple
+                              
+                              # Progress indicator
+                              - type: custom:button-card
+                                name: >
+                                  [[[ 
+                                    const total = 8;
+                                    const entities = [
+                                      'hockey_1', 'hockey_2', 'hockey_3', 'hockey_4',
+                                      'hockey_5', 'hockey_6', 'hockey_7', 'hockey_8'
+                                    ];
+                                    const checked = entities.filter(e => states[`input_boolean.${e}`].state === 'on').length;
+                                    return `Progress: ${checked}/${total} items packed`;
+                                  ]]]
+                                entity: input_boolean.hockey_1
+                                show_icon: true
+                                icon: >
+                                  [[[ 
+                                    const total = 8;
+                                    const entities = [
+                                      'hockey_1', 'hockey_2', 'hockey_3', 'hockey_4',
+                                      'hockey_5', 'hockey_6', 'hockey_7', 'hockey_8'
+                                    ];
+                                    const checked = entities.filter(e => states[`input_boolean.${e}`].state === 'on').length;
+                                    return checked === total ? 'mdi:check-circle' : 'mdi:clipboard-check-outline';
+                                  ]]]
+                                styles:
+                                  card:
+                                    - background: "#faf5ff"
+                                    - border-radius: 12px
+                                    - padding: 16px
+                                  icon:
+                                    - color: "#8b5cf6"
+                                  name:
+                                    - color: "#581c87"
+                                    - font-weight: 600
+
+                  # School Checklist Card
+                  - type: custom:button-card
+                    name: School
+                    icon: mdi:school
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#fffbeb"  # Amber-50
+                      accent_color: "#f59e0b"  # Amber-500
+                    tap_action:
+                      action: fire-dom-event
+                      browser_mod:
+                        service: browser_mod.popup
+                        data:
+                          title: School Checklist
+                          size: normal
+                          content:
+                            type: vertical-stack
+                            cards:
+                              - type: markdown
+                                content: |
+                                  ## Before School Checklist
+                                  Check off items as you get ready
+                                card_mod:
+                                  style: |
+                                    ha-card {
+                                      background: transparent;
+                                      box-shadow: none;
+                                      padding: 16px 0 8px 0;
+                                      margin: 0;
+                                    }
+                              
+                              - type: entities
+                                show_header_toggle: false
+                                entities:
+                                  - entity: input_boolean.beforeschool_1
+                                    name: Binder
+                                    icon: mdi:folder
+                                  - entity: input_boolean.beforeschool_2
+                                    name: Jacket
+                                    icon: mdi:tshirt-crew
+                                  - entity: input_boolean.beforeschool_3
+                                    name: Lunch
+                                    icon: mdi:food
+                                  - entity: input_boolean.beforeschool_4
+                                    name: Snack
+                                    icon: mdi:food-apple
+                                  - entity: input_boolean.beforeschool_5
+                                    name: Brush Teeth
+                                    icon: mdi:toothbrush
+                                  - entity: input_boolean.beforeschool_6
+                                    name: Water Bottle
+                                    icon: mdi:water
+
+                  # Beach Camp Card
+                  - type: custom:button-card
+                    name: Beach Camp
+                    icon: mdi:beach
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#fef3c7"  # Amber-100
+                      accent_color: "#f59e0b"  # Amber-500
+                    tap_action:
+                      action: fire-dom-event
+                      browser_mod:
+                        service: browser_mod.popup
+                        data:
+                          title: Beach Camp Checklist
+                          size: normal
+                          content:
+                            type: vertical-stack
+                            cards:
+                              - type: markdown
+                                content: |
+                                  ## Beach Camp Checklist
+                                  Check off items as you pack them
+                                card_mod:
+                                  style: |
+                                    ha-card {
+                                      background: transparent;
+                                      box-shadow: none;
+                                      padding: 16px 0 8px 0;
+                                      margin: 0;
+                                    }
+                              
+                              # Beach Essentials Section
+                              - type: markdown
+                                content: |
+                                  ### Beach Essentials
+                                card_mod:
+                                  style: |
+                                    ha-card {
+                                      background: transparent;
+                                      box-shadow: none;
+                                      padding: 8px 0 0 0;
+                                      margin: 0;
+                                    }
+                              - type: entities
+                                show_header_toggle: false
+                                entities:
+                                  - entity: input_boolean.beach_camp_towel
+                                    name: Towel
+                                    icon: mdi:paper-roll
+                                  - entity: input_boolean.beach_camp_wet_bag
+                                    name: Wet clothes bag
+                                    icon: mdi:water
+                                  - entity: input_boolean.beach_camp_dry_bag
+                                    name: Dry clothes bag
+                                    icon: mdi:bag-personal
+                              
+                              # Swimming Gear Section
+                              - type: markdown
+                                content: |
+                                  ### Swimming Gear
+                                card_mod:
+                                  style: |
+                                    ha-card {
+                                      background: transparent;
+                                      box-shadow: none;
+                                      padding: 8px 0 0 0;
+                                      margin: 0;
+                                    }
+                              - type: entities
+                                show_header_toggle: false
+                                entities:
+                                  - entity: input_boolean.beach_camp_swimsuit
+                                    name: Swimsuit
+                                    icon: mdi:swim
+                                  - entity: input_boolean.beach_camp_swimshirt
+                                    name: Swim shirt
+                                    icon: mdi:tshirt-crew
+                              
+                              # Sun Protection Section
+                              - type: markdown
+                                content: |
+                                  ### Sun Protection
+                                card_mod:
+                                  style: |
+                                    ha-card {
+                                      background: transparent;
+                                      box-shadow: none;
+                                      padding: 8px 0 0 0;
+                                      margin: 0;
+                                    }
+                              - type: entities
+                                show_header_toggle: false
+                                entities:
+                                  - entity: input_boolean.beach_camp_hat
+                                    name: Hat
+                                    icon: mdi:hat-fedora
+                                  - entity: input_boolean.beach_camp_sunscreen
+                                    name: Sunscreen
+                                    icon: mdi:sun-thermometer
+                              
+                              # Food Section
+                              - type: markdown
+                                content: |
+                                  ### Food & Drink
+                                card_mod:
+                                  style: |
+                                    ha-card {
+                                      background: transparent;
+                                      box-shadow: none;
+                                      padding: 8px 0 0 0;
+                                      margin: 0;
+                                    }
+                              - type: entities
+                                show_header_toggle: false
+                                entities:
+                                  - entity: input_boolean.beach_camp_lunch
+                                    name: Lunch
+                                    icon: mdi:food
+                                  - entity: input_boolean.beach_camp_water
+                                    name: Water bottle
+                                    icon: mdi:bottle-water
+                              
+                              # Progress indicator
+                              - type: custom:button-card
+                                name: >
+                                  [[[ 
+                                    const total = 9;
+                                    const entities = [
+                                      'beach_camp_towel', 'beach_camp_wet_bag', 'beach_camp_dry_bag', 
+                                      'beach_camp_swimsuit', 'beach_camp_swimshirt', 
+                                      'beach_camp_hat', 'beach_camp_sunscreen', 'beach_camp_lunch', 'beach_camp_water'
+                                    ];
+                                    const checked = entities.filter(e => states[`input_boolean.${e}`].state === 'on').length;
+                                    return `Progress: ${checked}/${total} items packed`;
+                                  ]]]
+                                entity: input_boolean.beach_camp_towel
+                                show_icon: true
+                                icon: >
+                                  [[[ 
+                                    const total = 9;
+                                    const entities = [
+                                      'beach_camp_towel', 'beach_camp_wet_bag', 'beach_camp_dry_bag', 
+                                      'beach_camp_swimsuit', 'beach_camp_swimshirt', 
+                                      'beach_camp_hat', 'beach_camp_sunscreen', 'beach_camp_lunch', 'beach_camp_water'
+                                    ];
+                                    const checked = entities.filter(e => states[`input_boolean.${e}`].state === 'on').length;
+                                    return checked === total ? 'mdi:check-circle' : 'mdi:clipboard-check-outline';
+                                  ]]]
+                                styles:
+                                  card:
+                                    - background: "#fef3c7"
+                                    - border-radius: 12px
+                                    - padding: 16px
+                                  icon:
+                                    - color: "#f59e0b"
+                                  name:
+                                    - color: "#78350f"
+                                    - font-weight: 600

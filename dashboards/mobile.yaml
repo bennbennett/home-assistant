@@ -1,0 +1,251 @@
+##############################################################################
+#                     Mobile Dashboard Redesign                             #
+#                  Tailwind CSS Inspired Mobile Design                      #
+##############################################################################
+title: Mobile Dashboard
+theme: mobile-redesign
+
+##############################################################################
+#                           1) Lovelace Resources                           #
+# Ensure all custom cards and dependencies are listed here.                 #
+##############################################################################
+resources: !include resources.yaml
+
+##############################################################################
+#                      2) Button Card Templates Section                     #
+# Define reusable button card templates here.                               #
+##############################################################################
+button_card_templates:
+  # Bottom Navigation Button (Simplified)
+  mobile_nav_button:
+    show_icon: true
+    show_name: true
+    show_state: false
+    styles:
+      card:
+        - background: transparent
+        - box-shadow: none
+        - padding: 8px 4px
+        - margin: 0
+        - min-height: 60px
+        - border-radius: 8px
+      icon:
+        - width: 24px
+        - height: 24px
+        - color: '#6b7280'
+      name:
+        - font-size: 12px
+        - font-weight: 500
+        - color: '#6b7280'
+        - text-align: center
+    tap_action:
+      action: navigate
+      navigation_path: "[[[ return '/mobile-dashboard/' + variables.nav_value; ]]]"
+        
+  mobile_room_enhanced:
+    show_icon: true
+    show_name: true
+    show_state: false
+    show_label: true
+    label: >
+      [[[
+        // Temperature display
+        let tempText = '';
+        if (variables.temp_entity) {
+          const tempState = states[variables.temp_entity];
+          if (tempState) {
+            const temp = Math.round(parseFloat(tempState.state));
+            tempText = `${temp}°F`;
+          }
+        }
+        
+        // Light status
+        let lightText = '';
+        if (variables.light_entity) {
+          const lightState = states[variables.light_entity];
+          if (lightState) {
+            lightText = lightState.state === 'on' ? 'Light On' : 'Light Off';
+          }
+        }
+        
+        // Return just temperature, other status will be shown via icons
+        return tempText;
+      ]]]
+    custom_fields:
+      status_bar: >
+        [[[
+          // Create a clean status bar with light icon only
+          let statusHtml = '<div style="display: flex; gap: 12px; align-items: center;">';
+          
+          // Light status icon
+          if (variables.light_entity) {
+            const lightState = states[variables.light_entity];
+            if (lightState && lightState.state === 'on') {
+              statusHtml += '<ha-icon icon="mdi:lightbulb" style="color: #fbbf24; width: 18px; height: 18px;"></ha-icon>';
+            } else {
+              statusHtml += '<ha-icon icon="mdi:lightbulb-outline" style="color: #9ca3af; width: 18px; height: 18px;"></ha-icon>';
+            }
+          }
+          
+          statusHtml += '</div>';
+          return statusHtml;
+        ]]]
+    styles:
+      card:
+        - background: "[[[ return variables.bg_color || '#ffffff'; ]]]"
+        - border-radius: 16px
+        - padding: 20px
+        - margin: 8px
+        - box-shadow: "0 1px 3px rgba(0,0,0,0.1)"
+        - min-height: 140px
+        - transition: "all 0.2s ease"
+        - position: relative
+      grid:
+        - grid-template-areas: '"i n" "i l" ". status_bar"'
+        - grid-template-columns: 40px 1fr
+        - grid-template-rows: auto auto 1fr
+        - grid-gap: 8px
+        - align-items: start
+      icon:
+        - width: 28px
+        - height: 28px
+        - color: "[[[ return variables.accent_color || '#3b82f6'; ]]]"
+        - grid-area: i
+        - align-self: start
+      name:
+        - font-size: 16px
+        - font-weight: 600
+        - color: "#111827"
+        - grid-area: n
+        - align-self: start
+        - margin-bottom: 4px
+      label:
+        - font-size: 14px
+        - font-weight: 500
+        - color: "#6b7280"
+        - grid-area: l
+        - align-self: start
+      custom_fields:
+        status_bar:
+          - grid-area: status_bar
+          - align-self: end
+          - justify-self: start
+    tap_action:
+      action: >
+        [[[
+          // If there's a light entity, toggle it. Otherwise, show more-info
+          if (variables.light_entity) {
+            return 'toggle';
+          } else {
+            return 'more-info';
+          }
+        ]]]
+      entity: >
+        [[[
+          // Use light entity for toggle, or main entity for more-info
+          return variables.light_entity || entity.entity_id;
+        ]]]
+    hold_action:
+      action: more-info
+
+  mobile_scene_button:
+    show_icon: true
+    show_name: true
+    show_state: false
+    styles:
+      card:
+        - background: "#f3f4f6"
+        - border-radius: 20px
+        - padding: 8px 16px
+        - margin: 4px
+        - min-width: 100px
+      icon:
+        - width: 20px
+        - height: 20px
+        - color: "#374151"
+      name:
+        - font-size: 14px
+        - font-weight: 500
+        - color: "#374151"
+
+##############################################################################
+#                      3) Decluttering Templates Section                    #
+# Define reusable decluttering templates here.                              #
+##############################################################################
+decluttering_templates:
+  mobile_container:
+    card:
+      type: vertical-stack
+      card_mod:
+        style: |
+          ha-card {
+            background: transparent;
+            box-shadow: none;
+            padding: 100px 16px 16px 16px;
+            margin: 0;
+          }
+      cards: '[[cards]]'
+  
+  mobile_top_nav:
+    card:
+      type: horizontal-stack
+      card_mod:
+        style: |
+          ha-card {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            margin: 0;
+            padding: 8px 16px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+          }
+      cards:
+        - type: custom:button-card
+          name: Home
+          icon: mdi:home
+          template: mobile_nav_button
+          variables:
+            nav_value: home
+        - type: custom:button-card
+          name: Calendar
+          icon: mdi:calendar
+          template: mobile_nav_button
+          variables:
+            nav_value: calendar
+        - type: custom:button-card
+          name: Tasks
+          icon: mdi:format-list-bulleted
+          template: mobile_nav_button
+          variables:
+            nav_value: tasks
+        - type: custom:button-card
+          name: People
+          icon: mdi:account-group
+          template: mobile_nav_button
+          variables:
+            nav_value: people
+        - type: custom:button-card
+          name: Devices
+          icon: mdi:cellphone
+          template: mobile_nav_button
+          variables:
+            nav_value: devices
+
+##############################################################################
+#                      4) Define Your Views (mobile optimized)              #
+##############################################################################
+views:
+  - !include mobile-views/home.yaml
+  - !include mobile-views/calendar.yaml
+  - !include mobile-views/tasks.yaml
+  - !include mobile-views/people.yaml
+  - !include mobile-views/devices.yaml
+  - !include mobile-views/toby.yaml

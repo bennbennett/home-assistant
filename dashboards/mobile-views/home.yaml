@@ -1,0 +1,197 @@
+# Home View with simplified layout
+title: Home
+path: home
+panel: true
+cards:
+  - type: vertical-stack
+    cards:
+      - type: custom:decluttering-card
+        template: mobile_top_nav
+      - type: custom:decluttering-card
+        template: mobile_container
+        variables:
+          - cards:
+              # Scene Controls
+              - type: markdown
+                content: |
+                  ## Scenes
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: transparent;
+                      box-shadow: none;
+                      padding: 16px 0 0 0;
+                      margin: 0;
+                    }
+                    h2 {
+                      font-size: 20px;
+                      font-weight: 600;
+                      margin: 0;
+                      color: #111827;
+                    }
+              
+              - type: horizontal-stack
+                cards:
+                  - type: custom:button-card
+                    name: Good Morning
+                    icon: mdi:weather-sunny
+                    template: mobile_scene_button
+                    tap_action:
+                      action: call-service
+                      service: script.turn_on
+                      service_data:
+                        entity_id: script.good_morning_sequence
+                  - type: custom:button-card
+                    name: Relax
+                    icon: mdi:sofa
+                    template: mobile_scene_button
+                    tap_action:
+                      action: call-service
+                      service: scene.turn_on
+                      service_data:
+                        entity_id: scene.front_house_relax
+                  - type: custom:button-card
+                    name: Bright
+                    icon: mdi:brightness-7
+                    template: mobile_scene_button
+                    tap_action:
+                      action: call-service
+                      service: scene.turn_on
+                      service_data:
+                        entity_id: scene.front_house_concentrate
+              
+              - type: horizontal-stack
+                cards:
+                  - type: custom:button-card
+                    name: All Off
+                    icon: mdi:lightbulb-off
+                    template: mobile_scene_button
+                    tap_action:
+                      action: call-service
+                      service: light.turn_off
+                      target:
+                        entity_id:
+                          - light.living_room_color
+                          - light.extended_color_light_1
+                          - light.bedroom
+                          - light.kitchen_table
+                          - light.kitchen
+                          - light.outdoor_lights
+                          - light.front_house
+                          - light.bedrooms
+                          - light.master_bedroom
+                          - light.toby_s_room
+                          - light.dining_kitchen_zone
+                  - type: custom:button-card
+                    name: Good Night
+                    icon: mdi:weather-night
+                    template: mobile_scene_button
+                    tap_action:
+                      action: call-service
+                      service: script.turn_on
+                      service_data:
+                        entity_id: script.good_night_sequence
+                  - type: custom:button-card
+                    name: Energize
+                    icon: mdi:lightning-bolt
+                    template: mobile_scene_button
+                    tap_action:
+                      action: call-service
+                      service: scene.turn_on
+                      service_data:
+                        entity_id: scene.front_house_energize
+              
+              # Rooms Section
+              - type: markdown
+                content: |
+                  ## Rooms
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: transparent;
+                      box-shadow: none;
+                      padding: 16px 0 0 0;
+                      margin: 0;
+                    }
+                    h2 {
+                      font-size: 20px;
+                      font-weight: 600;
+                      margin: 0;
+                      color: #111827;
+                    }
+              
+              # Room Grid
+              - type: grid
+                columns: 2
+                square: false
+                cards:
+                  # Living Room
+                  - type: custom:button-card
+                    name: Living Room
+                    icon: mdi:sofa
+                    entity: sensor.living_room_temp_temperature
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#fdf2f8"  # Pink-50
+                      accent_color: "#ec4899"  # Pink-500
+                      temp_entity: "sensor.living_room_temp_temperature"
+                      light_entity: "light.living_room_color"
+                  
+                  # Kitchen
+                  - type: custom:button-card
+                    name: Kitchen
+                    icon: mdi:chef-hat
+                    entity: light.dining_kitchen_zone
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#f0fdfa"  # Teal-50
+                      accent_color: "#14b8a6"  # Teal-500
+                      light_entity: "light.dining_kitchen_zone"
+                  
+                  # Bedroom
+                  - type: custom:button-card
+                    name: Bedroom
+                    icon: mdi:bed
+                    entity: sensor.bedroom_temp_humidity_temperature
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#faf5ff"  # Purple-50
+                      accent_color: "#8b5cf6"  # Purple-500
+                      temp_entity: "sensor.bedroom_temp_humidity_temperature"
+                      light_entity: "light.master_bedroom"
+                  
+                  # Toby's Room
+                  - type: custom:button-card
+                    name: "Toby's Room"
+                    icon: mdi:teddy-bear
+                    entity: sensor.toby_s_room_temp_temperature_2
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#fffbeb"  # Amber-50
+                      accent_color: "#f59e0b"  # Amber-500
+                      temp_entity: "sensor.toby_s_room_temp_temperature_2"
+                      light_entity: "light.toby_s_room"
+                  
+                  # Outside
+                  - type: custom:button-card
+                    name: Outside
+                    icon: mdi:tree
+                    entity: sensor.outside_temperature_temperature
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#f7fee7"  # Lime-50
+                      accent_color: "#84cc16"  # Lime-500
+                      temp_entity: "sensor.outside_temperature_temperature"
+                      light_entity: "light.outdoor_lights"
+                  
+                  # Whole House
+                  - type: custom:button-card
+                    name: Whole House
+                    icon: mdi:home
+                    entity: sensor.living_room_temp_temperature
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#eef2ff"  # Blue-50
+                      accent_color: "#6366f1"  # Indigo-500
+                      temp_entity: "sensor.living_room_temp_temperature"
+                      light_entity: "light.front_house"

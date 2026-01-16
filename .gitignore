@@ -1,0 +1,42 @@
+# Home Assistant sensitive files
+secrets.yaml
+.google_maps_location_sharing.cookies.*
+.shopping_list.json
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Log files
+*.log
+*.log.*
+home-assistant.log.fault
+
+# Cache and temporary files
+.storage/
+deps/
+tts/
+.cloud/
+__pycache__/
+*.pyc
+
+# System files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Backup files
+*.backup*
+*.bak
+
+# Nest tokens and other auth files
+nest/
+
+# Custom components cache (optional - uncomment if you want to track)
+# custom_components/
+
+# Lock files
+.HA_VERSION
+.ha_run.lock

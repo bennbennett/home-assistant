@@ -1,0 +1,590 @@
+############################################################
+#                    Core Configuration                      #
+############################################################
+# Base configuration
+default_config:
+
+# Frontend configuration
+frontend:
+  themes: !include_dir_merge_named themes
+  extra_module_url:
+    - /hacsfiles/lovelace-card-mod/card-mod.js
+
+# Dashboard configurations
+lovelace:
+  mode: storage  # Keeps your primary UI-managed dashboard
+  # Add additional YAML dashboards
+  dashboards:
+    tablet-dashboard:  # This is your existing iPad dashboard
+      mode: yaml
+      title: iPad Dashboard
+      icon: mdi:tablet
+      show_in_sidebar: true
+      filename: dashboards/tablet.yaml
+
+    test-dashboard:  # For testing new features
+      mode: yaml
+      title: Testing Ground
+      icon: mdi:test-tube
+      show_in_sidebar: true
+      filename: dashboards/test.yaml
+      require_admin: true  # Only visible to admin users
+
+    mobile-dashboard:  # New mobile dashboard with React UI design
+      mode: yaml
+      title: Mobile
+      icon: mdi:cellphone
+      show_in_sidebar: true
+      filename: dashboards/mobile-redesign-v2.yaml
+      require_admin: false  # Available to all users
+
+# Mobile app configuration
+mobile_app:
+
+# HTTP and CORS configuration
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - ::1
+  cors_allowed_origins:
+    - http://homeassistant.local:8123
+    - http://localhost:8123
+    - http://127.0.0.1:8123
+
+############################################################
+#                    Component Config                        #
+############################################################
+# Browser mod configuration
+browser_mod:
+
+# Adaptive Lighting configuration
+adaptive_lighting: !include adaptive_lighting.yaml
+
+template:
+  - sensor:
+      - name: "Current Month"
+        state: "{{ now().strftime('%B %Y') }}"
+        icon: mdi:calendar-month
+  - binary_sensor:
+      - name: "Outside Door"
+        unique_id: outside_door_combined
+        state: >
+          {% if is_state('binary_sensor.door_sensor_outside_opening','on') %}
+            on
+          {% else %}
+            off
+          {% endif %}
+        device_class: door
+  # KP405 Outdoor Dimmer Fix (migrated from legacy platform: template syntax Dec 2025)
+  # The TP-Link integration doesn't properly detect the KP405's dimming capability
+  - light:
+      - name: "Outdoor Lights (Dimmable)"
+        unique_id: outdoor_lights_dimmable_template
+        state: "{{ states('light.outdoor_lights') }}"
+        level: >
+          {% if state_attr('light.outdoor_lights', 'brightness') %}
+            {{ state_attr('light.outdoor_lights', 'brightness') }}
+          {% elif is_state('light.outdoor_lights', 'on') %}
+            255
+          {% else %}
+            0
+          {% endif %}
+        turn_on:
+          - action: light.turn_on
+            target:
+              entity_id: light.outdoor_lights
+            data:
+              brightness: "{{ brightness | default(255) }}"
+        turn_off:
+          - action: light.turn_off
+            target:
+              entity_id: light.outdoor_lights
+        set_level:
+          - action: light.turn_on
+            target:
+              entity_id: light.outdoor_lights
+            data:
+              brightness: "{{ brightness }}"
+
+# Roomba Configuration
+vacuum:
+  - platform: roomba
+    host: 192.168.86.181
+    blid: 2CA6CA7FEAC0411390B5CCE5BE9850AD
+    password: ":1:1689799537:jUUP6YGIKKOwiJLV"
+
+############################################################
+#                    Core Includes                           #
+############################################################
+# Split configuration files
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+group: !include groups.yaml
+
+# KP405 Dimmer Fix - DEPRECATED: Migrated to template: section above (Dec 2025)
+# light: !include lights.yaml
+
+############################################################
+#         INPUT BOOLEANS           #
+############################################################
+input_boolean:
+  # Menu States
+  menu_calendar:
+    name: Menu Calendar
+    initial: false
+  menu_tasks:
+    name: Menu Tasks
+    initial: false
+  menu_rooms:
+    name: Menu Rooms
+    initial: false
+  menu_electronics:
+    name: Menu Electronics
+    initial: false
+  menu_people:
+    name: Menu People
+    initial: false
+
+  # Calendar Views
+  calendar_week_view:
+    name: Calendar Week View
+    initial: false
+  calendar_month_view:
+    name: Calendar Month View
+    initial: on
+  calendar_event_created:
+    name: Calendar Event Created Helper
+    initial: false
+  event_set_end_time:
+    name: Set Specific End Time
+    initial: false
+    icon: mdi:clock-outline
+
+  event_all_day:
+    name: All Day Event
+    initial: false
+    icon: mdi:calendar-clock
+
+  event_show_location:
+    name: Show Location Field
+    initial: false
+    icon: mdi:map-marker
+  event_show_description:
+    name: Show Description Field
+    initial: false
+    icon: mdi:text
+
+  # Device Filter Views
+  device_filter_all:
+    name: All Devices View
+    initial: false
+  device_filter_phones:
+    name: Phones View
+    initial: true
+  device_filter_tablets:
+    name: Tablets View
+    initial: false
+  device_filter_computer:
+    name: Computers View
+    initial: false
+
+  # Morning checklist items
+  morning_make_bed:
+    name: Make bed
+    initial: false
+    icon: mdi:bed-empty
+  morning_brush_teeth:
+    name: Brush teeth
+    initial: false
+    icon: mdi:tooth
+  morning_get_dressed:
+    name: Get dressed
+    initial: false
+    icon: mdi:hanger
+  morning_breakfast:
+    name: Eat breakfast
+    initial: false
+    icon: mdi:food
+  morning_backpack:
+    name: Pack backpack
+    initial: false
+    icon: mdi:bag-personal
+
+  # After school checklist items
+  after_school_hang_backpack:
+    name: Hang up backpack
+    initial: false
+    icon: mdi:bag-personal
+  after_school_lunchbox:
+    name: Empty lunch box
+    initial: false
+    icon: mdi:food-outline
+  after_school_homework:
+    name: Do homework
+    initial: false
+    icon: mdi:pencil
+  after_school_reading:
+    name: Reading time
+    initial: false
+    icon: mdi:book-open-variant
+  after_school_tomorrow:
+    name: Pack for tomorrow
+    initial: false
+    icon: mdi:bag-checked
+
+  # Sports checklist items
+  sports_water:
+    name: Water bottle
+    initial: false
+    icon: mdi:water
+  sports_cleats:
+    name: Soccer cleats
+    initial: false
+    icon: mdi:shoe-cleats
+  sports_shinguards:
+    name: Shin guards
+    initial: false
+    icon: mdi:shield-outline
+  sports_ball:
+    name: Soccer ball
+    initial: false
+    icon: mdi:soccer
+  sports_uniform:
+    name: Sports uniform
+    initial: false
+    icon: mdi:tshirt-crew
+
+  # Hockey equipment checklist
+  hockey_1_2:
+    name: Helmet
+    initial: false
+    icon: mdi:head
+  hockey_2_2:
+    name: Stick
+    initial: false
+    icon: mdi:hockey-sticks
+  hockey_3_2:
+    name: Shinguards
+    initial: false
+    icon: mdi:seat-legroom-normal
+  hockey_4_2:
+    name: Elbow Pads
+    initial: false
+    icon: mdi:arm-flex
+  hockey_5_2:
+    name: Skates
+    initial: false
+    icon: mdi:roller-skate
+  hockey_6_2:
+    name: Pants
+    initial: false
+    icon: mdi:account-tie
+  hockey_7_2:
+    name: Shoulder Pads
+    initial: false
+    icon: mdi:shoulder-pads
+  hockey_8_2:
+    name: Practice Jersey
+    initial: false
+    icon: mdi:tshirt-v
+  hockey_9_2:
+    name: Neck Guard
+    initial: false
+    icon: mdi:account-tie
+  hockey_10_2:
+    name: Gloves
+    initial: false
+    icon: mdi:mitten
+  hockey_11_2:
+    name: Suspenders
+    initial: false
+    icon: mdi:account-tie
+  hockey_12_2:
+    name: Cup
+    initial: false
+    icon: mdi:shield
+  hockey_13_2:
+    name: Water Bottle
+    initial: false
+    icon: mdi:water
+  hockey_14_2:
+    name: Hockey Bag
+    initial: false
+    icon: mdi:bag-personal
+  hockey_15_2:
+    name: Stick Tape
+    initial: false
+    icon: mdi:tape
+  hockey_16_2:
+    name: Socks
+    initial: false
+    icon: mdi:shoe-formal
+
+  # Swimming equipment checklist
+  swimming_1:
+    name: Swimsuit
+    initial: false
+    icon: mdi:tshirt-v
+  swimming_2:
+    name: Towel
+    initial: false
+    icon: mdi:rectangle
+  swimming_3:
+    name: Goggles
+    initial: false
+    icon: mdi:glasses
+  swimming_4:
+    name: Swim Cap
+    initial: false
+    icon: mdi:hat-fedora
+  swimming_5:
+    name: Water Bottle
+    initial: false
+    icon: mdi:water
+  swimming_6:
+    name: Snacks
+    initial: false
+    icon: mdi:food-apple
+  swimming_7:
+    name: Change of Clothes
+    initial: false
+    icon: mdi:tshirt-crew
+  swimming_8:
+    name: Flip Flops
+    initial: false
+    icon: mdi:shoe-sneaker
+  swimming_9:
+    name: Swim Bag
+    initial: false
+    icon: mdi:bag-personal
+  swimming_10:
+    name: Sunscreen
+    initial: false
+    icon: mdi:weather-sunny
+  swimming_11:
+    name: Hair Ties
+    initial: false
+    icon: mdi:hair-dryer
+  swimming_12:
+    name: Shampoo
+    initial: false
+    icon: mdi:bottle-tonic
+
+  # School checklist (matches toby.yaml dashboard)
+  school_snack:
+    name: Snack
+    initial: false
+    icon: mdi:food-apple
+  school_lunch:
+    name: Lunch
+    initial: false
+    icon: mdi:lunchbox
+  school_water:
+    name: Water bottle
+    initial: false
+    icon: mdi:water-bottle
+  school_jacket:
+    name: Jacket
+    initial: false
+    icon: mdi:jacket
+  school_binder:
+    name: Binder
+    initial: false
+    icon: mdi:notebook
+  school_chromebook:
+    name: Chromebook
+    initial: false
+    icon: mdi:laptop
+  school_homework:
+    name: Homework
+    initial: false
+    icon: mdi:pencil
+
+  # Swimming checklist - descriptive names (matches toby.yaml dashboard)
+  swimming_bag:
+    name: Swim bag
+    initial: false
+    icon: mdi:bag-carry-on
+  swimming_shirt:
+    name: Swim shirt
+    initial: false
+    icon: mdi:tshirt-crew
+  swimming_trunks:
+    name: Swim trunks
+    initial: false
+    icon: mdi:swim
+  swimming_goggles:
+    name: Goggles
+    initial: false
+    icon: mdi:glasses
+  swimming_towel:
+    name: Towel
+    initial: false
+    icon: mdi:paper-roll
+  swimming_sunscreen:
+    name: Sunscreen
+    initial: false
+    icon: mdi:sun-thermometer
+  swimming_wet_bag:
+    name: Wet clothes bag
+    initial: false
+    icon: mdi:water
+  swimming_underwear:
+    name: Underwear
+    initial: false
+    icon: mdi:underwear-outline
+  swimming_shirt_change:
+    name: Shirt (change)
+    initial: false
+    icon: mdi:tshirt-crew-outline
+  swimming_shorts:
+    name: Shorts
+    initial: false
+    icon: mdi:human-pants
+  swimming_water:
+    name: Water bottle
+    initial: false
+    icon: mdi:bottle-water
+  swimming_snack:
+    name: Snack
+    initial: false
+    icon: mdi:food-apple
+
+  # Hockey checklist - without _2 suffix (matches toby.yaml dashboard)
+  hockey_1:
+    name: Helmet
+    initial: false
+    icon: mdi:racing-helmet
+  hockey_2:
+    name: Stick
+    initial: false
+    icon: mdi:hockey-sticks
+  hockey_3:
+    name: Shinguards
+    initial: false
+    icon: mdi:human-leg
+  hockey_4:
+    name: Elbow Pads
+    initial: false
+    icon: mdi:arm-flex
+  hockey_5:
+    name: Skates
+    initial: false
+    icon: mdi:skate
+  hockey_6:
+    name: Chestplate
+    initial: false
+    icon: mdi:shield-half-full
+  hockey_jersey:
+    name: Jersey
+    initial: false
+    icon: mdi:tshirt-v
+  hockey_7:
+    name: Water bottle
+    initial: false
+    icon: mdi:water-bottle
+  hockey_8:
+    name: Snack
+    initial: false
+    icon: mdi:food-apple
+
+  # FP2 Presence Automation Helpers
+  front_house_is_dimmed:
+    name: Front House Is Dimmed
+    initial: false
+    icon: mdi:lightbulb-auto
+
+############################################################
+#                   INPUT DATETIME                          #
+############################################################
+input_datetime:
+  event_start:
+    name: Event Start
+    has_date: true
+    has_time: true
+
+  event_end:
+    name: Event End
+    has_date: true
+    has_time: true
+
+############################################################
+#                   INPUT TEXT                              #
+############################################################
+input_text:
+  event_title:
+    name: Event Title
+    initial: ""
+    max: 100
+
+  event_description:
+    name: Event Description
+    initial: ""
+    max: 255
+
+  event_location:
+    name: Event Location
+    initial: ""
+    max: 100
+
+  event_calendar:
+    name: Event Calendar
+    initial: ""
+    max: 50
+
+  toby_activity_result:
+    name: Toby Activity Result
+    initial: "Click the button to pick an activity!"
+    max: 200
+
+  selected_recipe_id:
+    name: Selected Recipe ID
+    max: 100
+    icon: mdi:food
+
+############################################################
+#                   INPUT BUTTON                            #
+############################################################
+input_button:
+  sync_shopping_list:
+    name: Sync Shopping List
+    icon: mdi:sync
+
+############################################################
+#                   INPUT SELECT                            #
+############################################################
+input_select:
+  calendar_selector:
+    name: Calendar Selector
+    options:
+      - Home Calendar
+      - Birthdays & Anniversaries
+    initial: Home Calendar
+
+  meal_day_selector:
+    name: Meal Day
+    options:
+      - Monday
+      - Tuesday
+      - Wednesday
+      - Thursday
+      - Friday
+      - Saturday
+      - Sunday
+    icon: mdi:calendar
+
+############################################################
+#                   INPUT NUMBER                            #
+############################################################
+input_number:
+  cube_helper:
+    min: 0
+    max: 100
+    step: 1
+
+  gertle_last:
+    icon: mdi:border-inside
+    min: 0
+    max: 6

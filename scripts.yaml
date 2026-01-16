@@ -1,0 +1,437 @@
+toby_random_activity:
+  alias: "Pick Random Activity for Toby"
+  description: "Randomly selects an activity from the list"
+  sequence:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.toby_activity_selector
+      data:
+        option: >
+          {% set activities = [
+            'RC Cars',
+            'Toy Cars',
+            'Marbles',
+            'Read',
+            '1-Player Board Games',
+            'Make a Movie',
+            'Build Lego Set',
+            'Lego'
+          ] %}
+          {{ activities | random }}
+
+toggle_week_view:
+  sequence:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.calendar_week_view
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.calendar_month_view
+
+toggle_month_view:
+  sequence:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.calendar_month_view
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.calendar_week_view
+
+toggle_device_filter_all:
+  sequence:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.device_filter_all
+    - action: input_boolean.turn_off
+      target:
+        entity_id:
+          - input_boolean.device_filter_phones
+          - input_boolean.device_filter_tablets
+          - input_boolean.device_filter_computer
+
+toggle_device_filter_phones:
+  sequence:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.device_filter_phones
+    - action: input_boolean.turn_off
+      target:
+        entity_id:
+          - input_boolean.device_filter_all
+          - input_boolean.device_filter_tablets
+          - input_boolean.device_filter_computer
+
+toggle_device_filter_tablets:
+  sequence:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.device_filter_tablets
+    - action: input_boolean.turn_off
+      target:
+        entity_id:
+          - input_boolean.device_filter_all
+          - input_boolean.device_filter_phones
+          - input_boolean.device_filter_computer
+
+toggle_device_filter_computer:
+  sequence:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.device_filter_computer
+    - action: input_boolean.turn_off
+      target:
+        entity_id:
+          - input_boolean.device_filter_all
+          - input_boolean.device_filter_phones
+          - input_boolean.device_filter_tablets
+
+good_morning_sequence:
+  alias: "Good Morning Sequence"
+  sequence:
+    # First turn on the lights at minimum brightness
+    - service: light.turn_on
+      target:
+        entity_id: light.front_house
+      data:
+        brightness_pct: 1
+        transition: 1
+    
+    # Add a small delay to ensure lights are on
+    - delay:
+        seconds: 2
+        
+    # Step up to 10% first for more gradual control
+    - service: light.turn_on
+      target:
+        entity_id: light.front_house
+      data:
+        brightness_pct: 10
+        transition: 3
+        
+    # Small delay before next transition
+    - delay:
+        seconds: 1
+        
+    # Now transition to 30% over 8 seconds
+    - service: light.turn_on
+      target:
+        entity_id: light.front_house
+      data:
+        brightness_pct: 30
+        transition: 8
+    
+    # Add a small delay to ensure initial brightness is set
+    - delay:
+        seconds: 5
+
+    # Turn on adaptive lighting for the living room and kitchen
+    - service: switch.turn_on
+      target:
+        entity_id:
+          - switch.adaptive_lighting_living_room
+          - switch.adaptive_lighting_kitchen
+
+    # Add a delay for adaptive lighting to take effect
+    - delay:
+        seconds: 10
+        
+    # Gradually transition front house lights to 50% over 5 minutes
+    - service: light.turn_on
+      target:
+        entity_id: light.front_house
+      data:
+        brightness_pct: 50
+        transition: 300
+
+good_night_sequence:
+  alias: "Good Night Sequence"
+  sequence:
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.living_room_color
+          - light.bedroom
+          - light.kitchen_table
+          - light.kitchen
+          - light.outdoor_plug
+          - light.front_house
+          - light.bedrooms
+          - light.master_bedroom
+          - light.toby_s_room
+          - light.dining_kitchen_zone
+      data:
+        transition: 180  # 3 minutes in seconds
+
+set_mobile_dashboard:
+  alias: Set Mobile Dashboard as Default
+  description: Sets the mobile dashboard as the default for the current device
+  sequence:
+    - service: browser_mod.navigate
+      data:
+        navigation_path: /mobile-dashboard
+    - service: persistent_notification.create
+      data:
+        title: Mobile Dashboard Set
+        message: "This device will now use the mobile-optimized dashboard. You can bookmark this URL or add it to your home screen for easy access."
+
+sunset_gradual_lighting_script:
+  alias: "Sunset Gradual Lighting Script"
+  description: "Applies adaptive lighting for sunset, but only if lights are off" # Updated description
+  sequence:
+    - choose:
+        # OPTION 1: Lights are off - full adaptive lighting
+        - conditions:
+            - condition: template
+              value_template: >-
+                {% set current_state = states('light.front_house') %}
+                {% if current_state == 'off' %}
+                  true
+                {% else %}
+                  false
+                {% endif %}
+          sequence:
+            # Normal sunset routine for lights that are off
+            - service: light.turn_on
+              target:
+                entity_id: light.front_house
+              data:
+                brightness_pct: 1  # Start with minimal brightness
+                transition: 1  # Quick initial transition
+            
+            - delay:
+                seconds: 5  # Brief pause
+            
+            - service: adaptive_lighting.apply
+              data:
+                entity_id: switch.adaptive_lighting_living_room
+                lights:
+                  - light.front_house
+                adapt_brightness: true
+                adapt_color: true
+                transition: 1800  # 30 minutes
+                turn_on_lights: true
+
+create_calendar_event:
+  alias: "Create Calendar Event"
+  description: "Creates a new calendar event based on form input"
+  sequence:
+    # Determine which calendar entity to use
+    - variables:
+        calendar_entity: >
+          {% if states('input_select.calendar_selector') == 'Home Calendar' %}
+            calendar.home_calendar
+          {% elif states('input_select.calendar_selector') == 'Birthdays & Anniversaries' %}
+            calendar.birthdays_anniversaries
+          {% else %}
+            calendar.home_calendar
+          {% endif %}
+
+    # Create the calendar event (timed event)
+    - service: calendar.create_event
+      target:
+        entity_id: "{{ calendar_entity }}"
+      data:
+        summary: "{{ states('input_text.event_title') }}"
+        description: "{{ states('input_text.event_description') }}"
+        location: "{{ states('input_text.event_location') }}"
+        start_date_time: "{{ states('input_datetime.event_start') }}"
+        end_date_time: "{{ states('input_datetime.event_end') }}"
+    
+    # Show success notification
+    - service: persistent_notification.create
+      data:
+        title: "Calendar Event Created"
+        message: "Event '{{ states('input_text.event_title') }}' has been added to the calendar."
+        
+    # Navigate back to calendar view
+    - service: browser_mod.navigate
+      data:
+        navigation_path: "/tablet-dashboard/calendar"
+        
+    # Reset the form fields
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.event_title
+      data:
+        value: ""
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.event_location
+      data:
+        value: ""
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.event_description
+      data:
+        value: ""
+
+create_calendar_popup_event:
+  alias: "Create Calendar Event (Popup)"
+  description: "Creates a new calendar event from popup data and closes the popup"
+  sequence:
+    # Determine which calendar entity to use
+    - variables:
+        calendar_entity: >
+          {% if states('input_select.calendar_selector') == 'Home Calendar' %}
+            calendar.home_calendar
+          {% elif states('input_select.calendar_selector') == 'Birthdays & Anniversaries' %}
+            calendar.birthdays_anniversaries
+          {% else %}
+            calendar.home_calendar
+          {% endif %}
+
+    # Create the calendar event
+    - choose:
+        # All-day event: use date-only fields
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.event_all_day
+              state: 'on'
+          sequence:
+            - service: calendar.create_event
+              target:
+                entity_id: "{{ calendar_entity }}"
+              data:
+                summary: "{{ states('input_text.event_title') }}"
+                description: "{{ states('input_text.event_description') }}"
+                location: "{{ states('input_text.event_location') }}"
+                start_date: "{{ state_attr('input_datetime.event_start','timestamp') | timestamp_custom('%Y-%m-%d') }}"
+                end_date: "{{ (state_attr('input_datetime.event_start','timestamp') + 86400) | timestamp_custom('%Y-%m-%d') }}"
+        # Timed event: default 1 hour unless explicit end time is set
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.event_all_day
+              state: 'off'
+          sequence:
+            - service: calendar.create_event
+              target:
+                entity_id: "{{ calendar_entity }}"
+              data:
+                summary: "{{ states('input_text.event_title') }}"
+                description: "{{ states('input_text.event_description') }}"
+                location: "{{ states('input_text.event_location') }}"
+                start_date_time: "{{ states('input_datetime.event_start') }}"
+                end_date_time: >
+                  {% if is_state('input_boolean.event_set_end_time','on') %}
+                    {{ states('input_datetime.event_end') }}
+                  {% else %}
+                    {% set ts = state_attr('input_datetime.event_start','timestamp') %}
+                    {{ (ts + 3600) | timestamp_custom('%Y-%m-%d %H:%M:%S') }}
+                  {% endif %}
+
+    # Reset the form fields
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.event_title
+      data:
+        value: ""
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.event_location
+      data:
+        value: ""
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.event_description
+      data:
+        value: ""
+
+create_calendar_popup_event_and_close:
+  alias: "Create Calendar Event and Close Popup"
+  description: "Creates event, triggers helper to close popup"
+  mode: single
+  sequence:
+    # Turn on helper to trigger automation
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.calendar_event_created
+
+    # Create the event
+    - service: script.create_calendar_popup_event
+      data: {}
+      
+open_calendar_event_popup:
+  alias: "Open Calendar Event Popup"
+  description: "Opens the calendar event creation popup"
+  sequence:
+    # Set default values for the form
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.event_start
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:00:00') }}"
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.event_end
+      data:
+        datetime: "{{ (now() + timedelta(hours=1)).strftime('%Y-%m-%d %H:00:00') }}"
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.event_all_day
+    - service: input_boolean.turn_off
+      target:
+        entity_id:
+          - input_boolean.event_set_end_time
+          - input_boolean.event_show_location
+          - input_boolean.event_show_description
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.event_set_end_time
+    
+    # Clear previous values
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.event_title
+      data:
+        value: ""
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.event_location
+      data:
+        value: ""
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.event_description
+      data:
+        value: ""
+    
+    # Open the popup
+    - service: browser_mod.popup
+      data:
+        title: Add Calendar Event
+        size: normal
+        style:
+          $: |
+            .mdc-dialog .mdc-dialog__surface {
+              width: 50vw;
+              max-width: 50vw;
+            }
+        content: !include dashboards/popups/calendar_event_popup.yaml
+
+assign_meal_to_day:
+  alias: "Assign Meal to Day"
+  description: "Assigns a recipe to the selected day via Mealie"
+  fields:
+    recipe_id:
+      description: "Mealie recipe ID"
+      example: "abc123"
+    recipe_name:
+      description: "Recipe name for notification"
+      example: "Spaghetti Carbonara"
+  sequence:
+    - action: mealie.set_mealplan
+      data:
+        date: >-
+          {% set days = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6} %}
+          {% set selected = states('input_select.meal_day_selector') %}
+          {% set today_dow = now().weekday() %}
+          {% set target_dow = days[selected] %}
+          {% set diff = (target_dow - today_dow) % 7 %}
+          {{ (now() + timedelta(days=diff)).strftime('%Y-%m-%d') }}
+        entry_type: dinner
+        recipe_id: "{{ recipe_id }}"
+    - action: browser_mod.close_popup
+    - action: notify.mobile_app_pixel_10
+      data:
+        title: "Meal Planned"
+        message: "{{ recipe_name }} set for {{ states('input_select.meal_day_selector') }}"

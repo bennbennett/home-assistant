@@ -1,0 +1,58 @@
+# Tasks View
+title: Tasks
+path: tasks
+panel: true
+cards:
+  - type: vertical-stack
+    cards:
+      - type: custom:decluttering-card
+        template: mobile_top_nav
+      - type: custom:decluttering-card
+        template: mobile_container
+        variables:
+          - cards:
+              # Shopping List
+              - type: markdown
+                content: |
+                  ## Shopping List
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: transparent;
+                      box-shadow: none;
+                      padding: 16px 0 0 0;
+                      margin: 0;
+                    }
+                    h2 {
+                      font-size: 20px;
+                      font-weight: 600;
+                      margin: 0;
+                      color: #111827;
+                    }
+              
+              - type: todo-list
+                entity: todo.google_keep_shopping_list
+                hide_completed: true
+              
+              # Family Todo
+              - type: markdown
+                content: |
+                  ## Family Todo
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: transparent;
+                      box-shadow: none;
+                      padding: 16px 0 0 0;
+                      margin: 0;
+                    }
+                    h2 {
+                      font-size: 20px;
+                      font-weight: 600;
+                      margin: 0;
+                      color: #111827;
+                    }
+              
+              - type: todo-list
+                entity: todo.google_keep_family_todo
+                hide_completed: true

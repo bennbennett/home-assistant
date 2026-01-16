@@ -1,0 +1,48 @@
+# Living Room
+- name: Living Room
+  lights:
+    - light.living_room
+    - light.living_room_color
+  transition: 120
+  initial_transition: 1
+  sleep_transition: 30
+  only_once: true  # Don't override manual brightness changes
+  min_color_temp: 2700
+  max_color_temp: 5500
+
+# Kitchen
+- name: Kitchen
+  lights:
+    - light.kitchen
+    - light.kitchen_table
+    - light.dining_kitchen_zone
+  transition: 120
+  initial_transition: 1
+  sleep_transition: 30
+  only_once: true  # Don't override manual brightness changes
+  min_color_temp: 2700
+  max_color_temp: 5500
+
+# Toby's Room
+- name: Toby Room
+  lights:
+    - light.toby_s_room
+  transition: 120
+  initial_transition: 1
+  sleep_transition: 15
+  only_once: true  # Don't override manual brightness changes
+  min_color_temp: 2700
+  max_color_temp: 4500
+  sleep_color_temp: 2200
+
+# Bedrooms Group
+- name: Bedrooms
+  lights:
+    - light.bedrooms
+  transition: 120
+  initial_transition: 1
+  sleep_transition: 30
+  only_once: true  # Don't override manual brightness changes
+  min_color_temp: 2700
+  max_color_temp: 4500
+  sleep_color_temp: 2200 

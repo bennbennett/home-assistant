@@ -1,0 +1,38 @@
+# Timer View
+title: Timer
+path: timer
+panel: true
+cards:
+  - type: custom:decluttering-card
+    template: mobile_container
+    variables:
+      - cards:
+          - type: markdown
+            content: |
+              # Timer
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 24px 0 8px 0;
+                  margin: 0;
+                }
+                h1 {
+                  font-size: 32px;
+                  font-weight: bold;
+                  margin: 0;
+                  color: #111827;
+                }
+          
+          - type: markdown
+            content: |
+              **Coming Soon!**
+              
+              - Pomodoro timer
+              - Activity timers
+              - Study sessions
+              - Break reminders
+              
+          - type: custom:decluttering-card
+            template: mobile_bottom_nav

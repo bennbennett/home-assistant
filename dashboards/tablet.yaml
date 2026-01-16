@@ -1,0 +1,32 @@
+##############################################################################
+#                            Lovelace Configuration                         #
+##############################################################################
+title: Tablet Dashboard # Your dashboard title
+
+##############################################################################
+#                           1) Lovelace Resources                           #
+# Ensure all custom cards and dependencies are listed here.                 #
+##############################################################################
+resources: !include resources.yaml
+
+##############################################################################
+#                      2) Decluttering Templates Section                   #
+# Define reusable templates here.                                            #
+##############################################################################
+button_card_templates: !include button_card_templates.yaml
+decluttering_templates: !include decluttering_templates.yaml
+
+        # ... Add more buttons as needed
+##############################################################################
+#                      3) Define Your Views (panels, dashboards)          #
+##############################################################################
+views:
+  - !include views/calendar.yaml
+  - !include views/devices.yaml
+  - !include views/home.yaml
+  - !include views/meals.yaml
+  - !include views/people.yaml
+  - !include views/rooms.yaml
+  - !include views/tasks.yaml
+  - !include views/toby.yaml
+  - !include views/toby-bored.yaml

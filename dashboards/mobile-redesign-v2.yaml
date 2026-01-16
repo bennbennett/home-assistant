@@ -1,0 +1,1835 @@
+##############################################################################
+#                     Mobile Dashboard - Complete Redesign                   #
+#              Translated from iPad tablet.yaml for vertical mobile          #
+##############################################################################
+title: Mobile
+theme: default
+
+resources: !include resources.yaml
+
+##############################################################################
+#                         Button Card Templates                              #
+##############################################################################
+button_card_templates:
+
+  # Bottom Navigation Button
+  mobile_nav_button:
+    show_icon: true
+    show_name: true
+    show_state: false
+    styles:
+      card:
+        - background: transparent
+        - box-shadow: none
+        - padding: 6px 2px
+        - margin: 0
+        - border-radius: 8px
+      icon:
+        - width: 22px
+        - height: 22px
+        - color: var(--secondary-text-color)
+      name:
+        - font-size: 10px
+        - font-weight: 500
+        - color: var(--secondary-text-color)
+        - text-align: center
+        - margin-top: 2px
+    state:
+      - operator: template
+        value: "[[[ return variables.active === true ]]]"
+        styles:
+          icon:
+            - color: var(--primary-color)
+          name:
+            - color: var(--primary-color)
+            - font-weight: 600
+
+  # Mobile Room Card with popup support
+  mobile_room_card:
+    show_icon: true
+    show_name: true
+    show_state: false
+    show_label: true
+    label: "[[[ if (variables && variables.temp_entity && states[variables.temp_entity]) { return Math.round(parseFloat(states[variables.temp_entity].state)) + '°F'; } return ''; ]]]"
+    styles:
+      card:
+        - background: "[[[ return (variables && variables.bg_color) ? variables.bg_color : '#ffffff'; ]]]"
+        - border-radius: 16px
+        - padding: 16px
+        - position: relative
+        - overflow: hidden
+        - height: 110px
+      grid:
+        - grid-template-areas: '"i n" "i l" "status status"'
+        - grid-template-columns: 48px 1fr
+        - grid-template-rows: auto auto 1fr
+        - align-items: start
+      icon:
+        - width: 32px
+        - height: 32px
+        - color: "[[[ return (variables && variables.accent_color) ? variables.accent_color : '#3b82f6'; ]]]"
+        - grid-area: i
+        - align-self: start
+        - margin-top: 4px
+      name:
+        - font-size: 15px
+        - font-weight: 600
+        - color: '#1f2937'
+        - grid-area: n
+        - text-align: left
+        - white-space: nowrap
+        - overflow: hidden
+        - text-overflow: ellipsis
+      label:
+        - font-size: 24px
+        - font-weight: 700
+        - color: "[[[ return (variables && variables.accent_color) ? variables.accent_color : '#3b82f6'; ]]]"
+        - grid-area: l
+        - text-align: left
+      custom_fields:
+        circle:
+          - position: absolute
+          - right: -30px
+          - bottom: -30px
+          - width: 100px
+          - height: 100px
+          - background: "[[[ return ((variables && variables.accent_color) ? variables.accent_color : '#3b82f6') + '15'; ]]]"
+          - border-radius: 50%
+          - z-index: 0
+        status:
+          - grid-area: status
+          - display: flex
+          - gap: 8px
+          - align-self: end
+          - z-index: 1
+    custom_fields:
+      circle: ""
+      status: "[[[ var html = ''; if (variables && variables.light_entity && states[variables.light_entity]) { var isOn = states[variables.light_entity].state === 'on'; var color = isOn ? '#f59e0b' : '#9ca3af'; var icon = isOn ? 'mdi:lightbulb' : 'mdi:lightbulb-outline'; html += '<ha-icon icon=\"' + icon + '\" style=\"--mdc-icon-size: 18px; color: ' + color + ';\"></ha-icon>'; } if (variables && variables.door_entity && states[variables.door_entity]) { var doorState = states[variables.door_entity].state; var isOpen = doorState === 'on' || doorState === 'open'; var dColor = isOpen ? '#ef4444' : '#22c55e'; var dIcon = isOpen ? 'mdi:door-open' : 'mdi:door-closed'; html += '<ha-icon icon=\"' + dIcon + '\" style=\"--mdc-icon-size: 18px; color: ' + dColor + ';\"></ha-icon>'; } return html; ]]]"
+
+  # Mobile Scene Button
+  mobile_scene_button:
+    show_icon: true
+    show_name: true
+    show_state: false
+    styles:
+      card:
+        - background: '#f3f4f6'
+        - border-radius: 12px
+        - padding: 12px 16px
+        - box-shadow: none
+      grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: 24px 1fr
+        - grid-gap: 8px
+      icon:
+        - width: 20px
+        - height: 20px
+        - color: '#6b7280'
+      name:
+        - font-size: 13px
+        - font-weight: 500
+        - color: '#374151'
+        - text-align: left
+
+  # Mobile Activity Card (for checklists)
+  mobile_activity_card:
+    show_icon: true
+    show_name: true
+    show_state: false
+    styles:
+      card:
+        - background: "[[[ return variables.bg_color || '#ffffff' ]]]"
+        - border-radius: 16px
+        - padding: 20px
+        - position: relative
+        - overflow: hidden
+        - min-height: 100px
+      grid:
+        - grid-template-areas: '"i n" "i progress"'
+        - grid-template-columns: 56px 1fr
+        - grid-template-rows: auto 1fr
+        - align-items: center
+      icon:
+        - width: 40px
+        - height: 40px
+        - color: "[[[ return variables.accent_color || '#3b82f6' ]]]"
+        - grid-area: i
+      name:
+        - font-size: 18px
+        - font-weight: 600
+        - color: '#1f2937'
+        - grid-area: n
+        - text-align: left
+      custom_fields:
+        circle:
+          - position: absolute
+          - right: -40px
+          - bottom: -40px
+          - width: 120px
+          - height: 120px
+          - background: "[[[ return (variables.accent_color || '#3b82f6') + '15' ]]]"
+          - border-radius: 50%
+          - z-index: 0
+        progress:
+          - grid-area: progress
+          - font-size: 14px
+          - color: '#6b7280'
+          - z-index: 1
+    custom_fields:
+      circle: ""
+
+  # Person Card
+  mobile_person_card:
+    show_icon: false
+    show_name: true
+    show_state: true
+    show_entity_picture: true
+    styles:
+      card:
+        - background: "[[[ return variables.bg_color || '#ffffff' ]]]"
+        - border-radius: 16px
+        - padding: 20px
+        - position: relative
+      grid:
+        - grid-template-areas: '"pic n" "pic s"'
+        - grid-template-columns: 60px 1fr
+        - grid-template-rows: auto auto
+        - grid-gap: 4px
+        - align-items: center
+      entity_picture:
+        - width: 48px
+        - height: 48px
+        - border-radius: 50%
+        - grid-area: pic
+        - background-color: "[[[ return variables.accent_color || '#3b82f6' ]]]"
+      name:
+        - font-size: 18px
+        - font-weight: 600
+        - color: '#1f2937'
+        - grid-area: n
+        - text-align: left
+        - align-self: end
+      state:
+        - font-size: 14px
+        - color: '#6b7280'
+        - grid-area: s
+        - text-align: left
+        - align-self: start
+        - text-transform: capitalize
+      custom_fields:
+        status_dot:
+          - position: absolute
+          - top: 20px
+          - right: 20px
+    custom_fields:
+      status_dot: |
+        [[[
+          const isHome = entity.state === 'home';
+          const color = isHome ? '#22c55e' : '#9ca3af';
+          return `<div style="width: 12px; height: 12px; border-radius: 50%; background: ${color};"></div>`;
+        ]]]
+
+  # Device Card
+  mobile_device_card:
+    show_icon: true
+    show_name: true
+    show_state: false
+    show_label: true
+    label: |
+      [[[
+        if (variables.battery_entity) {
+          const batt = states[variables.battery_entity];
+          if (batt) return batt.state + '%';
+        }
+        return '';
+      ]]]
+    styles:
+      card:
+        - background: '#ffffff'
+        - border-radius: 16px
+        - padding: 16px
+        - position: relative
+      grid:
+        - grid-template-areas: '"i n" "i l"'
+        - grid-template-columns: 48px 1fr
+        - align-items: center
+      icon:
+        - width: 32px
+        - height: 32px
+        - color: "[[[ return variables.accent_color || '#3b82f6' ]]]"
+        - grid-area: i
+      name:
+        - font-size: 14px
+        - font-weight: 600
+        - color: '#1f2937'
+        - grid-area: n
+        - text-align: left
+      label:
+        - font-size: 20px
+        - font-weight: 700
+        - color: |
+            [[[
+              if (variables.battery_entity) {
+                const batt = states[variables.battery_entity];
+                if (batt) {
+                  const level = parseInt(batt.state);
+                  if (level <= 20) return '#ef4444';
+                  if (level <= 50) return '#f59e0b';
+                  return '#22c55e';
+                }
+              }
+              return '#6b7280';
+            ]]]
+        - grid-area: l
+        - text-align: left
+      custom_fields:
+        battery_icon:
+          - position: absolute
+          - top: 16px
+          - right: 16px
+    custom_fields:
+      battery_icon: |
+        [[[
+          if (variables.battery_entity) {
+            const batt = states[variables.battery_entity];
+            if (batt) {
+              const level = parseInt(batt.state);
+              let icon = 'mdi:battery';
+              let color = '#22c55e';
+
+              if (level <= 10) { icon = 'mdi:battery-10'; color = '#ef4444'; }
+              else if (level <= 20) { icon = 'mdi:battery-20'; color = '#ef4444'; }
+              else if (level <= 30) { icon = 'mdi:battery-30'; color = '#f59e0b'; }
+              else if (level <= 40) { icon = 'mdi:battery-40'; color = '#f59e0b'; }
+              else if (level <= 50) { icon = 'mdi:battery-50'; color = '#f59e0b'; }
+              else if (level <= 60) { icon = 'mdi:battery-60'; color = '#22c55e'; }
+              else if (level <= 70) { icon = 'mdi:battery-70'; color = '#22c55e'; }
+              else if (level <= 80) { icon = 'mdi:battery-80'; color = '#22c55e'; }
+              else if (level <= 90) { icon = 'mdi:battery-90'; color = '#22c55e'; }
+              else { icon = 'mdi:battery'; color = '#22c55e'; }
+
+              return `<ha-icon icon="${icon}" style="--mdc-icon-size: 24px; color: ${color};"></ha-icon>`;
+            }
+          }
+          return '';
+        ]]]
+
+##############################################################################
+#                         Decluttering Templates                             #
+##############################################################################
+decluttering_templates:
+
+  # Bottom Navigation Bar
+  bottom_nav:
+    card:
+      type: custom:mod-card
+      card_mod:
+        style: |
+          ha-card {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            height: 70px !important;
+            background: rgba(255, 255, 255, 0.98) !important;
+            backdrop-filter: blur(10px) !important;
+            border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+            border-radius: 0 !important;
+            z-index: 999 !important;
+            padding: 0 8px env(safe-area-inset-bottom) 8px !important;
+            margin: 0 !important;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05) !important;
+          }
+      card:
+        type: horizontal-stack
+        cards:
+          - type: custom:button-card
+            name: Home
+            icon: mdi:home
+            template: mobile_nav_button
+            variables:
+              active: '[[active_home]]'
+            tap_action:
+              action: navigate
+              navigation_path: /mobile-dashboard/home
+          - type: custom:button-card
+            name: Calendar
+            icon: mdi:calendar
+            template: mobile_nav_button
+            variables:
+              active: '[[active_calendar]]'
+            tap_action:
+              action: navigate
+              navigation_path: /mobile-dashboard/calendar
+          - type: custom:button-card
+            name: Lists
+            icon: mdi:format-list-checks
+            template: mobile_nav_button
+            variables:
+              active: '[[active_tasks]]'
+            tap_action:
+              action: navigate
+              navigation_path: /mobile-dashboard/tasks
+          - type: custom:button-card
+            name: People
+            icon: mdi:account-group
+            template: mobile_nav_button
+            variables:
+              active: '[[active_people]]'
+            tap_action:
+              action: navigate
+              navigation_path: /mobile-dashboard/people
+          - type: custom:button-card
+            name: Devices
+            icon: mdi:devices
+            template: mobile_nav_button
+            variables:
+              active: '[[active_devices]]'
+            tap_action:
+              action: navigate
+              navigation_path: /mobile-dashboard/devices
+
+##############################################################################
+#                              VIEWS                                         #
+##############################################################################
+views:
+
+  ############################################################################
+  # HOME VIEW - Rooms and Scenes
+  ############################################################################
+  - title: Home
+    path: home
+    icon: mdi:home
+    type: custom:vertical-layout
+    cards:
+      - type: vertical-stack
+        cards:
+          # Header
+          - type: markdown
+            content: |
+              # Smart Home
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 16px 16px 0 16px;
+                  margin: 0;
+                }
+                h1 {
+                  font-size: 28px;
+                  font-weight: 700;
+                  margin: 0;
+                  color: #111827;
+                }
+
+          # Scene Buttons Row 1
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                name: Relax
+                icon: mdi:sofa
+                template: mobile_scene_button
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  service_data:
+                    entity_id: scene.front_house_relax
+              - type: custom:button-card
+                name: Bright
+                icon: mdi:brightness-7
+                template: mobile_scene_button
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  service_data:
+                    entity_id: scene.front_house_concentrate
+              - type: custom:button-card
+                name: All Off
+                icon: mdi:lightbulb-off
+                template: mobile_scene_button
+                tap_action:
+                  action: call-service
+                  service: light.turn_off
+                  target:
+                    entity_id:
+                      - light.front_house
+                      - light.bedrooms
+                      - light.outdoor_lights_dimmable
+
+          # Scene Buttons Row 2
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                name: Morning
+                icon: mdi:weather-sunny
+                template: mobile_scene_button
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  service_data:
+                    entity_id: script.good_morning_sequence
+              - type: custom:button-card
+                name: Night
+                icon: mdi:weather-night
+                template: mobile_scene_button
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  service_data:
+                    entity_id: script.good_night_sequence
+
+          # Rooms Header
+          - type: markdown
+            content: |
+              ## Rooms
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 16px 16px 8px 16px;
+                  margin: 0;
+                }
+                h2 {
+                  font-size: 20px;
+                  font-weight: 600;
+                  margin: 0;
+                  color: #374151;
+                }
+
+          # Room Grid
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              # Living Room
+              - type: custom:button-card
+                name: Living Room
+                icon: mdi:sofa
+                entity: sensor.living_room_temp_temperature
+                template: mobile_room_card
+                variables:
+                  bg_color: '#fdf2f8'
+                  accent_color: '#ec4899'
+                  temp_entity: sensor.living_room_temp_temperature
+                  light_entity: light.living_room
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Living Room
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Living Room
+                            subtitle: "{{ states('sensor.living_room_temp_temperature') }}°F"
+                          - type: custom:mushroom-light-card
+                            entity: light.living_room
+                            name: All Lights
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          - type: custom:mushroom-light-card
+                            entity: light.living_room_color
+                            name: Ceiling Light
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          - type: custom:mushroom-light-card
+                            entity: light.extended_color_light_1
+                            name: LED Strip
+                            show_brightness_control: true
+                            show_color_control: true
+
+              # Kitchen
+              - type: custom:button-card
+                name: Kitchen
+                icon: mdi:countertop
+                entity: light.dining_kitchen_zone
+                template: mobile_room_card
+                variables:
+                  bg_color: '#f0fdfa'
+                  accent_color: '#14b8a6'
+                  light_entity: light.dining_kitchen_zone
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Kitchen
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Kitchen & Dining
+                          - type: custom:mushroom-light-card
+                            entity: light.dining_kitchen_zone
+                            name: All Lights
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          - type: custom:mushroom-light-card
+                            entity: light.kitchen
+                            name: Kitchen
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          - type: custom:mushroom-light-card
+                            entity: light.kitchen_table
+                            name: Dining Room
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          - type: custom:mushroom-template-card
+                            primary: Roomba
+                            secondary: "{{ states('vacuum.roomba_mcroomba') }} • {{ states('sensor.roomba_mcroomba_battery') }}%"
+                            icon: mdi:robot-vacuum
+                            tap_action:
+                              action: more-info
+                              entity: vacuum.roomba_mcroomba
+
+              # Bedroom
+              - type: custom:button-card
+                name: Bedroom
+                icon: mdi:bed-queen
+                entity: sensor.bedroom_temp_humidity_temperature
+                template: mobile_room_card
+                variables:
+                  bg_color: '#faf5ff'
+                  accent_color: '#8b5cf6'
+                  temp_entity: sensor.bedroom_temp_humidity_temperature
+                  light_entity: light.master_bedroom
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Bedroom
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Master Bedroom
+                            subtitle: "{{ states('sensor.bedroom_temp_humidity_temperature') }}°F"
+                          - type: custom:mushroom-light-card
+                            entity: light.master_bedroom
+                            name: Bedroom Lights
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          - type: custom:mushroom-light-card
+                            entity: light.hue_color_lamp_1_3
+                            name: Petra's Lamp
+                            show_brightness_control: true
+                            show_color_temp_control: true
+
+              # Toby's Room
+              - type: custom:button-card
+                name: Toby's Room
+                icon: mdi:toy-brick
+                entity: sensor.toby_s_room_temp_temperature_2
+                template: mobile_room_card
+                variables:
+                  bg_color: '#fffbeb'
+                  accent_color: '#f59e0b'
+                  temp_entity: sensor.toby_s_room_temp_temperature_2
+                  light_entity: light.toby_s_room
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Toby's Room
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Toby's Room
+                            subtitle: "{{ states('sensor.toby_s_room_temp_temperature_2') }}°F"
+                          - type: custom:mushroom-light-card
+                            entity: light.toby_s_room
+                            name: Room Lights
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          - type: custom:mushroom-light-card
+                            entity: light.dimmable_light_1
+                            name: Toby's Lamp
+                            show_brightness_control: true
+
+              # Outside
+              - type: custom:button-card
+                name: Outside
+                icon: mdi:tree
+                entity: sensor.outside_temperature_temperature
+                template: mobile_room_card
+                variables:
+                  bg_color: '#f7fee7'
+                  accent_color: '#84cc16'
+                  temp_entity: sensor.outside_temperature_temperature
+                  light_entity: light.outdoor_lights_dimmable
+                  door_entity: binary_sensor.outside_door
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Outside
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Outside
+                            subtitle: "{{ states('sensor.outside_temperature_temperature') }}°F"
+                          - type: custom:mushroom-light-card
+                            entity: light.outdoor_lights_dimmable
+                            name: Outdoor Lights
+                            icon: mdi:string-lights
+                            show_brightness_control: true
+                          - type: custom:mushroom-template-card
+                            primary: Gate
+                            secondary: "{{ 'Open' if is_state('binary_sensor.outside_door', 'on') else 'Closed' }}"
+                            icon: "{{ 'mdi:gate-open' if is_state('binary_sensor.outside_door', 'on') else 'mdi:gate' }}"
+                            icon_color: "{{ 'red' if is_state('binary_sensor.outside_door', 'on') else 'green' }}"
+                          - type: custom:mushroom-template-card
+                            primary: Shed
+                            secondary: "{{ 'Open' if is_state('binary_sensor.door_sensor_shed', 'on') else 'Closed' }}"
+                            icon: "{{ 'mdi:door-open' if is_state('binary_sensor.door_sensor_shed', 'on') else 'mdi:door-closed' }}"
+                            icon_color: "{{ 'red' if is_state('binary_sensor.door_sensor_shed', 'on') else 'green' }}"
+                          - type: picture-entity
+                            entity: camera.front_yard_camera
+                            camera_view: live
+                            show_state: false
+                            show_name: false
+
+              # Whole House
+              - type: custom:button-card
+                name: Whole House
+                icon: mdi:home
+                entity: sensor.living_room_temp_temperature
+                template: mobile_room_card
+                variables:
+                  bg_color: '#eef2ff'
+                  accent_color: '#6366f1'
+                  temp_entity: sensor.living_room_temp_temperature
+                  light_entity: light.front_house
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Whole House
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: House Controls
+                            subtitle: "{{ states('sensor.living_room_temp_temperature') }}°F"
+                          - type: horizontal-stack
+                            cards:
+                              - type: custom:mushroom-template-card
+                                primary: Relax
+                                icon: mdi:sofa
+                                tap_action:
+                                  action: call-service
+                                  service: scene.turn_on
+                                  service_data:
+                                    entity_id: scene.front_house_relax
+                              - type: custom:mushroom-template-card
+                                primary: Energize
+                                icon: mdi:lightning-bolt
+                                tap_action:
+                                  action: call-service
+                                  service: scene.turn_on
+                                  service_data:
+                                    entity_id: scene.front_house_energize
+                              - type: custom:mushroom-template-card
+                                primary: Night
+                                icon: mdi:weather-night
+                                tap_action:
+                                  action: call-service
+                                  service: scene.turn_on
+                                  service_data:
+                                    entity_id: scene.front_house_nightlight
+                          - type: custom:mushroom-light-card
+                            entity: light.front_house
+                            name: Front House
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          - type: custom:mushroom-light-card
+                            entity: light.bedrooms
+                            name: Bedrooms
+                            show_brightness_control: true
+                            show_color_temp_control: true
+
+          # Spacer for bottom nav
+          - type: markdown
+            content: ""
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  height: 80px;
+                }
+
+      # Bottom Navigation
+      - type: custom:decluttering-card
+        template: bottom_nav
+        variables:
+          - active_home: true
+          - active_activities: false
+          - active_calendar: false
+          - active_tasks: false
+          - active_people: false
+          - active_devices: false
+
+  ############################################################################
+  # ACTIVITIES VIEW - Toby's Checklists
+  ############################################################################
+  - title: Activities
+    path: activities
+    icon: mdi:clipboard-check
+    type: custom:vertical-layout
+    cards:
+      - type: vertical-stack
+        cards:
+          # Header
+          - type: markdown
+            content: |
+              # Activities
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 16px 16px 0 16px;
+                  margin: 0;
+                }
+                h1 {
+                  font-size: 28px;
+                  font-weight: 700;
+                  margin: 0;
+                  color: #111827;
+                }
+
+          # Activity Cards Grid
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              # School
+              - type: custom:button-card
+                name: School
+                icon: mdi:backpack
+                template: mobile_activity_card
+                variables:
+                  bg_color: '#dbeafe'
+                  accent_color: '#3b82f6'
+                custom_fields:
+                  progress: |
+                    [[[
+                      const items = [
+                        'input_boolean.school_snack',
+                        'input_boolean.school_lunch',
+                        'input_boolean.school_water',
+                        'input_boolean.school_jacket',
+                        'input_boolean.school_binder',
+                        'input_boolean.school_chromebook',
+                        'input_boolean.school_homework'
+                      ];
+                      const checked = items.filter(e => states[e] && states[e].state === 'on').length;
+                      return `${checked}/${items.length} packed`;
+                    ]]]
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: School Checklist
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: School Checklist
+                            subtitle: Check off items as you pack
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_snack
+                            name: Snack
+                            icon: mdi:food-apple
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_lunch
+                            name: Lunch
+                            icon: mdi:lunchbox
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_water
+                            name: Water bottle
+                            icon: mdi:bottle-water
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_jacket
+                            name: Jacket
+                            icon: mdi:jacket
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_binder
+                            name: Binder
+                            icon: mdi:notebook
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_chromebook
+                            name: Chromebook
+                            icon: mdi:laptop
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_homework
+                            name: Homework
+                            icon: mdi:pencil
+                            tap_action:
+                              action: toggle
+
+              # Swimming
+              - type: custom:button-card
+                name: Swimming
+                icon: mdi:pool
+                template: mobile_activity_card
+                variables:
+                  bg_color: '#cffafe'
+                  accent_color: '#06b6d4'
+                custom_fields:
+                  progress: |
+                    [[[
+                      const items = [
+                        'input_boolean.swimming_bag',
+                        'input_boolean.swimming_shirt',
+                        'input_boolean.swimming_trunks',
+                        'input_boolean.swimming_goggles',
+                        'input_boolean.swimming_towel',
+                        'input_boolean.swimming_sunscreen',
+                        'input_boolean.swimming_wet_bag',
+                        'input_boolean.swimming_underwear',
+                        'input_boolean.swimming_shirt_change',
+                        'input_boolean.swimming_shorts',
+                        'input_boolean.swimming_water',
+                        'input_boolean.swimming_snack'
+                      ];
+                      const checked = items.filter(e => states[e] && states[e].state === 'on').length;
+                      return `${checked}/${items.length} packed`;
+                    ]]]
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Swimming Checklist
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Swimming Checklist
+                            subtitle: Check off items as you pack
+                          - type: markdown
+                            content: "**Swimming Gear**"
+                            card_mod:
+                              style: |
+                                ha-card { background: transparent; box-shadow: none; padding: 8px 0 0 0; }
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_bag
+                            name: Swim bag
+                            icon: mdi:bag-carry-on
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_shirt
+                            name: Swim shirt
+                            icon: mdi:tshirt-crew
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_trunks
+                            name: Swim trunks
+                            icon: mdi:swim
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_goggles
+                            name: Goggles
+                            icon: mdi:glasses
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_towel
+                            name: Towel
+                            icon: mdi:paper-roll
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_sunscreen
+                            name: Sunscreen
+                            icon: mdi:sun-thermometer
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_wet_bag
+                            name: Wet clothes bag
+                            icon: mdi:water
+                            tap_action:
+                              action: toggle
+                          - type: markdown
+                            content: "**Change of Clothes**"
+                            card_mod:
+                              style: |
+                                ha-card { background: transparent; box-shadow: none; padding: 8px 0 0 0; }
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_underwear
+                            name: Underwear
+                            icon: mdi:hanger
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_shirt_change
+                            name: Shirt
+                            icon: mdi:tshirt-crew-outline
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_shorts
+                            name: Shorts
+                            icon: mdi:roller-skate
+                            tap_action:
+                              action: toggle
+                          - type: markdown
+                            content: "**Food & Drink**"
+                            card_mod:
+                              style: |
+                                ha-card { background: transparent; box-shadow: none; padding: 8px 0 0 0; }
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_water
+                            name: Water bottle
+                            icon: mdi:bottle-water
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_snack
+                            name: Snack
+                            icon: mdi:food-apple
+                            tap_action:
+                              action: toggle
+
+              # Hockey
+              - type: custom:button-card
+                name: Hockey
+                icon: mdi:hockey-sticks
+                template: mobile_activity_card
+                variables:
+                  bg_color: '#ede9fe'
+                  accent_color: '#8b5cf6'
+                custom_fields:
+                  progress: |
+                    [[[
+                      const items = [
+                        'input_boolean.hockey_1',
+                        'input_boolean.hockey_2',
+                        'input_boolean.hockey_3',
+                        'input_boolean.hockey_4',
+                        'input_boolean.hockey_5',
+                        'input_boolean.hockey_6',
+                        'input_boolean.hockey_jersey',
+                        'input_boolean.hockey_7',
+                        'input_boolean.hockey_8'
+                      ];
+                      const checked = items.filter(e => states[e] && states[e].state === 'on').length;
+                      return `${checked}/${items.length} packed`;
+                    ]]]
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Hockey Checklist
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Hockey Checklist
+                            subtitle: Check off items as you pack
+                          - type: markdown
+                            content: "**Equipment**"
+                            card_mod:
+                              style: |
+                                ha-card { background: transparent; box-shadow: none; padding: 8px 0 0 0; }
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_1
+                            name: Helmet
+                            icon: mdi:racing-helmet
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_2
+                            name: Stick
+                            icon: mdi:hockey-sticks
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_5
+                            name: Skates
+                            icon: mdi:skate
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_4
+                            name: Elbow Pads
+                            icon: mdi:arm-flex
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_3
+                            name: Shinguards
+                            icon: mdi:shoe-cleat
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_6
+                            name: Chestplate
+                            icon: mdi:shield
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_jersey
+                            name: Jersey
+                            icon: mdi:tshirt-v
+                            tap_action:
+                              action: toggle
+                          - type: markdown
+                            content: "**Food & Drink**"
+                            card_mod:
+                              style: |
+                                ha-card { background: transparent; box-shadow: none; padding: 8px 0 0 0; }
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_7
+                            name: Water bottle
+                            icon: mdi:bottle-water
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_8
+                            name: Snack
+                            icon: mdi:food-apple
+                            tap_action:
+                              action: toggle
+
+              # After School
+              - type: custom:button-card
+                name: After School
+                icon: mdi:home-account
+                template: mobile_activity_card
+                variables:
+                  bg_color: '#fef3c7'
+                  accent_color: '#f59e0b'
+                custom_fields:
+                  progress: |
+                    [[[
+                      const items = [
+                        'input_boolean.after_school_hang_backpack',
+                        'input_boolean.after_school_lunchbox',
+                        'input_boolean.after_school_homework',
+                        'input_boolean.after_school_reading',
+                        'input_boolean.after_school_tomorrow'
+                      ];
+                      const checked = items.filter(e => states[e] && states[e].state === 'on').length;
+                      return `${checked}/${items.length} done`;
+                    ]]]
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: After School Checklist
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: After School
+                            subtitle: Things to do when you get home
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.after_school_hang_backpack
+                            name: Hang up backpack
+                            icon: mdi:hanger
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.after_school_lunchbox
+                            name: Empty lunch box
+                            icon: mdi:lunchbox
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.after_school_homework
+                            name: Do homework
+                            icon: mdi:pencil
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.after_school_reading
+                            name: Reading time
+                            icon: mdi:book-open-page-variant
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.after_school_tomorrow
+                            name: Pack for tomorrow
+                            icon: mdi:bag-checked
+                            tap_action:
+                              action: toggle
+
+          # Spacer for bottom nav
+          - type: markdown
+            content: ""
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  height: 80px;
+                }
+
+      # Bottom Navigation
+      - type: custom:decluttering-card
+        template: bottom_nav
+        variables:
+          - active_home: false
+          - active_activities: true
+          - active_calendar: false
+          - active_tasks: false
+          - active_people: false
+          - active_devices: false
+
+  ############################################################################
+  # CALENDAR VIEW
+  ############################################################################
+  - title: Calendar
+    path: calendar
+    icon: mdi:calendar
+    type: custom:vertical-layout
+    cards:
+      - type: vertical-stack
+        cards:
+          # Header
+          - type: markdown
+            content: |
+              # Calendar
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 16px 16px 0 16px;
+                  margin: 0;
+                }
+                h1 {
+                  font-size: 28px;
+                  font-weight: 700;
+                  margin: 0;
+                  color: #111827;
+                }
+
+          # Calendar
+          - type: calendar
+            entities:
+              - calendar.home_calendar
+              - calendar.meals
+              - calendar.birthdays_anniversaries
+            initial_view: listWeek
+            card_mod:
+              style: |
+                ha-card {
+                  margin: 8px 16px;
+                  border-radius: 16px;
+                }
+
+          # Spacer for bottom nav
+          - type: markdown
+            content: ""
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  height: 80px;
+                }
+
+      # Bottom Navigation
+      - type: custom:decluttering-card
+        template: bottom_nav
+        variables:
+          - active_home: false
+          - active_activities: false
+          - active_calendar: true
+          - active_tasks: false
+          - active_people: false
+          - active_devices: false
+
+  ############################################################################
+  # TASKS VIEW
+  ############################################################################
+  - title: Tasks
+    path: tasks
+    icon: mdi:format-list-checks
+    type: custom:vertical-layout
+    cards:
+      - type: vertical-stack
+        cards:
+          # Header
+          - type: markdown
+            content: |
+              # Tasks
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 16px 16px 0 16px;
+                  margin: 0;
+                }
+                h1 {
+                  font-size: 28px;
+                  font-weight: 700;
+                  margin: 0;
+                  color: #111827;
+                }
+
+          # Shopping List Header
+          - type: markdown
+            content: |
+              ## Shopping List
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 16px 16px 8px 16px;
+                  margin: 0;
+                }
+                h2 {
+                  font-size: 20px;
+                  font-weight: 600;
+                  margin: 0;
+                  color: #374151;
+                }
+
+          # Shopping List
+          - type: todo-list
+            entity: todo.google_keep_shopping_list
+            hide_completed: true
+            card_mod:
+              style: |
+                ha-card {
+                  margin: 0 16px;
+                  border-radius: 16px;
+                }
+
+          # Family Todo Header
+          - type: markdown
+            content: |
+              ## Family Todo
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 16px 16px 8px 16px;
+                  margin: 0;
+                }
+                h2 {
+                  font-size: 20px;
+                  font-weight: 600;
+                  margin: 0;
+                  color: #374151;
+                }
+
+          # Family Todo
+          - type: todo-list
+            entity: todo.google_keep_family_todo
+            hide_completed: true
+            card_mod:
+              style: |
+                ha-card {
+                  margin: 0 16px;
+                  border-radius: 16px;
+                }
+
+          # Spacer for bottom nav
+          - type: markdown
+            content: ""
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  height: 80px;
+                }
+
+      # Bottom Navigation
+      - type: custom:decluttering-card
+        template: bottom_nav
+        variables:
+          - active_home: false
+          - active_activities: false
+          - active_calendar: false
+          - active_tasks: true
+          - active_people: false
+          - active_devices: false
+
+  ############################################################################
+  # PEOPLE VIEW
+  ############################################################################
+  - title: People
+    path: people
+    icon: mdi:account-group
+    type: custom:vertical-layout
+    cards:
+      - type: vertical-stack
+        cards:
+          # Header
+          - type: markdown
+            content: |
+              # People
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 16px 16px 0 16px;
+                  margin: 0;
+                }
+                h1 {
+                  font-size: 28px;
+                  font-weight: 700;
+                  margin: 0;
+                  color: #111827;
+                }
+
+          # Person Cards
+          - type: vertical-stack
+            cards:
+              # Ben
+              - type: custom:button-card
+                entity: person.ben_bennett
+                name: Ben
+                template: mobile_person_card
+                variables:
+                  bg_color: '#dbeafe'
+                  accent_color: '#3b82f6'
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Ben
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-person-card
+                            entity: person.ben_bennett
+                            icon_type: entity-picture
+                          - type: custom:mushroom-template-card
+                            primary: iPhone
+                            secondary: "{{ states('sensor.iphone_battery_level') }}% battery"
+                            icon: mdi:cellphone
+                            icon_color: |
+                              {% set level = states('sensor.iphone_battery_level') | int %}
+                              {% if level <= 20 %}red{% elif level <= 50 %}orange{% else %}green{% endif %}
+
+              # Petra
+              - type: custom:button-card
+                entity: person.petra_bennett
+                name: Petra
+                template: mobile_person_card
+                variables:
+                  bg_color: '#fce7f3'
+                  accent_color: '#ec4899'
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Petra
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-person-card
+                            entity: person.petra_bennett
+                            icon_type: entity-picture
+                          - type: custom:mushroom-template-card
+                            primary: Pixel 10
+                            secondary: "{{ states('sensor.pixel_10_battery_level') }}% battery"
+                            icon: mdi:cellphone
+                            icon_color: |
+                              {% set level = states('sensor.pixel_10_battery_level') | int %}
+                              {% if level <= 20 %}red{% elif level <= 50 %}orange{% else %}green{% endif %}
+
+              # Toby (no person entity, but link to activities)
+              - type: custom:button-card
+                name: Toby
+                icon: mdi:account-child
+                show_state: false
+                styles:
+                  card:
+                    - background: '#fffbeb'
+                    - border-radius: 16px
+                    - padding: 20px
+                    - margin: 8px 16px
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: 60px 1fr
+                    - align-items: center
+                  icon:
+                    - width: 48px
+                    - height: 48px
+                    - color: '#f59e0b'
+                    - background: '#fef3c7'
+                    - border-radius: 50%
+                    - padding: 8px
+                  name:
+                    - font-size: 18px
+                    - font-weight: 600
+                    - color: '#1f2937'
+                    - text-align: left
+                tap_action:
+                  action: navigate
+                  navigation_path: /mobile-dashboard/activities
+
+          # Spacer for bottom nav
+          - type: markdown
+            content: ""
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  height: 80px;
+                }
+
+      # Bottom Navigation
+      - type: custom:decluttering-card
+        template: bottom_nav
+        variables:
+          - active_home: false
+          - active_activities: false
+          - active_calendar: false
+          - active_tasks: false
+          - active_people: true
+          - active_devices: false
+
+  ############################################################################
+  # DEVICES VIEW
+  ############################################################################
+  - title: Devices
+    path: devices
+    icon: mdi:devices
+    type: custom:vertical-layout
+    cards:
+      - type: vertical-stack
+        cards:
+          # Header
+          - type: markdown
+            content: |
+              # Devices
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 16px 16px 0 16px;
+                  margin: 0;
+                }
+                h1 {
+                  font-size: 28px;
+                  font-weight: 700;
+                  margin: 0;
+                  color: #111827;
+                }
+
+          # Phones Section
+          - type: markdown
+            content: |
+              ## Phones
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 16px 16px 8px 16px;
+                  margin: 0;
+                }
+                h2 {
+                  font-size: 20px;
+                  font-weight: 600;
+                  margin: 0;
+                  color: #374151;
+                }
+
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: custom:button-card
+                name: iPhone
+                icon: mdi:cellphone
+                entity: device_tracker.iphone
+                template: mobile_device_card
+                variables:
+                  accent_color: '#3b82f6'
+                  battery_entity: sensor.iphone_battery_level
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: iPhone
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: iPhone
+                            subtitle: "{{ states('sensor.iphone_battery_level') }}% battery"
+                          - type: custom:mushroom-template-card
+                            primary: Battery
+                            secondary: "{{ states('sensor.iphone_battery_level') }}%"
+                            icon: mdi:battery
+                            icon_color: |
+                              {% set level = states('sensor.iphone_battery_level') | int %}
+                              {% if level <= 20 %}red{% elif level <= 50 %}orange{% else %}green{% endif %}
+                          - type: custom:mushroom-template-card
+                            primary: Find iPhone
+                            icon: mdi:cellphone-sound
+                            icon_color: blue
+                            tap_action:
+                              action: call-service
+                              service: notify.mobile_app_iphone_4
+                              service_data:
+                                message: "Finding phone"
+                                data:
+                                  push:
+                                    sound:
+                                      name: default
+                                      critical: 1
+                                      volume: 1.0
+
+              - type: custom:button-card
+                name: Pixel 10
+                icon: mdi:cellphone
+                entity: device_tracker.pixel_10
+                template: mobile_device_card
+                variables:
+                  accent_color: '#8b5cf6'
+                  battery_entity: sensor.pixel_10_battery_level
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Pixel 10
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Pixel 10
+                            subtitle: "{{ states('sensor.pixel_10_battery_level') }}% battery"
+                          - type: custom:mushroom-template-card
+                            primary: Battery
+                            secondary: "{{ states('sensor.pixel_10_battery_level') }}%"
+                            icon: mdi:battery
+                            icon_color: |
+                              {% set level = states('sensor.pixel_10_battery_level') | int %}
+                              {% if level <= 20 %}red{% elif level <= 50 %}orange{% else %}green{% endif %}
+
+          # Tablets Section
+          - type: markdown
+            content: |
+              ## Tablets
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 16px 16px 8px 16px;
+                  margin: 0;
+                }
+                h2 {
+                  font-size: 20px;
+                  font-weight: 600;
+                  margin: 0;
+                  color: #374151;
+                }
+
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: custom:button-card
+                name: Ben's iPad
+                icon: mdi:tablet
+                entity: device_tracker.benjamins_ipad
+                template: mobile_device_card
+                variables:
+                  accent_color: '#6366f1'
+                  battery_entity: sensor.benjamins_ipad_battery_level
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Ben's iPad
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Ben's iPad
+                            subtitle: "{{ states('sensor.benjamins_ipad_battery_level') }}% battery"
+                          - type: custom:mushroom-template-card
+                            primary: Battery
+                            secondary: "{{ states('sensor.benjamins_ipad_battery_level') }}%"
+                            icon: mdi:battery
+                            icon_color: |
+                              {% set level = states('sensor.benjamins_ipad_battery_level') | int %}
+                              {% if level <= 20 %}red{% elif level <= 50 %}orange{% else %}green{% endif %}
+
+              - type: custom:button-card
+                name: iPad
+                icon: mdi:tablet
+                entity: device_tracker.ipad
+                template: mobile_device_card
+                variables:
+                  accent_color: '#14b8a6'
+                  battery_entity: sensor.ipad_battery_level
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: iPad
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: iPad
+                            subtitle: "{{ states('sensor.ipad_battery_level') }}% battery"
+                          - type: custom:mushroom-template-card
+                            primary: Battery
+                            secondary: "{{ states('sensor.ipad_battery_level') }}%"
+                            icon: mdi:battery
+                            icon_color: |
+                              {% set level = states('sensor.ipad_battery_level') | int %}
+                              {% if level <= 20 %}red{% elif level <= 50 %}orange{% else %}green{% endif %}
+
+          # Other Devices Section
+          - type: markdown
+            content: |
+              ## Other
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  padding: 16px 16px 8px 16px;
+                  margin: 0;
+                }
+                h2 {
+                  font-size: 20px;
+                  font-weight: 600;
+                  margin: 0;
+                  color: #374151;
+                }
+
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: custom:button-card
+                name: Roomba
+                icon: mdi:robot-vacuum
+                entity: vacuum.roomba_mcroomba
+                template: mobile_device_card
+                variables:
+                  accent_color: '#22c55e'
+                  battery_entity: sensor.roomba_mcroomba_battery
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Roomba
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: McRoomba
+                            subtitle: "{{ states('vacuum.roomba_mcroomba') | title }}"
+                          - type: custom:mushroom-template-card
+                            primary: Battery
+                            secondary: "{{ states('sensor.roomba_mcroomba_battery') }}%"
+                            icon: mdi:battery
+                            icon_color: |
+                              {% set level = states('sensor.roomba_mcroomba_battery') | int %}
+                              {% if level <= 20 %}red{% elif level <= 50 %}orange{% else %}green{% endif %}
+                          - type: custom:mushroom-template-card
+                            primary: Status
+                            secondary: "{{ states('vacuum.roomba_mcroomba') | title }}"
+                            icon: mdi:robot-vacuum
+                            icon_color: "{{ 'green' if is_state('vacuum.roomba_mcroomba', 'cleaning') else 'grey' }}"
+                          - type: horizontal-stack
+                            cards:
+                              - type: custom:mushroom-template-card
+                                primary: Start
+                                icon: mdi:play
+                                icon_color: green
+                                tap_action:
+                                  action: call-service
+                                  service: vacuum.start
+                                  target:
+                                    entity_id: vacuum.roomba_mcroomba
+                              - type: custom:mushroom-template-card
+                                primary: Dock
+                                icon: mdi:home
+                                icon_color: blue
+                                tap_action:
+                                  action: call-service
+                                  service: vacuum.return_to_base
+                                  target:
+                                    entity_id: vacuum.roomba_mcroomba
+                              - type: custom:mushroom-template-card
+                                primary: Stop
+                                icon: mdi:stop
+                                icon_color: red
+                                tap_action:
+                                  action: call-service
+                                  service: vacuum.stop
+                                  target:
+                                    entity_id: vacuum.roomba_mcroomba
+
+          # Spacer for bottom nav
+          - type: markdown
+            content: ""
+            card_mod:
+              style: |
+                ha-card {
+                  background: transparent;
+                  box-shadow: none;
+                  height: 80px;
+                }
+
+      # Bottom Navigation
+      - type: custom:decluttering-card
+        template: bottom_nav
+        variables:
+          - active_home: false
+          - active_activities: false
+          - active_calendar: false
+          - active_tasks: false
+          - active_people: false
+          - active_devices: true

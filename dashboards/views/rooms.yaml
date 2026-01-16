@@ -1,0 +1,742 @@
+title: Rooms
+path: rooms
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 80px 1fr
+      grid-template-rows: 1fr
+      margin: 0
+      padding: 0
+      grid-gap: 0
+    cards:
+      # Left Menu (column 1)
+      - type: custom:decluttering-card
+        template: side_menu
+        view_layout:
+          grid-column: 1
+
+      # Main content area in column 2
+      - type: vertical-stack
+        view_layout:
+          grid-column: 2
+        card_mod:
+          style: |
+            :host {
+              /* Same padding/margin style as calendar if desired */
+              padding: 16px 8px !important;
+              margin: 0 !important;
+            }
+        cards:
+          ############################################
+          # 1) SCENE BUTTONS (horizontal-stack)
+          ############################################
+          - type: horizontal-stack
+            cards:
+              # Relax scene
+              - type: custom:button-card
+                icon: mdi:white-balance-sunny
+                name: Relax
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  service_data:
+                    entity_id: scene.front_house_relax
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 140px
+                    - background-color: "rgba(254, 226, 219, 0.5)"
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: "rgba(249, 115, 22, 0.8)"
+                  name:
+                    - color: "rgba(249, 115, 22, 0.8)"
+                    - font-size: 14px
+                    - margin-left: 8px
+
+              # All lights off scene
+              - type: custom:button-card
+                icon: mdi:lightbulb-off
+                name: All Off
+                tap_action:
+                  action: call-service
+                  service: light.turn_off
+                  target:
+                    entity_id:
+                      - light.living_room_color
+                      - light.extended_color_light_1
+                      - light.bedroom
+                      - light.kitchen_table
+                      - light.kitchen
+                      - light.outdoor_lights_dimmable
+                      - light.front_house
+                      - light.bedrooms
+                      - light.master_bedroom
+                      - light.toby_s_room
+                      - light.dining_kitchen_zone
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 140px
+                    - background-color: "rgba(254, 226, 219, 0.5)"
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: "rgba(249, 115, 22, 0.8)"
+                  name:
+                    - color: "rgba(249, 115, 22, 0.8)"
+                    - font-size: 14px
+                    - margin-left: 8px
+
+              # Bright scene
+              - type: custom:button-card
+                icon: mdi:brightness-7
+                name: Bright
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  service_data:
+                    entity_id: scene.front_house_concentrate
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 140px
+                    - background-color: "rgba(254, 226, 219, 0.5)"
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: "rgba(249, 115, 22, 0.8)"
+                  name:
+                    - color: "rgba(249, 115, 22, 0.8)"
+                    - font-size: 14px
+                    - margin-left: 8px
+
+              # Good Morning scene
+              - type: custom:button-card
+                icon: mdi:weather-sunny
+                name: Good Morning
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  service_data:
+                    entity_id: script.good_morning_sequence
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 140px
+                    - background-color: "rgba(254, 226, 219, 0.5)"
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: "rgba(249, 115, 22, 0.8)"
+                  name:
+                    - color: "rgba(249, 115, 22, 0.8)"
+                    - font-size: 14px
+                    - margin-left: 8px
+
+              # Good Night scene
+              - type: custom:button-card
+                icon: mdi:weather-night
+                name: Good Night
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  service_data:
+                    entity_id: script.good_night_sequence
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 140px
+                    - background-color: "rgba(254, 226, 219, 0.5)"
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: "rgba(249, 115, 22, 0.8)"
+                  name:
+                    - color: "rgba(249, 115, 22, 0.8)"
+                    - font-size: 14px
+                    - margin-left: 8px
+
+          ####################################################
+          # 2) ROOM GRID (3 columns, your 6 room-cards, etc.)
+          ####################################################
+          - type: grid
+            columns: 3
+            square: true
+            cards:
+              ############################################
+              # Whole House card
+              ############################################
+              - type: custom:button-card
+                template: room_card
+                name: Whole House
+                icon: mdi:home
+                entity: sensor.living_room_temp_temperature
+                triggers_update:
+                  - sensor.living_room_temp_temperature
+                variables:
+                  color: "#6366f1"
+                  light_entities:
+                    - light.living_room_color
+                    - light.bedroom
+                    - light.kitchen_table
+                    - light.kitchen
+                    - light.outdoor_lights_dimmable
+                  no_light_tap: true
+                  temp_entity: sensor.living_room_temp_temperature
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: House Controls
+                      popup_styles:
+                        - style: all
+                          styles: |
+                            ha-dialog {
+                              --ha-dialog-border-radius: 20px;
+                            }
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: House Controls
+                            subtitle: "Current Temperature: {{ states('sensor.living_room_temp_temperature') }}°F"
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-left: 4px solid #6366f1;
+                                  padding-left: 16px;
+                                  background: rgba(99, 102, 241, 0.08);
+                                  border-radius: 12px;
+                                  margin-bottom: 12px;
+                                }
+                          # Scene Controls
+                          - type: horizontal-stack
+                            cards:
+                              - type: custom:button-card
+                                name: Relax
+                                icon: mdi:white-balance-sunny
+                                tap_action:
+                                  action: call-service
+                                  service: scene.turn_on
+                                  service_data:
+                                    entity_id: scene.front_house_relax
+                              - type: custom:button-card
+                                name: Energize
+                                icon: mdi:lightning-bolt
+                                tap_action:
+                                  action: call-service
+                                  service: scene.turn_on
+                                  service_data:
+                                    entity_id: scene.front_house_energize
+                              - type: custom:button-card
+                                name: Night
+                                icon: mdi:weather-night
+                                tap_action:
+                                  action: call-service
+                                  service: scene.turn_on
+                                  service_data:
+                                    entity_id: scene.front_house_nightlight
+                          # Front House Controls
+                          - type: custom:mushroom-light-card
+                            entity: light.front_house
+                            name: Front House Lights
+                            icon: mdi:home-lightbulb
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          # Bedrooms Control
+                          - type: custom:mushroom-light-card
+                            entity: light.bedrooms
+                            name: Bedroom Lights
+                            icon: mdi:bed-double
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+
+              ############################################
+              # Living Room card
+              ############################################
+              - type: custom:button-card
+                template: room_card
+                name: Living Room
+                icon: mdi:sofa
+                entity: sensor.living_room_temp_temperature
+                triggers_update:
+                  - sensor.living_room_temp_temperature
+                  - light.living_room_color
+                variables:
+                  color: "#ec4899"
+                  light_entity: light.living_room_color
+                  temp_entity: sensor.living_room_temp_temperature
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Living Room Controls
+                      popup_styles:
+                        - style: all
+                          styles: |
+                            ha-dialog {
+                              --ha-dialog-border-radius: 20px;
+                            }
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Living Room
+                            subtitle: "Current Temperature: {{ states('sensor.living_room_temp_temperature') }}°F"
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-left: 4px solid #ec4899;
+                                  padding-left: 16px;
+                                  background: rgba(236, 72, 153, 0.08);
+                                  border-radius: 12px;
+                                  margin-bottom: 12px;
+                                }
+                          - type: custom:mushroom-light-card
+                            entity: light.living_room_color
+                            name: Main Light
+                            icon: mdi:ceiling-light
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                            use_light_color: true
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          - type: custom:mushroom-light-card
+                            entity: light.extended_color_light_1
+                            name: LED Strip
+                            icon: mdi:led-strip-variant
+                            show_brightness_control: true
+                            show_color_control: true
+                            use_light_color: true
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          - type: custom:mushroom-template-card
+                            primary: Temperature
+                            secondary: "{{ states('sensor.living_room_temp_temperature') }}°F"
+                            icon: mdi:thermometer
+                            icon_color: blue
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                }
+
+              ############################################
+              # Kitchen card
+              ############################################
+              - type: custom:button-card
+                template: room_card
+                name: Kitchen
+                icon: mdi:countertop
+                triggers_update:
+                  - light.dining_kitchen_zone
+                variables:
+                  color: "#14b8a6"
+                  light_entity: light.dining_kitchen_zone
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Kitchen & Dining Controls
+                      popup_styles:
+                        - style: all
+                          styles: |
+                            ha-dialog {
+                              --ha-dialog-border-radius: 20px;
+                            }
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Kitchen & Dining
+                            subtitle: "Current Temperature: {{ states('sensor.living_room_temp_temperature') }}°F"
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-left: 4px solid #14b8a6;
+                                  padding-left: 16px;
+                                  background: rgba(20, 184, 166, 0.08);
+                                  border-radius: 12px;
+                                  margin-bottom: 12px;
+                                }
+                          - type: custom:mushroom-light-card
+                            entity: light.dining_kitchen_zone
+                            name: All Kitchen & Dining Lights
+                            icon: mdi:lightbulb-group
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          - type: custom:mushroom-light-card
+                            entity: light.kitchen_table
+                            name: Dining Room
+                            icon: mdi:food-fork-drink
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          - type: custom:mushroom-light-card
+                            entity: light.kitchen
+                            name: Kitchen
+                            icon: mdi:stove
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          # Roomba example
+                          - type: custom:mushroom-template-card
+                            primary: Roomba McRoomba
+                            secondary: "Battery: {{ states('sensor.roomba_mcroomba_battery') }}% | Bin: {{ states('binary_sensor.roomba_mcroomba_bin_full') }}"
+                            icon: mdi:robot-vacuum
+                            icon_color: >-
+                              [[[
+                                if (states['vacuum.roomba_mcroomba'].state === 'cleaning') return 'green';
+                                if (states['vacuum.roomba_mcroomba'].state === 'docked') return 'blue';
+                                if (states['vacuum.roomba_mcroomba'].state === 'error') return 'red';
+                                return 'grey';
+                              ]]]
+                          - type: horizontal-stack
+                            cards:
+                              - type: custom:mushroom-template-card
+                                tap_action:
+                                  action: call-service
+                                  service: vacuum.start
+                                  target:
+                                    entity_id: vacuum.roomba_mcroomba
+                                icon: mdi:play
+                                primary: Start
+                              - type: custom:mushroom-template-card
+                                tap_action:
+                                  action: call-service
+                                  service: vacuum.return_to_base
+                                  target:
+                                    entity_id: vacuum.roomba_mcroomba
+                                icon: mdi:home
+                                primary: Dock
+                          - type: entities
+                            show_header_toggle: false
+                            entities:
+                              - entity: sensor.roomba_mcroomba_successful_missions
+                                name: Successful Cleans
+                              - entity: sensor.roomba_mcroomba_average_mission_time
+                                name: Average Clean Time
+                              - entity: sensor.roomba_mcroomba_total_cleaning_time
+                                name: Total Cleaning Time
+
+              ############################################
+              # Bedroom card
+              ############################################
+              - type: custom:button-card
+                template: room_card
+                name: Bedroom
+                icon: mdi:bed-queen-outline
+                entity: sensor.bedroom_temp_humidity_temperature
+                triggers_update:
+                  - sensor.bedroom_temp_humidity_temperature
+                  - light.master_bedroom
+                variables:
+                  color: "#8b5cf6"
+                  light_entity: light.master_bedroom
+                  temp_entity: sensor.bedroom_temp_humidity_temperature
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Master Bedroom Controls
+                      popup_styles:
+                        - style: all
+                          styles: |
+                            ha-dialog {
+                              --ha-dialog-border-radius: 20px;
+                            }
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Master Bedroom
+                            subtitle: "Current Temperature: {{ states('sensor.bedroom_temp_humidity_temperature') }}°F"
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-left: 4px solid #8b5cf6;
+                                  padding-left: 16px;
+                                  background: rgba(139, 92, 246, 0.08);
+                                  border-radius: 12px;
+                                  margin-bottom: 12px;
+                                }
+                          - type: custom:mushroom-light-card
+                            entity: light.master_bedroom
+                            name: Bedroom Light
+                            icon: mdi:ceiling-light
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          - type: custom:mushroom-light-card
+                            entity: light.hue_color_lamp_1_3
+                            name: Petra's Lamp
+                            icon: mdi:lamp
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                            use_light_color: true
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          - type: custom:mushroom-template-card
+                            primary: Temperature
+                            secondary: "{{ states('sensor.bedroom_temp_humidity_temperature') }}°F"
+                            icon: mdi:thermometer
+                            icon_color: blue
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                }
+
+              ############################################
+              # Toby's Room card
+              ############################################
+              - type: custom:button-card
+                template: room_card
+                name: "Toby's Room"
+                icon: mdi:toy-brick-outline
+                entity: sensor.toby_s_room_temp_temperature_2
+                triggers_update:
+                  - sensor.toby_s_room_temp_temperature_2
+                  - light.toby_s_room
+                variables:
+                  color: "#f59e0b"
+                  light_entity: light.toby_s_room
+                  temp_entity: sensor.toby_s_room_temp_temperature_2
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Toby's Room Controls
+                      popup_styles:
+                        - style: all
+                          styles: |
+                            ha-dialog {
+                              --ha-dialog-border-radius: 20px;
+                            }
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Toby's Room
+                            subtitle: "Current Temperature: {{ states('sensor.toby_s_room_temp_temperature_2') }}°F"
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-left: 4px solid #f59e0b;
+                                  padding-left: 16px;
+                                  background: rgba(245, 158, 11, 0.08);
+                                  border-radius: 12px;
+                                  margin-bottom: 12px;
+                                }
+                          - type: custom:mushroom-light-card
+                            entity: light.toby_s_room
+                            name: Room Light
+                            icon: mdi:ceiling-light
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          - type: custom:mushroom-light-card
+                            entity: light.dimmable_light_1
+                            name: Toby's Lamp
+                            icon: mdi:lamp
+                            show_brightness_control: true
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          - type: custom:mushroom-template-card
+                            primary: Temperature
+                            secondary: "{{ states('sensor.toby_s_room_temp_temperature_2') }}°F"
+                            icon: mdi:thermometer
+                            icon_color: blue
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                }
+
+              ############################################
+              # Outside card
+              ############################################
+              - type: custom:button-card
+                template: room_card
+                name: Outside
+                icon: mdi:tree
+                entity: sensor.outside_temperature_temperature
+                triggers_update:
+                  - sensor.outside_temperature_temperature
+                  - light.outdoor_lights_dimmable
+                  - binary_sensor.outside_door
+                  - binary_sensor.door_sensor_shed
+                variables:
+                  color: "#84cc16"
+                  light_icon: mdi:string-lights
+                  light_entity: light.outdoor_lights_dimmable
+                  temp_entity: sensor.outside_temperature_temperature
+                  door_entity: binary_sensor.outside_door
+                  door_entity_2: binary_sensor.door_sensor_shed
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Outside Controls
+                      popup_styles:
+                        - style: all
+                          styles: |
+                            ha-dialog {
+                              --ha-dialog-border-radius: 20px;
+                            }
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Outside
+                            subtitle: "Current Temperature: {{ states('sensor.outside_temperature_temperature') }}°F"
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-left: 4px solid #84cc16;
+                                  padding-left: 16px;
+                                  background: rgba(132, 204, 22, 0.08);
+                                  border-radius: 12px;
+                                  margin-bottom: 12px;
+                                }
+                          - type: custom:mushroom-light-card
+                            entity: light.outdoor_lights_dimmable
+                            name: Outdoor Light
+                            icon: mdi:string-lights
+                            show_brightness_control: true
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          - type: picture-entity
+                            entity: camera.front_yard_camera
+                            camera_view: live
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          - type: custom:mushroom-template-card
+                            primary: Temperature
+                            secondary: "{{ states('sensor.outside_temperature_temperature') }}°F"
+                            icon: mdi:thermometer
+                            icon_color: blue
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          - type: custom:mushroom-template-card
+                            primary: Outside Gate
+                            secondary: "{{ 'Open' if is_state('binary_sensor.outside_door', 'on') else 'Closed' }}"
+                            icon: "{{ 'mdi:gate-open' if is_state('binary_sensor.outside_door', 'on') else 'mdi:gate' }}"
+                            icon_color: "{{ 'red' if is_state('binary_sensor.outside_door', 'on') else 'green' }}"
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                  margin-bottom: 8px;
+                                }
+                          - type: custom:mushroom-template-card
+                            primary: Shed Door
+                            secondary: "{{ 'Open' if is_state('binary_sensor.door_sensor_shed', 'on') else 'Closed' }}"
+                            icon: "{{ 'mdi:door-open' if is_state('binary_sensor.door_sensor_shed', 'on') else 'mdi:door-closed' }}"
+                            icon_color: "{{ 'red' if is_state('binary_sensor.door_sensor_shed', 'on') else 'green' }}"
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-radius: 12px;
+                                }

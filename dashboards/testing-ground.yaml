@@ -1,0 +1,42 @@
+type: custom:week-planner-card
+title: "My Month"
+days: "month"           # <-- shows the entire current month
+startingDay: "sunday"   # or "monday", "today", etc.
+updateInterval: 600     # refresh events every 10 mins
+noCardBackground: false # set to 'true' if you don't want the standard card look
+eventBackground: "rgba(0, 0, 0, 0.75)"
+showLegend: true
+calendars:
+  - entity: calendar.family
+    name: Family
+    color: "#1a8fe3"
+  - entity: calendar.waste_collection
+    name: Waste
+    color: "#e6c229"
+card_mod:
+  style: |
+    ha-card {
+      /* Card wrapper */
+      margin: 16px;
+      padding: 16px;
+      font-size: 14px !important;  /* Tweak base font size */
+    }
+    /* Make each day look a bit more “boxy” */
+    .container .day {
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+    /* If you don't want any card background at all: 
+       noCardBackground: true
+       Then remove background/border from .day if desired. */
+
+    /* Example: highlight “today” with a red circle or background */
+    .today .date .number {
+      background-color: #ff0000 !important;
+      color: white !important;
+      border-radius: 50%;
+    }
+    .today {
+      /* or background behind the entire day cell */
+      background-color: rgba(255,0,0,0.05);
+    }

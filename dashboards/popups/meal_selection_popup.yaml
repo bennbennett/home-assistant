@@ -1,0 +1,56 @@
+type: vertical-stack
+cards:
+  - type: markdown
+    content: "## Select a Meal"
+    card_mod:
+      style: |
+        ha-card {
+          background: transparent;
+          border: none;
+          padding: 0;
+        }
+        h2 {
+          color: white;
+          margin: 0;
+        }
+
+  - type: custom:auto-entities
+    card:
+      type: grid
+      columns: 2
+      square: false
+    card_param: cards
+    filter:
+      template: |
+        {% set recipes = state_attr('sensor.mealie_recipes', 'recipes') or [] %}
+        {% for recipe in recipes[:20] %}
+        {{
+          {
+            'type': 'custom:button-card',
+            'name': recipe.name,
+            'icon': 'mdi:food',
+            'tap_action': {
+              'action': 'call-service',
+              'service': 'script.assign_meal_to_day',
+              'service_data': {
+                'recipe_id': recipe.id,
+                'recipe_name': recipe.name
+              }
+            },
+            'styles': {
+              'card': [
+                {'background-color': '#3a3a3a'},
+                {'border-radius': '8px'},
+                {'padding': '12px'}
+              ],
+              'name': [
+                {'font-size': '14px'},
+                {'color': 'white'}
+              ],
+              'icon': [
+                {'color': '#f87171'}
+              ]
+            }
+          }
+        }},
+        {% endfor %}

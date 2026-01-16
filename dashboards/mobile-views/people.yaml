@@ -1,0 +1,54 @@
+# People View
+title: People
+path: people
+panel: true
+cards:
+  - type: vertical-stack
+    cards:
+      - type: custom:decluttering-card
+        template: mobile_top_nav
+      - type: custom:decluttering-card
+        template: mobile_container
+        variables:
+          - cards:
+              # Family Members Grid
+              - type: grid
+                columns: 2
+                square: false
+                cards:
+                  # Toby Card
+                  - type: custom:button-card
+                    name: Toby
+                    icon: mdi:account-circle
+                    entity: input_boolean.swimming_bag
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#dbeafe"  # Blue-100
+                      accent_color: "#3b82f6"  # Blue-500
+                    tap_action:
+                      action: navigate
+                      navigation_path: "/mobile-dashboard/toby"
+                  
+                  # Ben Card  
+                  - type: custom:button-card
+                    name: Ben
+                    icon: mdi:account-circle
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#dcfce7"  # Green-100
+                      accent_color: "#10b981"  # Emerald-500
+                    tap_action:
+                      action: navigate
+                      navigation_path: /mobile-dashboard/ben
+                  
+                  # Petra Card
+                  - type: custom:button-card
+                    name: Petra
+                    icon: mdi:account-circle
+                    template: mobile_room_enhanced
+                    variables:
+                      bg_color: "#fef3c7"  # Amber-100
+                      accent_color: "#f59e0b"  # Amber-500
+                    tap_action:
+                      action: navigate
+                      navigation_path: /mobile-dashboard/petra

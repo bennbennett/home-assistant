@@ -1,0 +1,842 @@
+##############################################################################
+#                      2) Decluttering Templates Section                   #
+# Define reusable templates here.                                            #
+##############################################################################
+
+room_card:
+  show_icon: true
+  show_name: true
+  show_state: true
+  
+  styles:
+    card:
+      - aspect-ratio: 1/1
+      - border-radius: 12px
+      - padding-top: 40px
+      - padding-left: 24px
+      - padding-bottom: 24px
+      - padding-right: 24px
+      - position: relative
+    grid:
+      - grid-template-areas: '"n n" "s s" "i i"'
+      - grid-template-columns: 1fr auto
+      - grid-template-rows: auto auto 1fr
+    name:
+      - font-size: 22px
+      - font-weight: 500
+      - padding-bottom: 8px
+      - padding-top: 20px
+      - justify-self: start
+      - opacity: 0.9
+    state:
+      - font-size: 14px
+      - color: var(--secondary-text-color)
+      - justify-self: start
+      - margin-bottom: 16px
+    icon:
+      - width: 100px
+      - height: 180px
+      - color: "[[[ return variables.color ]]]"
+      - z-index: 2
+      - align-self: end
+      - justify-self: start
+      - margin-left: 0px
+      - margin-bottom: 0px
+    custom_fields:
+      circle:
+        - position: absolute
+        - left: -48px
+        - bottom: -50px
+        - width: 230px
+        - height: 230px
+        - background-color: '[[[ return variables.color + "15" ]]]'
+        - z-index: 1
+        - border-radius: 50%
+      status:
+        - position: absolute
+        - top: 24px
+        - right: 24px
+        - display: flex
+        - flex-direction: column
+        - gap: 12px
+
+  # Remove "large: true" or "size: wide" if you don't want wide popups
+  tap_action:
+    action: fire-dom-event
+    browser_mod:
+      command: popup
+      title: "{{ name }}"
+      card:
+        type: vertical-stack
+        cards:
+          # Temperature Display (example only; you can remove if you want)
+          - type: custom:mushroom-template-card
+            primary: Temperature
+            secondary: "{{ states(entity) }}°F"
+            icon: mdi:thermometer
+            icon_color: blue
+            card_mod:
+              style: |-
+                ha-card {
+                  background: rgb(239, 246, 255);
+                  margin-bottom: 12px;
+                }
+          # Light Controls (example only; you can remove if you want)
+          - type: custom:mushroom-light-card
+            entity: "[[[ return variables.light_entity ]]]"
+            name: Main Light
+            icon: mdi:ceiling-light
+            show_brightness_control: true
+            show_color_temp_control: true
+            use_light_color: true
+            card_mod:
+              style: |-
+                ha-card {
+                  background: rgb(249, 250, 251);
+                }
+
+  custom_fields:
+    circle: " "
+    status: |-
+      [[[
+        // ======================
+        //   Helper Functions
+        // ======================
+
+        const colorToRgba15 = (color) => {
+          // fallback to a neutral gray if something fails
+          const fallback = 'rgba(148,163,184,0.15)';
+
+          if (!color) return fallback;
+
+          // If it's already a hex color like #FF9002, append '15' which works in modern CSS 
+          // (assuming your Home Assistant environment supports #RRGGBBAA).
+          // For older browsers or if your HA doesn't parse #FF900215, we can do a real RGBA approach.
+          if (color.startsWith('#')) {
+            // e.g. #FF9002 => #FF900215
+            return color + '15';
+          }
+
+          // For named colors, map them to explicit RGBA:
+          const c = color.toLowerCase();
+          if (c === 'blue')   return 'rgba(0, 0, 255, 0.15)';
+          if (c === 'red')    return 'rgba(255, 0, 0, 0.15)';
+          if (c === 'orange') return 'rgba(255, 165, 0, 0.15)';
+          if (c === 'green')  return 'rgba(0, 128, 0, 0.15)';
+
+          // If you use any other named colors, add them here
+          // Otherwise fallback
+          return fallback;
+        };
+
+        // Check if ANY light is on
+        const isLightOn = (lightEntities) => {
+          if (!lightEntities) return false;
+          const root = document.querySelector('home-assistant');
+          if (!root || !root.hass) return false;
+
+          const entityArray = Array.isArray(lightEntities) ? lightEntities : [lightEntities];
+          return entityArray.some(eid => root.hass.states[eid]?.state === 'on');
+        };
+
+        // Toggle one or multiple lights
+        const toggleLights = (lightEntities) => {
+          const root = document.querySelector('home-assistant');
+          if (!root || !root.hass) return;
+
+          const entityArray = Array.isArray(lightEntities) ? lightEntities : [lightEntities];
+          const anyOn = entityArray.some(eid => root.hass.states[eid]?.state === 'on');
+          const service = anyOn ? 'turn_off' : 'turn_on';
+
+          entityArray.forEach(eid => {
+            root.hass.callService('light', service, { entity_id: eid });
+          });
+        };
+
+        // Check if speaker is "on" (i.e., not off/unavailable)
+        const isSpeakerOn = (speakerEntity) => {
+          const root = document.querySelector('home-assistant');
+          if (!root || !root.hass || !speakerEntity) return false;
+          const st = root.hass.states[speakerEntity]?.state || 'off';
+          return st !== 'off' && st !== 'unavailable';
+        };
+
+        // Toggle the speaker with media_player.turn_on / turn_off
+        const toggleSpeaker = (speakerEntity) => {
+          const root = document.querySelector('home-assistant');
+          if (!root || !root.hass || !speakerEntity) return;
+          const st = root.hass.states[speakerEntity]?.state || 'off';
+          const service = (st === 'off' || st === 'unavailable') ? 'turn_on' : 'turn_off';
+          root.hass.callService('media_player', service, { entity_id: speakerEntity });
+        };
+
+        // Return a 3-color scale for temperature
+        // <65 => blue, 65-74.9 => orange, >=75 => red
+        const getTempColor = (tempEntity) => {
+          const root = document.querySelector('home-assistant');
+          if (!root || !root.hass || !tempEntity) return 'blue'; // fallback
+          const val = parseFloat(root.hass.states[tempEntity]?.state || '0');
+
+          if (val < 65) {
+            return 'blue';
+          } else if (val < 75) {
+            return 'orange';
+          } else {
+            return 'red';
+          }
+        };
+
+        // Show more-info popup for an entity
+        const showMoreInfo = (tempEntity) => {
+          const root = document.querySelector('home-assistant');
+          if (!root || !root.hass) return;
+          root.hass.callService('browser_mod', 'more_info', {
+            entity_id: tempEntity,
+          });
+        };
+
+        // ======================
+        //  Door-specific helper
+        // ======================
+        const isDoorOpen = (doorEntity) => {
+          // Typical binary_sensors for doors can be 'on' = open, 'off' = closed
+          // or 'open'/'closed' if device_class is set. We'll just check both.
+          const root = document.querySelector('home-assistant');
+          if (!root || !root.hass || !doorEntity) return false;
+          const st = root.hass.states[doorEntity]?.state;
+          return (st === 'on' || st === 'open');
+        };
+
+        // ======================
+        //   Icon Rendering
+        // ======================
+        const renderIcon = (iconConfig) => {
+          let color = '#94a3b8'; // default
+          // If we have a custom getColor function (temperature),
+          // we call that. Otherwise we check if the entity is on/off
+          if (iconConfig.getColor) {
+            color = iconConfig.getColor();
+          } else {
+            const isOn = iconConfig.isOn?.();
+            color = isOn ? iconConfig.onColor : iconConfig.offColor;
+          }
+
+          // Convert that color to a semi-transparent background
+          const bgColor = colorToRgba15(color);
+
+          const pointer = iconConfig.onClick ? 'pointer' : 'default';
+
+          return `
+            <div
+              onclick="(function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                ${iconConfig.onClick ? `(${iconConfig.onClick})(e);` : ''}
+              })(event)"
+              onmousedown="(function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                ${iconConfig.onClick ? `(${iconConfig.onClick})(e);` : ''}
+              })(event)"
+              ontouchstart="(function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                ${iconConfig.onClick ? `(${iconConfig.onClick})(e);` : ''}
+              })(event)"
+              style="
+                width: 48px;
+                height: 48px;
+                background: ${bgColor};
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 3px;
+                cursor: ${pointer};
+                pointer-events: auto;
+                transition: all 3.0s ease-in-out;
+              "
+            >
+              <ha-icon
+                icon="${iconConfig.icon}"
+                style="
+                  --mdc-icon-size: 16px;
+                  color: ${color};
+                  transition: all 0.2s ease-in-out;"
+              ></ha-icon>
+            </div>
+          `;
+        };
+
+        // ======================
+        //   Build Indicators
+        // ======================
+        const indicators = [];
+
+        // 1) Light Icon
+        if (variables.light_entities || variables.light_entity) {
+          indicators.push(renderIcon({
+            icon: variables.light_icon || 'mdi:lightbulb',
+            onColor: '#FF9002',
+            offColor: '#94a3b8',
+            isOn: () => isLightOn(variables.light_entities || variables.light_entity),
+            onClick: variables.no_light_tap
+              ? ''
+              : `(${toggleLights.toString()})('${variables.light_entities || variables.light_entity}')`
+          }));
+        }
+
+        // 2) Speaker Icon
+        if (variables.speaker_entity) {
+          indicators.push(renderIcon({
+            icon: variables.speaker_icon || 'mdi:speaker',
+            onColor: '#3D5AFE',
+            offColor: '#94a3b8',
+            isOn: () => isSpeakerOn(variables.speaker_entity),
+            onClick: variables.no_speaker_tap
+              ? ''
+              : `(${toggleSpeaker.toString()})('${variables.speaker_entity}')`
+          }));
+        }
+
+        // 3) Temperature Icon (3-state color)
+        //    => "blue", "orange", or "red"
+        if (variables.temp_entity || entity) {
+          const tEntity = variables.temp_entity || entity;
+          indicators.push(renderIcon({
+            icon: variables.temp_icon || 'mdi:thermometer',
+            getColor: () => getTempColor(tEntity),
+            onClick: variables.no_temp_tap
+              ? ''
+              : `(${showMoreInfo.toString()})('${tEntity}')`
+          }));
+        }
+
+        // 4) Door Icon
+        if (variables.door_entity) {
+          indicators.push(renderIcon({
+            icon: isDoorOpen(variables.door_entity) ? 'mdi:door-open' : 'mdi:door-closed',
+            onColor: 'red',
+            offColor: 'blue',
+            isOn: () => isDoorOpen(variables.door_entity),
+            // For a door sensor, you might only want more-info:
+            onClick: `(${showMoreInfo.toString()})('${variables.door_entity}')`
+          }));
+        }
+
+        // 5) Second Door Icon (for additional door sensors)
+        if (variables.door_entity_2) {
+          indicators.push(renderIcon({
+            icon: isDoorOpen(variables.door_entity_2) ? 'mdi:door-open' : 'mdi:door-closed',
+            onColor: 'red',
+            offColor: 'green',
+            isOn: () => isDoorOpen(variables.door_entity_2),
+            onClick: `(${showMoreInfo.toString()})('${variables.door_entity_2}')`
+          }));
+        }
+
+        // Return them all in a row/column (depends on your styles above)
+        return indicators.join('');
+      ]]]
+
+device_card:
+  show_icon: true
+  show_name: true
+  show_state: true
+  styles:
+    card:
+      - aspect-ratio: 1/1
+      - border-radius: 12px
+      - padding-top: 40px
+      - padding-left: 24px
+      - padding-bottom: 24px
+      - padding-right: 24px
+      - position: relative
+    grid:
+      - grid-template-areas: '"n n" "s s" "i i"'
+      - grid-template-columns: 1fr auto
+      - grid-template-rows: auto auto 1fr
+    name:
+      - font-size: 16px
+      - font-weight: 500
+      - padding-bottom: 8px
+      - justify-self: start
+      - opacity: 0.9
+    state:
+      - font-size: 13px
+      - color: var(--secondary-text-color)
+      - justify-self: start
+      - margin-bottom: 16px
+    icon:
+      - width: 110px
+      - height: 180px
+      - color: "[[[ return variables.color ]]]"
+      - z-index: 2
+      - align-self: end
+      - justify-self: start
+      - margin-left: 0px
+      - margin-bottom: 16px
+    custom_fields:
+      status:
+        - position: absolute
+        - top: 24px
+        - right: 24px
+        - display: flex
+        - flex-direction: column
+        - gap: 12px
+
+  custom_fields:
+    circle: " "
+    status: |-
+      [[[
+        const colors = variables.indicator_colors || ["#22c55e", "#3b82f6", "#f59e0b"];
+
+        return colors.map(color => `
+          <div style="
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: ${color}15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 4px;"
+          >
+            <div style="
+              width: 12px;
+              height: 12px;
+              border-radius: 50%;
+              background: ${color};"
+            >
+            </div>
+          </div>
+        `).join('');
+      ]]]
+
+popup_base:
+  card_mod:
+    style: |-
+      ha-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 24px;
+        margin: 16px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        max-width: 800px;
+        width: 90vw;
+        position: fixed;
+        z-index: 999;
+      }
+  styles:
+    card:
+      - background: rgba(255, 255, 255, 0.95)
+      - backdrop-filter: blur(10px)
+    name:
+      - font-size: 24px
+      - font-weight: 500
+      - margin-bottom: 16px
+
+# Template for a light control section
+light_control_section:
+  show_name: true
+  show_icon: true
+  styles:
+    card:
+      - border-radius: 12px
+      - padding: 16px
+      - background: rgba(0, 0, 0, 0.04)
+    grid:
+      - grid-template-areas: '"i n s"'
+      - grid-template-columns: min-content auto max-content
+    name:
+      - justify-self: start
+      - font-weight: 400
+    icon:
+      - width: 24px
+      - color: var(--primary-color)
+    state:
+      - justify-self: end
+      - font-size: 14px
+
+# Template for temperature display
+temp_display_section:
+  show_name: true
+  show_state: true
+  styles:
+    card:
+      - border-radius: 12px
+      - padding: 16px
+      - background: rgba(0, 0, 0, 0.04)
+    grid:
+      - grid-template-areas: '"i n s"'
+      - grid-template-columns: min-content auto max-content
+    name:
+      - justify-self: start
+      - font-weight: 400
+    state:
+      - font-size: 20px
+      - color: var(--primary-color)
+
+variables:
+  status_map:
+    light: '[[[ return variables.light_entity ? states[variables.light_entity].state === "on" : false ]]]'
+    temp: "[[[ return states[entity].state > 70 ]]]"
+    motion: '[[[ return variables.motion_entity ? states[variables.motion_entity].state === "on" : false ]]]'
+
+custom_fields:
+  status: |-
+    [[[
+      const getStatusColor = (type) => {
+        const colors = {
+          light: '#22c55e',
+          temp: '#3b82f6', 
+          motion: '#f59e0b'
+        };
+        const opacity = variables.status_map[type] ? '1' : '0.3';
+        const color = colors[type];
+        return `
+          <div style="
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: ${color}15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 4px;"
+          >
+            <div style="
+              width: 12px;
+              height: 12px;
+              border-radius: 50%;
+              background: ${color};
+              opacity: ${opacity};"
+            ></div>
+          </div>
+        `;
+      };
+      return `
+        ${getStatusColor('light')}
+        ${getStatusColor('temp')}
+        ${getStatusColor('motion')}
+      `;
+    ]]]
+
+quick_action:
+  show_icon: true
+  show_name: true
+  show_state: false
+  styles:
+    card:
+      - border-radius: 12px
+      - padding: 12px
+      - height: 80px
+      - box-shadow: var(--ha-card-box-shadow, 0px 2px 4px 0px rgba(0,0,0,0.12))
+    grid:
+      - grid-template-areas: '"i" "n"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: 1fr auto
+    icon:
+      - width: 32px
+      - height: 32px
+      - color: var(--primary-color)
+    name:
+      - font-size: 14px
+      - font-weight: 500
+      - margin-top: 8px
+      - justify-self: center
+  state:
+    - value: "on"
+      styles:
+        card:
+          - background-color: "rgba(var(--rgb-primary-color), 0.2)"
+        icon:
+          - color: var(--primary-color)
+    - value: "off"
+      styles:
+        card:
+          - background-color: var(--card-background-color)
+        icon:
+          - color: var(--secondary-text-color)
+
+heading:
+  show_icon: false
+  show_name: true
+  show_state: false
+  styles:
+    card:
+      - box-shadow: none
+      - padding: 8px 0px
+      - background: none
+      - border-radius: 0
+    name:
+      - font-size: 20px
+      - font-weight: 500
+      - color: var(--primary-text-color)
+      - padding-left: 8px
+      - border-left: 3px solid var(--primary-color)
+
+# Mobile-optimized room card
+mobile_room_card:
+  show_icon: true
+  show_name: true
+  show_state: true
+  
+  styles:
+    card:
+      - border-radius: 12px
+      - padding: 16px
+      - position: relative
+      - height: 120px
+    grid:
+      - grid-template-areas: '"n n" "s s" "i i"'
+      - grid-template-columns: 1fr auto
+      - grid-template-rows: auto auto 1fr
+    name:
+      - font-size: 18px
+      - font-weight: 500
+      - padding-bottom: 4px
+      - justify-self: start
+      - opacity: 0.9
+    state:
+      - font-size: 14px
+      - color: var(--secondary-text-color)
+      - justify-self: start
+      - margin-bottom: 8px
+    icon:
+      - width: 40px
+      - height: 40px
+      - color: "[[[ return variables.color ]]]"
+      - z-index: 2
+      - align-self: end
+      - justify-self: start
+      - margin-left: 0px
+      - margin-bottom: 0px
+    custom_fields:
+      circle:
+        - position: absolute
+        - right: -20px
+        - bottom: -20px
+        - width: 100px
+        - height: 100px
+        - background-color: '[[[ return variables.color + "15" ]]]'
+        - z-index: 1
+        - border-radius: 50%
+      status:
+        - position: absolute
+        - top: 16px
+        - right: 16px
+        - display: flex
+        - flex-direction: row
+        - gap: 8px
+
+  # Simplified popup for mobile
+  tap_action:
+    action: fire-dom-event
+    browser_mod:
+      command: popup
+      title: "{{ name }}"
+      card:
+        type: vertical-stack
+        cards:
+          # Temperature Display
+          - type: custom:mushroom-template-card
+            primary: Temperature
+            secondary: "{{ states(entity) }}°F"
+            icon: mdi:thermometer
+            icon_color: blue
+            card_mod:
+              style: |-
+                ha-card {
+                  background: rgb(239, 246, 255);
+                  margin-bottom: 12px;
+                }
+          # Light Controls
+          - type: custom:mushroom-light-card
+            entity: "[[[ return variables.light_entity ]]]"
+            name: Main Light
+            icon: mdi:ceiling-light
+            show_brightness_control: true
+            use_light_color: true
+            card_mod:
+              style: |-
+                ha-card {
+                  background: rgb(249, 250, 251);
+                }
+
+  custom_fields:
+    circle: " "
+    status: |-
+      [[[
+        // Simplified status indicators for mobile
+        const renderIndicator = (icon, color) => {
+          return `
+            <div style="
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              background: ${color}15;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin: 2px;"
+            >
+              <ha-icon
+                icon="${icon}"
+                style="
+                  --mdc-icon-size: 14px;
+                  color: ${color};"
+              ></ha-icon>
+            </div>
+          `;
+        };
+
+        const indicators = [];
+        
+        // Light indicator
+        if (variables.light_entity) {
+          const root = document.querySelector('home-assistant');
+          const isOn = root && root.hass && root.hass.states[variables.light_entity]?.state === 'on';
+          indicators.push(renderIndicator('mdi:lightbulb', isOn ? '#FF9002' : '#94a3b8'));
+        }
+        
+        // Temperature indicator
+        if (variables.temp_entity || entity) {
+          const tEntity = variables.temp_entity || entity;
+          const root = document.querySelector('home-assistant');
+          const temp = root && root.hass ? parseFloat(root.hass.states[tEntity]?.state || '0') : 0;
+          
+          let color = '#3b82f6'; // default blue
+          if (temp < 65) {
+            color = '#3b82f6'; // blue
+          } else if (temp < 75) {
+            color = '#f59e0b'; // orange
+          } else {
+            color = '#ef4444'; // red
+          }
+          
+          indicators.push(renderIndicator('mdi:thermometer', color));
+        }
+        
+        return indicators.join('');
+      ]]]
+
+# Mobile-optimized device card
+mobile_device_card:
+  show_icon: true
+  show_name: true
+  show_state: true
+  styles:
+    card:
+      - border-radius: 12px
+      - padding: 16px
+      - position: relative
+      - height: 120px
+    grid:
+      - grid-template-areas: '"n n" "s s" "i i"'
+      - grid-template-columns: 1fr auto
+      - grid-template-rows: auto auto 1fr
+    name:
+      - font-size: 16px
+      - font-weight: 500
+      - padding-bottom: 4px
+      - justify-self: start
+      - opacity: 0.9
+    state:
+      - font-size: 13px
+      - color: var(--secondary-text-color)
+      - justify-self: start
+      - margin-bottom: 8px
+    icon:
+      - width: 40px
+      - height: 40px
+      - color: "[[[ return variables.color ]]]"
+      - z-index: 2
+      - align-self: end
+      - justify-self: start
+      - margin-left: 0px
+      - margin-bottom: 0px
+    custom_fields:
+      circle:
+        - position: absolute
+        - right: -20px
+        - bottom: -20px
+        - width: 100px
+        - height: 100px
+        - background-color: '[[[ return variables.color + "15" ]]]'
+        - z-index: 1
+        - border-radius: 50%
+
+  # Simple tap action to show more info
+  tap_action:
+    action: more-info
+
+  custom_fields:
+    circle: " "
+
+# Mobile top navigation template
+mobile_top_nav:
+  color: var(--primary-text-color)
+  show_icon: true
+  show_name: true
+  styles:
+    card:
+      - height: 60px
+      - border-radius: 15px
+      - padding: 5px
+      - background-color: "[[[ 
+          const path = variables.current_view || 'home';
+          const currentPath = window.location.pathname;
+          const hash = window.location.hash.substring(1);
+          
+          const isActive = 
+            (currentPath.includes('/mobile-dashboard') && hash === path) || 
+            (currentPath.includes('/mobile-dashboard') && hash === '' && path === 'home') ||
+            (currentPath.includes('/lovelace/mobile-dashboard') && hash === path) ||
+            (currentPath.includes('/lovelace/mobile-dashboard') && hash === '' && path === 'home');
+          
+          const viewColors = {
+            'home': 'rgba(var(--rgb-primary-color), 0.9)',
+            'calendar': 'rgba(var(--rgb-accent-color), 0.9)',
+            'devices': 'rgba(var(--rgb-green), 0.9)'
+          };
+          
+          return isActive ? viewColors[path] || viewColors['home'] : 'rgba(var(--rgb-card-background), 0.7)';
+        ]]]"
+    icon:
+      - color: "[[[ 
+          const path = variables.current_view || 'home';
+          const currentPath = window.location.pathname;
+          const hash = window.location.hash.substring(1);
+          
+          const isActive = 
+            (currentPath.includes('/mobile-dashboard') && hash === path) || 
+            (currentPath.includes('/mobile-dashboard') && hash === '' && path === 'home') ||
+            (currentPath.includes('/lovelace/mobile-dashboard') && hash === path) ||
+            (currentPath.includes('/lovelace/mobile-dashboard') && hash === '' && path === 'home');
+          
+          return isActive ? 'rgba(var(--rgb-white), 1)' : 'rgba(var(--rgb-primary-text-color), 0.6)';
+        ]]]"
+    name:
+      - color: "[[[ 
+          const path = variables.current_view || 'home';
+          const currentPath = window.location.pathname;
+          const hash = window.location.hash.substring(1);
+          
+          const isActive = 
+            (currentPath.includes('/mobile-dashboard') && hash === path) || 
+            (currentPath.includes('/mobile-dashboard') && hash === '' && path === 'home') ||
+            (currentPath.includes('/lovelace/mobile-dashboard') && hash === path) ||
+            (currentPath.includes('/lovelace/mobile-dashboard') && hash === '' && path === 'home');
+          
+          return isActive ? 'rgba(var(--rgb-white), 1)' : 'rgba(var(--rgb-primary-text-color), 0.6)';
+        ]]]"
+  tap_action:
+    action: navigate
+    navigation_path: "[[[ 
+        const path = variables.current_view || 'home';
+        return `/dashboards/mobile-dashboard/${path}`;
+      ]]]"

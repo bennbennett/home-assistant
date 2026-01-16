@@ -1,0 +1,24 @@
+title: Home
+path: home
+type: panel
+cards:
+  - type: horizontal-stack # Replacing grid with horizontal-stack
+    cards:
+      # --- Menu Column ---
+      - type: custom:decluttering-card
+        template: side_menu
+
+      # --- Main Content Column ---
+      - type: custom:vertical-stack-in-card # Allows applying card_mod
+        card_mod:
+          style: |
+            ha-card {
+              background: none;
+              margin: 0;
+              padding: 16px;
+              height: 100%;
+            }
+        cards:
+          - type: markdown
+            content: |
+              # Home Page Content Here

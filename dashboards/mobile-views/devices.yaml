@@ -1,0 +1,21 @@
+# Devices View
+title: Devices
+path: devices
+panel: true
+cards:
+  - type: vertical-stack
+    cards:
+      - type: custom:decluttering-card
+        template: mobile_top_nav
+      - type: custom:decluttering-card
+        template: mobile_container
+        variables:
+          - cards:
+              - type: markdown
+                content: |
+                  **Coming Soon!**
+                  
+                  - Phone tracking and battery levels
+                  - Tablet management  
+                  - Device categories and filters
+                  - Find device functionality

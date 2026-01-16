@@ -1,0 +1,535 @@
+title: Meals
+path: meals
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 80px 1fr
+      grid-template-rows: 1fr
+      margin: 0
+      padding: 0
+      grid-gap: 0
+    cards:
+      # Left Menu (column 1)
+      - type: custom:decluttering-card
+        template: side_menu
+        view_layout:
+          grid-column: 1
+
+      # Main content area in column 2
+      - type: vertical-stack
+        view_layout:
+          grid-column: 2
+        card_mod:
+          style: |
+            :host {
+              padding: 16px 8px !important;
+              margin: 0 !important;
+            }
+        cards:
+          ############################################
+          # 1) HEADER ROW
+          ############################################
+          - type: horizontal-stack
+            cards:
+              # Header Card
+              - type: custom:button-card
+                name: This Week's Meals
+                icon: mdi:calendar-week
+                show_state: false
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 20px
+                    - margin: 4px
+                    - background-color: "rgba(249, 115, 22, 0.15)"
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 28px
+                    - height: 28px
+                    - color: "rgba(249, 115, 22, 0.9)"
+                  name:
+                    - color: "rgba(249, 115, 22, 0.9)"
+                    - font-size: 18px
+                    - font-weight: 600
+                    - margin-left: 12px
+
+              # Open Mealie Button
+              - type: custom:button-card
+                name: Open Mealie
+                icon: mdi:chef-hat
+                tap_action:
+                  action: url
+                  url_path: "http://192.168.68.116:9925"
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 150px
+                    - background-color: "rgba(96, 165, 250, 0.15)"
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: "rgba(96, 165, 250, 0.9)"
+                  name:
+                    - color: "rgba(96, 165, 250, 0.9)"
+                    - font-size: 14px
+                    - margin-left: 8px
+
+              # Sync to Keep Button
+              - type: custom:button-card
+                name: Sync to Keep
+                icon: mdi:sync
+                entity: input_button.sync_shopping_list
+                tap_action:
+                  action: call-service
+                  service: input_button.press
+                  service_data:
+                    entity_id: input_button.sync_shopping_list
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 150px
+                    - background-color: "rgba(16, 185, 129, 0.15)"
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: "rgba(16, 185, 129, 0.9)"
+                  name:
+                    - color: "rgba(16, 185, 129, 0.9)"
+                    - font-size: 14px
+                    - margin-left: 8px
+
+          ############################################
+          # 2) WEEKLY MEAL GRID
+          ############################################
+          - type: custom:layout-card
+            layout_type: custom:grid-layout
+            layout:
+              grid-template-columns: repeat(4, 1fr)
+              grid-gap: 8px
+              margin: 8px 4px
+            cards:
+              # Monday
+              - type: custom:button-card
+                entity: calendar.mealie_dinner
+                name: Monday
+                show_state: true
+                icon: mdi:food
+                tap_action:
+                  action: call-service
+                  service: browser_mod.sequence
+                  service_data:
+                    sequence:
+                      - service: input_select.select_option
+                        data:
+                          entity_id: input_select.meal_day_selector
+                          option: Monday
+                      - service: browser_mod.popup
+                        data:
+                          content: !include ../popups/meal_selection_popup.yaml
+                          style:
+                            "--mdc-dialog-min-width": "60vw"
+                styles:
+                  card:
+                    - background-color: "#2a2a2a"
+                    - border-radius: 12px
+                    - padding: 16px
+                    - min-height: 100px
+                  name:
+                    - font-size: 14px
+                    - font-weight: 600
+                    - color: white
+                    - text-transform: uppercase
+                    - letter-spacing: 0.05em
+                  state:
+                    - font-size: 13px
+                    - color: "#9ca3af"
+                    - white-space: nowrap
+                    - overflow: hidden
+                    - text-overflow: ellipsis
+                  icon:
+                    - color: "#f87171"
+                    - width: 36px
+
+              # Tuesday
+              - type: custom:button-card
+                entity: calendar.mealie_dinner
+                name: Tuesday
+                show_state: true
+                icon: mdi:food
+                tap_action:
+                  action: call-service
+                  service: browser_mod.sequence
+                  service_data:
+                    sequence:
+                      - service: input_select.select_option
+                        data:
+                          entity_id: input_select.meal_day_selector
+                          option: Tuesday
+                      - service: browser_mod.popup
+                        data:
+                          content: !include ../popups/meal_selection_popup.yaml
+                          style:
+                            "--mdc-dialog-min-width": "60vw"
+                styles:
+                  card:
+                    - background-color: "#2a2a2a"
+                    - border-radius: 12px
+                    - padding: 16px
+                    - min-height: 100px
+                  name:
+                    - font-size: 14px
+                    - font-weight: 600
+                    - color: white
+                    - text-transform: uppercase
+                    - letter-spacing: 0.05em
+                  state:
+                    - font-size: 13px
+                    - color: "#9ca3af"
+                  icon:
+                    - color: "#f87171"
+                    - width: 36px
+
+              # Wednesday
+              - type: custom:button-card
+                entity: calendar.mealie_dinner
+                name: Wednesday
+                show_state: true
+                icon: mdi:food
+                tap_action:
+                  action: call-service
+                  service: browser_mod.sequence
+                  service_data:
+                    sequence:
+                      - service: input_select.select_option
+                        data:
+                          entity_id: input_select.meal_day_selector
+                          option: Wednesday
+                      - service: browser_mod.popup
+                        data:
+                          content: !include ../popups/meal_selection_popup.yaml
+                          style:
+                            "--mdc-dialog-min-width": "60vw"
+                styles:
+                  card:
+                    - background-color: "#2a2a2a"
+                    - border-radius: 12px
+                    - padding: 16px
+                    - min-height: 100px
+                  name:
+                    - font-size: 14px
+                    - font-weight: 600
+                    - color: white
+                    - text-transform: uppercase
+                    - letter-spacing: 0.05em
+                  state:
+                    - font-size: 13px
+                    - color: "#9ca3af"
+                  icon:
+                    - color: "#f87171"
+                    - width: 36px
+
+              # Thursday
+              - type: custom:button-card
+                entity: calendar.mealie_dinner
+                name: Thursday
+                show_state: true
+                icon: mdi:food
+                tap_action:
+                  action: call-service
+                  service: browser_mod.sequence
+                  service_data:
+                    sequence:
+                      - service: input_select.select_option
+                        data:
+                          entity_id: input_select.meal_day_selector
+                          option: Thursday
+                      - service: browser_mod.popup
+                        data:
+                          content: !include ../popups/meal_selection_popup.yaml
+                          style:
+                            "--mdc-dialog-min-width": "60vw"
+                styles:
+                  card:
+                    - background-color: "#2a2a2a"
+                    - border-radius: 12px
+                    - padding: 16px
+                    - min-height: 100px
+                  name:
+                    - font-size: 14px
+                    - font-weight: 600
+                    - color: white
+                    - text-transform: uppercase
+                    - letter-spacing: 0.05em
+                  state:
+                    - font-size: 13px
+                    - color: "#9ca3af"
+                  icon:
+                    - color: "#f87171"
+                    - width: 36px
+
+              # Friday
+              - type: custom:button-card
+                entity: calendar.mealie_dinner
+                name: Friday
+                show_state: true
+                icon: mdi:food
+                tap_action:
+                  action: call-service
+                  service: browser_mod.sequence
+                  service_data:
+                    sequence:
+                      - service: input_select.select_option
+                        data:
+                          entity_id: input_select.meal_day_selector
+                          option: Friday
+                      - service: browser_mod.popup
+                        data:
+                          content: !include ../popups/meal_selection_popup.yaml
+                          style:
+                            "--mdc-dialog-min-width": "60vw"
+                styles:
+                  card:
+                    - background-color: "#2a2a2a"
+                    - border-radius: 12px
+                    - padding: 16px
+                    - min-height: 100px
+                  name:
+                    - font-size: 14px
+                    - font-weight: 600
+                    - color: white
+                    - text-transform: uppercase
+                    - letter-spacing: 0.05em
+                  state:
+                    - font-size: 13px
+                    - color: "#9ca3af"
+                  icon:
+                    - color: "#f87171"
+                    - width: 36px
+
+              # Saturday
+              - type: custom:button-card
+                entity: calendar.mealie_dinner
+                name: Saturday
+                show_state: true
+                icon: mdi:food
+                tap_action:
+                  action: call-service
+                  service: browser_mod.sequence
+                  service_data:
+                    sequence:
+                      - service: input_select.select_option
+                        data:
+                          entity_id: input_select.meal_day_selector
+                          option: Saturday
+                      - service: browser_mod.popup
+                        data:
+                          content: !include ../popups/meal_selection_popup.yaml
+                          style:
+                            "--mdc-dialog-min-width": "60vw"
+                styles:
+                  card:
+                    - background-color: "#2a2a2a"
+                    - border-radius: 12px
+                    - padding: 16px
+                    - min-height: 100px
+                  name:
+                    - font-size: 14px
+                    - font-weight: 600
+                    - color: white
+                    - text-transform: uppercase
+                    - letter-spacing: 0.05em
+                  state:
+                    - font-size: 13px
+                    - color: "#9ca3af"
+                  icon:
+                    - color: "#f87171"
+                    - width: 36px
+
+              # Sunday
+              - type: custom:button-card
+                entity: calendar.mealie_dinner
+                name: Sunday
+                show_state: true
+                icon: mdi:food
+                tap_action:
+                  action: call-service
+                  service: browser_mod.sequence
+                  service_data:
+                    sequence:
+                      - service: input_select.select_option
+                        data:
+                          entity_id: input_select.meal_day_selector
+                          option: Sunday
+                      - service: browser_mod.popup
+                        data:
+                          content: !include ../popups/meal_selection_popup.yaml
+                          style:
+                            "--mdc-dialog-min-width": "60vw"
+                styles:
+                  card:
+                    - background-color: "#2a2a2a"
+                    - border-radius: 12px
+                    - padding: 16px
+                    - min-height: 100px
+                  name:
+                    - font-size: 14px
+                    - font-weight: 600
+                    - color: white
+                    - text-transform: uppercase
+                    - letter-spacing: 0.05em
+                  state:
+                    - font-size: 13px
+                    - color: "#9ca3af"
+                  icon:
+                    - color: "#f87171"
+                    - width: 36px
+
+              # Shopping List Card
+              - type: custom:button-card
+                name: Shopping List
+                icon: mdi:cart
+                entity: todo.mealie_shopping_list
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: browser_mod.popup
+                  service_data:
+                    content:
+                      type: todo-list
+                      entity: todo.mealie_shopping_list
+                    style:
+                      "--mdc-dialog-min-width": "50vw"
+                styles:
+                  card:
+                    - background-color: "#2a2a2a"
+                    - border-radius: 12px
+                    - padding: 16px
+                    - min-height: 100px
+                  name:
+                    - font-size: 14px
+                    - font-weight: 600
+                    - color: white
+                    - text-transform: uppercase
+                    - letter-spacing: 0.05em
+                  state:
+                    - font-size: 24px
+                    - font-weight: bold
+                    - color: "#f5a623"
+                  icon:
+                    - color: "#f5a623"
+                    - width: 36px
+
+          ############################################
+          # 3) STATS ROW
+          ############################################
+          - type: horizontal-stack
+            cards:
+              # Recipe Count
+              - type: custom:button-card
+                name: Total Recipes
+                icon: mdi:book-open-page-variant
+                entity: sensor.mealie_recipes
+                show_state: true
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 16px
+                    - margin: 4px
+                    - background-color: "rgba(167, 139, 250, 0.15)"
+                  grid:
+                    - grid-template-areas: '"i n" "i s"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 40px
+                    - height: 40px
+                    - color: "rgba(167, 139, 250, 0.9)"
+                  name:
+                    - color: "rgba(167, 139, 250, 0.9)"
+                    - font-size: 12px
+                    - text-transform: uppercase
+                    - margin-left: 12px
+                    - justify-self: start
+                  state:
+                    - font-size: 28px
+                    - font-weight: bold
+                    - color: "rgba(167, 139, 250, 0.9)"
+                    - margin-left: 12px
+                    - justify-self: start
+
+              # Categories
+              - type: custom:button-card
+                name: Categories
+                icon: mdi:tag-multiple
+                entity: sensor.mealie_categories
+                show_state: true
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 16px
+                    - margin: 4px
+                    - background-color: "rgba(52, 211, 153, 0.15)"
+                  grid:
+                    - grid-template-areas: '"i n" "i s"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 40px
+                    - height: 40px
+                    - color: "rgba(52, 211, 153, 0.9)"
+                  name:
+                    - color: "rgba(52, 211, 153, 0.9)"
+                    - font-size: 12px
+                    - text-transform: uppercase
+                    - margin-left: 12px
+                    - justify-self: start
+                  state:
+                    - font-size: 28px
+                    - font-weight: bold
+                    - color: "rgba(52, 211, 153, 0.9)"
+                    - margin-left: 12px
+                    - justify-self: start
+
+              # Tags
+              - type: custom:button-card
+                name: Tags
+                icon: mdi:label-multiple
+                entity: sensor.mealie_tags
+                show_state: true
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 16px
+                    - margin: 4px
+                    - background-color: "rgba(251, 191, 36, 0.15)"
+                  grid:
+                    - grid-template-areas: '"i n" "i s"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 40px
+                    - height: 40px
+                    - color: "rgba(251, 191, 36, 0.9)"
+                  name:
+                    - color: "rgba(251, 191, 36, 0.9)"
+                    - font-size: 12px
+                    - text-transform: uppercase
+                    - margin-left: 12px
+                    - justify-self: start
+                  state:
+                    - font-size: 28px
+                    - font-weight: bold
+                    - color: "rgba(251, 191, 36, 0.9)"
+                    - margin-left: 12px
+                    - justify-self: start

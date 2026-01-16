@@ -1,0 +1,235 @@
+side_menu:
+  card:
+    type: vertical-stack
+    card_mod:
+      style: |
+        ha-card {
+          height: calc(100vh);
+          width: 100px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 32px;  # Increased from 16px
+          padding: 48px 0;  # Increased from 24px
+          background: rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(8px);
+          margin: 0;
+          border-right: 1px solid rgba(0, 0, 0, 0.1);
+        }
+    cards:
+      # --- Button #1: Calendar ---
+      - type: custom:button-card
+        icon: mdi:calendar-month
+        tap_action:
+          action: navigate
+          navigation_path: /tablet-dashboard/calendar
+        styles:
+          card:
+            - width: 60px
+            - height: 60px
+            - border-radius: 12px
+            - padding: 0px
+            - margin: 8px
+            - padding: 0px
+            - background-color: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/calendar')
+                    ? 'rgb(219, 234, 254)'
+                    : 'rgba(219, 234, 254, 0.5)' ]]]
+            - box-shadow: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/calendar')
+                    ? '0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06)'
+                    : 'none'
+                ]]]
+            - "&:before":
+                - content: "''"
+                - position: absolute
+                - left: -8px
+                - height: 24px
+                - width: 3px
+                - background-color: rgb(59, 130, 246)
+                - border-radius: 0 4px 4px 0
+                - opacity: >
+                    [[[
+                      if(window.location.pathname.endsWith('/tablet-dashboard/calendar')) return '1';
+                      return '0';
+                    ]]]
+          icon:
+            - width: 30px
+            - height: 30px
+            - color: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/calendar')
+                    ? 'rgb(59, 130, 246)'
+                    : 'rgba(59, 130, 246, 0.6)' 
+                ]]]
+      # --- Button #2: Tasks & Lists ---
+      - type: custom:button-card
+        icon: mdi:format-list-checks
+        tap_action:
+          action: navigate
+          navigation_path: /tablet-dashboard/tasks
+        styles:
+          card:
+            - width: 60px
+            - height: 60px
+            - border-radius: 12px
+            - padding: 0px
+            - margin: 8px
+            - background-color: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/tasks')
+                    ? 'rgb(254, 226, 219)'
+                    : 'rgba(254, 226, 219, 0.5)' ]]]
+            - box-shadow: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/tasks')
+                    ? '0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06)'
+                    : 'none'
+                ]]]
+            - "&:before":
+                - content: "''"
+                - position: absolute
+                - left: -8px
+                - height: 24px
+                - width: 3px
+                - background-color: rgb(249, 115, 22)
+                - border-radius: 0 4px 4px 0
+                - opacity: >
+                    [[[
+                      if(window.location.pathname.endsWith('/tablet-dashboard/tasks')) return '1';
+                      return '0';
+                    ]]]
+          icon:
+            - width: 30px
+            - height: 30px
+            - color: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/tasks')
+                    ? 'rgb(249, 115, 22)'
+                    : 'rgba(249, 115, 22, 0.6)' ]]]
+      # --- Button #3: Rooms ---
+      - type: custom:button-card
+        icon: mdi:home
+        tap_action:
+          action: navigate
+          navigation_path: /tablet-dashboard/rooms
+        show_name: false
+        styles:
+          card:
+            - width: 60px
+            - height: 60px
+            - border-radius: 12px
+            - margin: 8px
+            - padding: 0px
+            - background-color: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/rooms')
+                    ? 'rgb(236, 242, 237)'
+                    : 'rgba(236, 242, 237, 0.5)' ]]]
+            - box-shadow: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/rooms')
+                    ? '0 4px 6px -1px rgba(34, 97, 58, 0.1), 0 2px 4px -1px rgba(34, 97, 58, 0.06)'
+                    : 'none'
+                ]]]
+            - "&:before":
+                - content: "''"
+                - position: absolute
+                - left: -8px
+                - height: 24px
+                - width: 3px
+                - background-color: rgb(34, 97, 58)
+                - border-radius: 0 4px 4px 0
+                - opacity: >
+                    [[[
+                      if(window.location.pathname.endsWith('/tablet-dashboard/rooms')) return '1';
+                      return '0';
+                    ]]]
+          icon:
+            - width: 30px
+            - height: 30px
+            - color: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/rooms')
+                    ? 'rgb(34, 97, 58)'
+                    : 'rgba(34, 97, 58, 0.6)' ]]]
+      # --- Button #4: Devices ---
+      - type: custom:button-card
+        icon: mdi:devices
+        tap_action:
+          action: navigate
+          navigation_path: /tablet-dashboard/devices
+        show_name: false
+        styles:
+          card:
+            - width: 60px
+            - height: 60px
+            - border-radius: 12px
+            - margin: 8px
+            - padding: 0px
+            - background-color: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/devices')
+                    ? 'rgb(254, 226, 226)'
+                    : 'rgba(254, 226, 226, 0.5)' ]]]
+            - box-shadow: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/devices')
+                    ? '0 4px 6px -1px rgba(220, 38, 38, 0.1), 0 2px 4px -1px rgba(220, 38, 38, 0.06)'
+                    : 'none'
+                ]]]
+            - "&:before":
+                - content: "''"
+                - position: absolute
+                - left: -8px
+                - height: 24px
+                - width: 3px
+                - background-color: rgb(220, 38, 38)
+                - border-radius: 0 4px 4px 0
+                - opacity: >
+                    [[[
+                      if(window.location.pathname.endsWith('/tablet-dashboard/devices')) return '1';
+                      return '0';
+                    ]]]
+          icon:
+            - width: 30px
+            - height: 30px
+            - color: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/devices')
+                    ? 'rgb(220, 38, 38)'
+                    : 'rgba(220, 38, 38, 0.6)' ]]]
+      # --- Button #5: People ---
+      - type: custom:button-card
+        icon: mdi:account-group
+        tap_action:
+          action: navigate
+          navigation_path: /tablet-dashboard/people
+        show_name: false
+        styles:
+          card:
+            - width: 60px
+            - height: 60px
+            - border-radius: 12px
+            - margin: 8px
+            - padding: 0px
+            - background-color: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/people')
+                    ? 'rgb(233, 213, 255)'
+                    : 'rgba(233, 213, 255, 0.5)' ]]]
+            - box-shadow: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/people')
+                    ? '0 4px 6px -1px rgba(109, 40, 217, 0.1), 0 2px 4px -1px rgba(109, 40, 217, 0.06)'
+                    : 'none'
+                ]]]
+            - "&:before":
+                - content: "''"
+                - position: absolute
+                - left: -8px
+                - height: 24px
+                - width: 3px
+                - background-color: rgb(109, 40, 217)
+                - border-radius: 0 4px 4px 0
+                - opacity: >
+                    [[[
+                      if(window.location.pathname.endsWith('/tablet-dashboard/people')) return '1';
+                      return '0';
+                    ]]]
+          icon:
+            - width: 30px
+            - height: 30px
+            - color: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/people')
+                    ? 'rgb(109, 40, 217)'
+                    : 'rgba(109, 40, 217, 0.6)' ]]]

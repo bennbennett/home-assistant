@@ -1,0 +1,66 @@
+custom_fields:
+  status: |
+    [[[
+      const indicators = [];
+
+      // ---------- LIGHT ICON ----------
+      // (Your existing logic for lights)
+
+      // ---------- SPEAKER ICON ----------
+      // (Your existing logic for speakers)
+
+      // ---------- TEMPERATURE ICON (3-state) ----------
+      if (variables.temp_entity || entity) {
+        const tEntity = variables.temp_entity || entity;
+        const root = document.querySelector('home-assistant');
+        let tempColor = '#94a3b8';
+
+        if (root && root.hass) {
+          const val = parseFloat(root.hass.states[tEntity]?.state || '0');
+          if (val < 65) {
+            tempColor = 'blue';
+          } else if (val < 75) {
+            tempColor = 'orange';
+          } else {
+            tempColor = 'red';
+          }
+        }
+
+        const tempClickHandler = variables.no_temp_tap
+          ? ''
+          : `onclick="(function(e) {
+               e.stopPropagation();
+               const root = document.querySelector('home-assistant');
+               if (!root || !root.hass) return;
+               root.hass.callService('browser_mod', 'more_info', {
+                 entity_id: '${tEntity}',
+               });
+             })(event)"`;
+
+        indicators.push(`
+          <div ${tempClickHandler} style="
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: ${tempColor}15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 4px;
+            cursor: ${variables.no_temp_tap ? 'default' : 'pointer'};
+            pointer-events: auto;
+            transition: all 0.2s ease-in-out;">
+            <ha-icon
+              icon="${variables.temp_icon || 'mdi:thermometer'}"
+              style="
+                --mdc-icon-size: 16px;
+                color: ${tempColor};
+                transition: all 0.2s ease-in-out;">
+            </ha-icon>
+          </div>
+        `);
+      }
+
+      // Return combined icons
+      return indicators.join('');
+    ]]]

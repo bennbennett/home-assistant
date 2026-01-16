@@ -1,0 +1,445 @@
+title: When I'm Bored
+path: toby-bored
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 80px 1fr
+      grid-template-rows: 1fr
+      margin: 0
+      padding: 0
+      grid-gap: 0
+    cards:
+      # Left Menu (column 1)
+      - type: custom:decluttering-card
+        template: side_menu
+        view_layout:
+          grid-column: 1
+
+      # Main content area in column 2
+      - type: vertical-stack
+        view_layout:
+          grid-column: 2
+        card_mod:
+          style: |
+            :host {
+              padding: 16px 8px !important;
+              margin: 0 !important;
+            }
+        cards:
+          # Title Section
+          - type: custom:mushroom-title-card
+            title: When I'm Bored
+            subtitle: Choose an activity to do when you're looking for something fun!
+
+          # Selected Activity Display Card
+          - type: conditional
+            conditions:
+              - entity: input_select.toby_activity_selector
+                state_not: "None"
+              - entity: input_select.toby_activity_selector
+                state_not: "Pick Random!"
+            card:
+              type: custom:mushroom-template-card
+              primary: |
+                {% set activity = states('input_select.toby_activity_selector') %}
+                {% set emojis = {
+                  'RC Cars': '🚗',
+                  'Toy Cars': '🚙',
+                  'Marbles': '⚪',
+                  'Read': '📚',
+                  '1-Player Board Games': '🎯',
+                  'Make a Movie': '🎬',
+                  'Build Lego Set': '🧱',
+                  'Lego': '🏗️'
+                } %}
+                {{ emojis.get(activity, '✨') }} Let's {{ activity }}!
+              secondary: Click another activity to change your choice
+              icon: none
+              card_mod:
+                style: |
+                  ha-card {
+                    {% set activity = states('input_select.toby_activity_selector') %}
+                    {% set colors = {
+                      'RC Cars': 'rgb(219, 234, 254)',
+                      'Toy Cars': 'rgb(254, 226, 254)',
+                      'Marbles': 'rgb(226, 254, 254)',
+                      'Read': 'rgb(226, 254, 226)',
+                      '1-Player Board Games': 'rgb(254, 243, 226)',
+                      'Make a Movie': 'rgb(234, 226, 254)',
+                      'Build Lego Set': 'rgb(254, 234, 226)',
+                      'Lego': 'rgb(254, 226, 234)'
+                    } %}
+                    background: {{ colors.get(activity, 'rgb(239, 246, 255)') }};
+                    margin: 16px;
+                    padding: 20px;
+                    --primary-text-color: rgb(30, 41, 59);
+                    --secondary-text-color: rgb(100, 116, 139);
+                    --card-primary-font-size: 28px;
+                    --card-secondary-font-size: 14px;
+                  }
+
+          # Activity Grid - 3x3 for 9 items
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              # RC Cars
+              - type: custom:mushroom-template-card
+                primary: 🚗
+                secondary: RC Cars
+                tap_action:
+                  action: call-service
+                  service: input_select.select_option
+                  service_data:
+                    entity_id: input_select.toby_activity_selector
+                    option: RC Cars
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: rgb(219, 234, 254);
+                      text-align: center;
+                      cursor: pointer;
+                      transition: all 0.2s ease;
+                      {% if states('input_select.toby_activity_selector') == 'RC Cars' %}
+                        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+                        transform: scale(1.05);
+                      {% endif %}
+                    }
+                    ha-card:hover {
+                      transform: scale(1.05);
+                      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    }
+                    ha-card:active {
+                      transform: scale(0.98);
+                    }
+                    .primary {
+                      font-size: 36px !important;
+                      line-height: 1.2 !important;
+                    }
+                    .secondary {
+                      font-size: 14px !important;
+                      font-weight: 600 !important;
+                      color: rgb(59, 130, 246) !important;
+                    }
+
+              # Toy Cars
+              - type: custom:mushroom-template-card
+                primary: 🚙
+                secondary: Toy Cars
+                tap_action:
+                  action: call-service
+                  service: input_select.select_option
+                  service_data:
+                    entity_id: input_select.toby_activity_selector
+                    option: Toy Cars
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: rgb(254, 226, 254);
+                      text-align: center;
+                      cursor: pointer;
+                      transition: all 0.2s ease;
+                      {% if states('input_select.toby_activity_selector') == 'Toy Cars' %}
+                        box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+                        transform: scale(1.05);
+                      {% endif %}
+                    }
+                    ha-card:hover {
+                      transform: scale(1.05);
+                      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    }
+                    ha-card:active {
+                      transform: scale(0.98);
+                    }
+                    .primary {
+                      font-size: 36px !important;
+                      line-height: 1.2 !important;
+                    }
+                    .secondary {
+                      font-size: 14px !important;
+                      font-weight: 600 !important;
+                      color: rgb(236, 72, 153) !important;
+                    }
+
+              # Marbles
+              - type: custom:mushroom-template-card
+                primary: ⚪
+                secondary: Marbles
+                tap_action:
+                  action: call-service
+                  service: input_select.select_option
+                  service_data:
+                    entity_id: input_select.toby_activity_selector
+                    option: Marbles
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: rgb(226, 254, 254);
+                      text-align: center;
+                      cursor: pointer;
+                      transition: all 0.2s ease;
+                      {% if states('input_select.toby_activity_selector') == 'Marbles' %}
+                        box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
+                        transform: scale(1.05);
+                      {% endif %}
+                    }
+                    ha-card:hover {
+                      transform: scale(1.05);
+                      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    }
+                    ha-card:active {
+                      transform: scale(0.98);
+                    }
+                    .primary {
+                      font-size: 36px !important;
+                      line-height: 1.2 !important;
+                    }
+                    .secondary {
+                      font-size: 14px !important;
+                      font-weight: 600 !important;
+                      color: rgb(34, 211, 238) !important;
+                    }
+
+              # Read
+              - type: custom:mushroom-template-card
+                primary: 📚
+                secondary: Read
+                tap_action:
+                  action: call-service
+                  service: input_select.select_option
+                  service_data:
+                    entity_id: input_select.toby_activity_selector
+                    option: Read
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: rgb(226, 254, 226);
+                      text-align: center;
+                      cursor: pointer;
+                      transition: all 0.2s ease;
+                      {% if states('input_select.toby_activity_selector') == 'Read' %}
+                        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+                        transform: scale(1.05);
+                      {% endif %}
+                    }
+                    ha-card:hover {
+                      transform: scale(1.05);
+                      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    }
+                    ha-card:active {
+                      transform: scale(0.98);
+                    }
+                    .primary {
+                      font-size: 36px !important;
+                      line-height: 1.2 !important;
+                    }
+                    .secondary {
+                      font-size: 14px !important;
+                      font-weight: 600 !important;
+                      color: rgb(34, 197, 94) !important;
+                    }
+
+              # Random Picker
+              - type: custom:mushroom-template-card
+                primary: 🎲
+                secondary: Pick Random!
+                tap_action:
+                  action: call-service
+                  service: script.toby_random_activity
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: linear-gradient(135deg, rgb(254, 243, 199) 0%, rgb(252, 211, 77) 100%);
+                      text-align: center;
+                      cursor: pointer;
+                      transition: all 0.2s ease;
+                      animation: pulse 2s infinite;
+                    }
+                    ha-card:hover {
+                      transform: scale(1.05);
+                      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+                    }
+                    ha-card:active {
+                      transform: scale(0.98);
+                    }
+                    .primary {
+                      font-size: 36px !important;
+                      line-height: 1.2 !important;
+                      animation: rotate 3s linear infinite;
+                    }
+                    .secondary {
+                      font-size: 14px !important;
+                      font-weight: 700 !important;
+                      color: rgb(180, 83, 9) !important;
+                    }
+                    @keyframes pulse {
+                      0%, 100% {
+                        box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+                      }
+                      50% {
+                        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.5);
+                      }
+                    }
+                    @keyframes rotate {
+                      from { transform: rotate(0deg); }
+                      to { transform: rotate(360deg); }
+                    }
+
+              # Board Games
+              - type: custom:mushroom-template-card
+                primary: 🎯
+                secondary: Board Games
+                tap_action:
+                  action: call-service
+                  service: input_select.select_option
+                  service_data:
+                    entity_id: input_select.toby_activity_selector
+                    option: 1-Player Board Games
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: rgb(254, 243, 226);
+                      text-align: center;
+                      cursor: pointer;
+                      transition: all 0.2s ease;
+                      {% if states('input_select.toby_activity_selector') == '1-Player Board Games' %}
+                        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+                        transform: scale(1.05);
+                      {% endif %}
+                    }
+                    ha-card:hover {
+                      transform: scale(1.05);
+                      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    }
+                    ha-card:active {
+                      transform: scale(0.98);
+                    }
+                    .primary {
+                      font-size: 36px !important;
+                      line-height: 1.2 !important;
+                    }
+                    .secondary {
+                      font-size: 14px !important;
+                      font-weight: 600 !important;
+                      color: rgb(249, 115, 22) !important;
+                    }
+
+              # Make a Movie
+              - type: custom:mushroom-template-card
+                primary: 🎬
+                secondary: Make Movie
+                tap_action:
+                  action: call-service
+                  service: input_select.select_option
+                  service_data:
+                    entity_id: input_select.toby_activity_selector
+                    option: Make a Movie
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: rgb(234, 226, 254);
+                      text-align: center;
+                      cursor: pointer;
+                      transition: all 0.2s ease;
+                      {% if states('input_select.toby_activity_selector') == 'Make a Movie' %}
+                        box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+                        transform: scale(1.05);
+                      {% endif %}
+                    }
+                    ha-card:hover {
+                      transform: scale(1.05);
+                      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    }
+                    ha-card:active {
+                      transform: scale(0.98);
+                    }
+                    .primary {
+                      font-size: 36px !important;
+                      line-height: 1.2 !important;
+                    }
+                    .secondary {
+                      font-size: 14px !important;
+                      font-weight: 600 !important;
+                      color: rgb(147, 51, 234) !important;
+                    }
+
+              # Build Lego Set
+              - type: custom:mushroom-template-card
+                primary: 🧱
+                secondary: Build Set
+                tap_action:
+                  action: call-service
+                  service: input_select.select_option
+                  service_data:
+                    entity_id: input_select.toby_activity_selector
+                    option: Build Lego Set
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: rgb(254, 234, 226);
+                      text-align: center;
+                      cursor: pointer;
+                      transition: all 0.2s ease;
+                      {% if states('input_select.toby_activity_selector') == 'Build Lego Set' %}
+                        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+                        transform: scale(1.05);
+                      {% endif %}
+                    }
+                    ha-card:hover {
+                      transform: scale(1.05);
+                      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    }
+                    ha-card:active {
+                      transform: scale(0.98);
+                    }
+                    .primary {
+                      font-size: 36px !important;
+                      line-height: 1.2 !important;
+                    }
+                    .secondary {
+                      font-size: 14px !important;
+                      font-weight: 600 !important;
+                      color: rgb(239, 68, 68) !important;
+                    }
+
+              # Lego (Free Play)
+              - type: custom:mushroom-template-card
+                primary: 🏗️
+                secondary: Lego
+                tap_action:
+                  action: call-service
+                  service: input_select.select_option
+                  service_data:
+                    entity_id: input_select.toby_activity_selector
+                    option: Lego
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: rgb(254, 226, 234);
+                      text-align: center;
+                      cursor: pointer;
+                      transition: all 0.2s ease;
+                      {% if states('input_select.toby_activity_selector') == 'Lego' %}
+                        box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+                        transform: scale(1.05);
+                      {% endif %}
+                    }
+                    ha-card:hover {
+                      transform: scale(1.05);
+                      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    }
+                    ha-card:active {
+                      transform: scale(0.98);
+                    }
+                    .primary {
+                      font-size: 36px !important;
+                      line-height: 1.2 !important;
+                    }
+                    .secondary {
+                      font-size: 14px !important;
+                      font-weight: 600 !important;
+                      color: rgb(244, 63, 94) !important;
+                    }
+

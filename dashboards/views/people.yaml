@@ -1,0 +1,87 @@
+title: People
+path: people
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 80px 1fr
+      grid-template-rows: 1fr
+      margin: 0
+      padding: 0
+      grid-gap: 0
+    cards:
+      # Left Menu (column 1)
+      - type: custom:decluttering-card
+        template: side_menu
+        view_layout:
+          grid-column: 1
+
+      # Main content area in column 2
+      - type: vertical-stack
+        view_layout:
+          grid-column: 2
+        card_mod:
+          style: |
+            :host {
+              padding: 16px 8px !important;
+              margin: 0 !important;
+            }
+        cards:
+          # Title Section
+          - type: custom:mushroom-title-card
+            title: Family Members
+            subtitle: Select a family member to view their details
+
+          # Family Members Grid - centered with 3 columns
+          - type: grid
+            columns: 3
+            square: true
+            cards:
+              # Toby Card
+              - type: custom:button-card
+                template: room_card
+                name: Toby
+                icon: mdi:account-circle
+                variables:
+                  color: "#3b82f6"
+                tap_action:
+                  action: navigate
+                  navigation_path: /tablet-dashboard/toby
+                styles:
+                  card:
+                    - margin: 8px
+                  name:
+                    - color: "[[[ return variables.color ]]]"
+
+              # Ben Card  
+              - type: custom:button-card
+                template: room_card
+                name: Ben
+                icon: mdi:account-circle
+                variables:
+                  color: "#10b981"
+                tap_action:
+                  action: navigate
+                  navigation_path: /tablet-dashboard/ben
+                styles:
+                  card:
+                    - margin: 8px
+                  name:
+                    - color: "[[[ return variables.color ]]]"
+
+              # Petra Card
+              - type: custom:button-card
+                template: room_card
+                name: Petra
+                icon: mdi:account-circle
+                variables:
+                  color: "#f59e0b"
+                tap_action:
+                  action: navigate
+                  navigation_path: /tablet-dashboard/petra
+                styles:
+                  card:
+                    - margin: 8px
+                  name:
+                    - color: "[[[ return variables.color ]]]"

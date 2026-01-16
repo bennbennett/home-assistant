@@ -1,0 +1,273 @@
+title: Calendar
+path: calendar
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 80px 1fr
+      grid-template-rows: 1fr
+      margin: 0
+      padding: 0
+      grid-gap: 0
+    cards:
+      # Left Menu
+      - type: custom:decluttering-card
+        template: side_menu
+        view_layout:
+          grid-column: 1
+
+      # Main Content Area
+      - type: vertical-stack
+        view_layout:
+          grid-column: 2
+        card_mod:
+          style: |
+            :host {
+              padding: 16px 8px !important;
+              margin: 0 !important;
+            }
+        cards:
+          # View Toggle Buttons
+          - type: horizontal-stack
+            cards:
+              # Week Button
+              - type: custom:button-card
+                icon: mdi:view-week
+                name: Week
+                entity: input_boolean.calendar_week_view
+                tap_action:
+                  action: call-service
+                  service: script.toggle_week_view
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 140px
+                    - background-color: >
+                        [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                            ? 'rgb(219, 234, 254)'
+                            : 'rgba(219, 234, 254, 0.5)' ]]]
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: >
+                        [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                            ? 'rgb(59, 130, 246)'
+                            : 'rgba(59, 130, 246, 0.6)' ]]]
+                  name:
+                    - color: >
+                        [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                            ? 'rgb(59, 130, 246)'
+                            : 'rgba(59, 130, 246, 0.6)' ]]]
+                    - font-size: 14px
+                    - margin-left: 8px
+
+              # Month Button
+              - type: custom:button-card
+                icon: mdi:calendar-month
+                name: Month
+                entity: input_boolean.calendar_month_view
+                tap_action:
+                  action: call-service
+                  service: script.toggle_month_view
+                  service_data: {}
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 140px
+                    - background-color: >
+                        [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                            ? 'rgb(219, 234, 254)'
+                            : 'rgba(219, 234, 254, 0.5)' ]]]
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: >
+                        [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                            ? 'rgb(59, 130, 246)'
+                            : 'rgba(59, 130, 246, 0.6)' ]]]
+                  name:
+                    - color: >
+                        [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                            ? 'rgb(59, 130, 246)'
+                            : 'rgba(59, 130, 246, 0.6)' ]]]
+                    - font-size: 14px
+                    - margin-left: 8px
+
+              # Add Event Button
+              - type: custom:button-card
+                icon: mdi:calendar-plus
+                name: Add Event
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Add Calendar Event
+                      size: normal
+                      style:
+                        $: |
+                          .mdc-dialog .mdc-dialog__surface {
+                            width: 50vw;
+                            max-width: 50vw;
+                          }
+                      content: !include ../popups/calendar_event_popup.yaml
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 140px
+                    - background-color: 'rgb(254, 226, 226)'
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: 'rgb(220, 38, 38)'
+                  name:
+                    - color: 'rgb(220, 38, 38)'
+                    - font-size: 14px
+                    - margin-left: 8px
+
+          # WEEK VIEW - Shows 7 days horizontally starting today
+          - type: conditional
+            conditions:
+              - entity: input_boolean.calendar_week_view
+                state: "on"
+            card:
+              type: custom:week-planner-card
+              calendars:
+                - entity: calendar.home_calendar
+                  color: "#e6c229"
+                  name: Home
+                - entity: calendar.birthdays_anniversaries
+                  color: "#9333EA"
+                  name: Birthdays & Anniversaries
+              days: 7
+              startingDay: today
+              startingDayOffset: 0
+              compact: false
+              showLegend: true
+              legendToggle: true
+              showLocation: false
+              showDescription: false
+              updateInterval: 60
+              locale: en
+              card_mod:
+                style: |
+                  ha-card {
+                    font-size: 14px !important;
+                    padding: 12px !important;
+                    margin: 16px !important;
+                    background: #FAFAFA;
+                    border-radius: 12px;
+                    --legend-spacing: 15px;
+                    --legend-dot-size: 12px;
+                  }
+                  .container .day {
+                    width: calc((100% - 6 * var(--days-spacing)) / 7) !important;
+                    margin-right: 10px;
+                  }
+                  .container .day .date .number {
+                    height: 35px;
+                    width: 35px;
+                    line-height: 35px;
+                    text-align: center;
+                    margin-bottom: 8px;
+                  }
+                  .today {
+                    background-color: rgb(219, 234, 254);
+                    border-radius: 12px;
+                  }
+                  .event {
+                    position: relative;
+                    white-space: nowrap;
+                    overflow: hidden;
+                  }
+                  .event::after {
+                    content: '';
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    bottom: 0;
+                    width: 30px;
+                    background: linear-gradient(to right, transparent, #FAFAFA);
+                    pointer-events: none;
+                  }
+
+          # MONTH VIEW - Shows next 4 weeks starting Monday
+          - type: conditional
+            conditions:
+              - entity: input_boolean.calendar_month_view
+                state: "on"
+            card:
+              type: custom:week-planner-card
+              title: "Next 4 Weeks"
+              days: 28
+              startingDay: monday
+              startingDayOffset: 0
+              maxDayEvents: 5
+              updateInterval: 600
+              noCardBackground: false
+              showLegend: true
+              legendToggle: true
+              showLocation: false
+              showDescription: false
+              calendars:
+                - entity: calendar.home_calendar
+                  color: "#e6c229"
+                  name: Home
+                - entity: calendar.birthdays_anniversaries
+                  color: "#9333EA"
+                  name: Birthdays & Anniversaries
+              card_mod:
+                style: |
+                  ha-card {
+                    margin: 8px;
+                    padding: 12px;
+                    background: #FAFAFA;
+                    border-radius: 12px;
+                    font-size: 12px !important;
+                  }
+                  .container .day {
+                    width: calc((100% - 6 * var(--days-spacing)) / 7) !important;
+                    margin-right: 10px;
+                  }
+                  .container .day .date .number {
+                    height: 35px;
+                    width: 35px;
+                    line-height: 35px;
+                    text-align: center;
+                    margin-bottom: 8px;
+                  }
+                  .today {
+                    background-color: rgb(219, 234, 254);
+                    border-radius: 12px;
+                  }
+                  .event {
+                    position: relative;
+                    white-space: nowrap;
+                    overflow: hidden;
+                  }
+                  .event::after {
+                    content: '';
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    bottom: 0;
+                    width: 30px;
+                    background: linear-gradient(to right, transparent, #FAFAFA);
+                    pointer-events: none;
+                  }

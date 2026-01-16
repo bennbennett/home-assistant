@@ -1,0 +1,765 @@
+title: Devices
+path: devices
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 80px 1fr
+      grid-template-rows: 1fr
+      margin: 0
+      padding: 0
+      grid-gap: 0
+    cards:
+      # LEFT MENU (column 1)
+      - type: custom:decluttering-card
+        template: side_menu
+        view_layout:
+          grid-column: 1
+
+      # RIGHT-SIDE GRID (column 2)
+      - type: vertical-stack
+        view_layout:
+          grid-colum: 2
+        cards:
+          # View toggle Buttons
+          - type: horizontal-stack
+            cards:
+              # All Devices Button
+              - type: custom:button-card
+                icon: mdi:devices
+                name: All
+                entity: input_boolean.device_filter_all
+                tap_action:
+                  action: call-service
+                  service: script.toggle_device_filter_all
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 140px
+                    - background-color: >
+                        [[[ return states['input_boolean.device_filter_all'].state === 'on' 
+                            ? 'rgb(254, 226, 226)' 
+                            : 'rgba(254, 226, 226, 0.5)' ]]]
+
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: >
+                        [[[ return states['input_boolean.device_filter_all'].state === 'on'
+                            ? 'rgb(220, 38, 38)'
+                            : 'rgba(220, 38, 38, 0.6)' ]]]
+                  name:
+                    - color: >
+                        [[[ return states['input_boolean.device_filter_all'].state === 'on'
+                            ? 'rgb(220, 38, 38)'
+                            : 'rgba(220, 38, 38, 0.6)' ]]]
+                    - font-size: 14px
+                    - margin-left: 8px
+
+              # Phones Button
+              - type: custom:button-card
+                icon: mdi:cellphone
+                name: Phones
+                entity: input_boolean.device_filter_phones
+                tap_action:
+                  action: call-service
+                  service: script.toggle_device_filter_phones
+                  service_data: {}
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 140px
+                    - background-color: >
+                        [[[ return states['input_boolean.device_filter_phones'].state === 'on'
+                            ? 'rgb(254, 226, 226)'
+                            : 'rgba(254, 226, 226, 0.5)' ]]]
+
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: >
+                        [[[ return states['input_boolean.device_filter_phones'].state === 'on'
+                            ? 'rgb(220, 38, 38)'
+                            : 'rgba(220, 38, 38, 0.6)' ]]]
+                  name:
+                    - color: >
+                        [[[ return states['input_boolean.device_filter_phones'].state === 'on'
+                            ? 'rgb(220, 38, 38)'
+                            : 'rgba(220, 38, 38, 0.6)' ]]]
+                    - font-size: 14px
+                    - margin-left: 8px
+
+              # Tablets Button
+              - type: custom:button-card
+                icon: mdi:tablet
+                name: Tablets
+                entity: input_boolean.device_filter_tablets
+                tap_action:
+                  action: call-service
+                  service: script.toggle_device_filter_tablets
+                  service_data: {}
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 140px
+                    - background-color: >
+                        [[[ return states['input_boolean.device_filter_tablets'].state === 'on'
+                            ? 'rgb(254, 226, 226)'
+                            : 'rgba(254, 226, 226, 0.5)' ]]]
+
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: >
+                        [[[ return states['input_boolean.device_filter_tablets'].state === 'on'
+                            ? 'rgb(220, 38, 38)'
+                            : 'rgba(220, 38, 38, 0.6)' ]]]
+                  name:
+                    - color: >
+                        [[[ return states['input_boolean.device_filter_tablets'].state === 'on'
+                            ? 'rgb(220, 38, 38)'
+                            : 'rgba(220, 38, 38, 0.6)' ]]]
+                    - font-size: 14px
+                    - margin-left: 8px
+
+              # Computer Button
+              - type: custom:button-card
+                icon: mdi:desktop-tower
+                name: Computer
+                entity: input_boolean.device_filter_computer
+                tap_action:
+                  action: call-service
+                  service: script.toggle_device_filter_computer
+                  service_data: {}
+                styles:
+                  card:
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                    - margin: 4px
+                    - width: 140px
+                    - background-color: >
+                        [[[ return states['input_boolean.device_filter_computer'].state === 'on'
+                            ? 'rgb(254, 226, 226)'
+                            : 'rgba(254, 226, 226, 0.5)' ]]]
+
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                  icon:
+                    - width: 24px
+                    - height: 24px
+                    - color: >
+                        [[[ return states['input_boolean.device_filter_computer'].state === 'on'
+                            ? 'rgb(220, 38, 38)'
+                            : 'rgba(220, 38, 38, 0.6)' ]]]
+                  name:
+                    - color: >
+                        [[[ return states['input_boolean.device_filter_computer'].state === 'on'
+                            ? 'rgb(220, 38, 38)'
+                            : 'rgba(220, 38, 38, 0.6)' ]]]
+                    - font-size: 14px
+                    - margin-left: 8px
+          # Device Sections with Conditional Display
+          - type: grid
+            columns: 3
+            square: true
+            cards:
+              # iPhone Card
+              - type: conditional
+                conditions:
+                  - condition: or
+                    conditions:
+                      - entity: input_boolean.device_filter_all
+                        state: "on"
+                      - entity: input_boolean.device_filter_phones
+                        state: "on"
+                card:
+                  type: custom:button-card
+                  template: device_card
+                  name: iPhone
+                  icon: mdi:apple
+                  entity: sensor.iphone_battery_level
+                  variables:
+                    color: "#c8a4de"
+                    indicator_colors: ["#22c55e", "#3b82f6", "#f59e0b"]
+                  state_display: >
+                    [[[
+                      return `${states['sensor.iphone_battery_level'].state}% | ${states['device_tracker.iphone'].state}`;
+                    ]]]
+                  tap_action:
+                    action: fire-dom-event
+                    browser_mod:
+                      service: browser_mod.popup
+                      data:
+                        title: iPhone Dashboard
+                        content:
+                          type: vertical-stack
+                          cards:
+                            - type: custom:mushroom-template-card
+                              primary: Battery Status
+                              secondary: "{{ states('sensor.iphone_battery_level') }}%"
+                              icon: mdi:battery
+                              icon_color: >
+                                [[[
+                                  const level = states['sensor.iphone_battery_level'].state;
+                                  if (level > 70) return 'green';
+                                  if (level > 30) return 'orange';
+                                  return 'red';
+                                ]]]
+                            - type: custom:mushroom-template-card
+                              primary: Find iPhone
+                              icon: mdi:cellphone-sound
+                              tap_action:
+                                action: call-service
+                                service: notify.mobile_app_iphone_4 
+                                service_data:
+                                  message: "Finding phone"
+                                  data:
+                                    push:
+                                      sound:
+                                        name: default
+                                        critical: 1
+                                        volume: 1.0
+
+              # Pixel Card
+              - type: conditional
+                conditions:
+                  - condition: or
+                    conditions:
+                      - entity: input_boolean.device_filter_all
+                        state: "on"
+                      - entity: input_boolean.device_filter_phones
+                        state: "on"
+                card:
+                  type: custom:button-card
+                  template: device_card
+                  name: Pixel 10
+                  icon: mdi:android
+                  entity: sensor.pixel_10_battery_level
+                  variables:
+                    color: "#d5e899"
+                    indicator_colors: ["#22c55e", "#3b82f6", "#f59e0b"]
+                  state_display: >
+                    [[[
+                      return `${states['sensor.pixel_10_battery_level'].state}% | ${states['device_tracker.pixel_10'].state}`;
+                    ]]]
+                  tap_action:
+                    action: fire-dom-event
+                    browser_mod:
+                      service: browser_mod.popup
+                      data:
+                        title: Pixel Dashboard
+                        content:
+                          type: vertical-stack
+                          cards:
+                            - type: custom:mushroom-template-card
+                              primary: Battery Status
+                              secondary: "{{ states('sensor.pixel_10_battery_level') }}%"
+                              icon: mdi:battery
+                              icon_color: >
+                                [[[
+                                  const level = states['sensor.pixel_10_battery_level'].state;
+                                  if (level > 70) return 'green';
+                                  if (level > 30) return 'orange';
+                                  return 'red';
+                                ]]]
+                            - type: custom:mushroom-template-card
+                              primary: Find Pixel
+                              icon: mdi:cellphone-sound
+                              tap_action:
+                                action: call-service
+                                service: notify.mobile_app_pixel_10
+                                service_data:
+                                  message: "TTS"
+                                  data:
+                                    tts_text: "Hello! I am your phone! I am over here!"
+                                    media_stream: "alarm_stream_max"
+                                    importance: max
+                                    channel: "Find Phone"
+                                    alert_once: false
+                                    vibrationPattern: "1000, 2000, 1000, 2000, 1000"
+                                    sticky: true
+
+              # Tablets Section (Visible when All or Tablets is selected)
+              # Small iPad Card
+              - type: conditional
+                conditions:
+                  - condition: or
+                    conditions:
+                      - entity: input_boolean.device_filter_all
+                        state: "on"
+                      - entity: input_boolean.device_filter_tablets
+                        state: "on"
+                card:
+                  type: custom:button-card
+                  template: device_card
+                  name: Small iPad
+                  icon: mdi:tablet
+                  entity: sensor.benjamins_ipad_battery_level
+                  variables:
+                    color: "#4363a3"
+                    indicator_colors: ["#22c55e", "#3b82f6", "#f59e0b"]
+                  state_display: >
+                    [[[
+                      return `${states['sensor.benjamins_ipad_battery_level'].state}% | ${states['device_tracker.benjamins_ipad'].state}`;
+                    ]]]
+                  tap_action:
+                    action: fire-dom-event
+                    browser_mod:
+                      service: browser_mod.popup
+                      data:
+                        title: iPad
+                        content:
+                          type: vertical-stack
+                          cards:
+                            - type: custom:mushroom-template-card
+                              primary: Battery Status
+                              secondary: "{{ states('sensor.benjamins_ipad_battery_level') }}%"
+                              icon: mdi:battery
+                              icon_color: >
+                                [[[
+                                  const level = states['sensor.benjamins_ipad_battery_level'].state;
+                                  if (level > 70) return 'green';
+                                  if (level > 30) return 'orange';
+                                  return 'red';
+                                ]]]
+                            - type: custom:mushroom-template-card
+                              primary: Find Small iPad
+                              icon: mdi:cellphone-sound
+                              tap_action:
+                                action: call-service
+                                service: notify.mobile_app_benjamins_ipad
+                                service_data:
+                                  message: "Finding Small iPad"
+                                  data:
+                                    push:
+                                      sound:
+                                        name: default
+                                        critical: 1
+                                        volume: 1.0
+              #Big iPad Card
+              - type: conditional
+                conditions:
+                  - condition: or
+                    conditions:
+                      - entity: input_boolean.device_filter_all
+                        state: "on"
+                      - entity: input_boolean.device_filter_tablets
+                        state: "on"
+                card:
+                  type: custom:button-card
+                  template: device_card
+                  name: Big iPad
+                  icon: mdi:tablet
+                  entity: sensor.sensor.at_dlxc313bk7m9_sped_battery_level
+                  variables:
+                    color: "#44484f"
+                    indicator_colors: ["#22c55e", "#3b82f6", "#f59e0b"]
+                  state_display: >
+                    [[[
+                      return `${states['sensor.at_dlxc313bk7m9_sped_battery_level'].state}% | ${states['device_tracker.at_dlxc313bk7m9_sped'].state}`;
+                    ]]]
+                  tap_action:
+                    action: fire-dom-event
+                    browser_mod:
+                      service: browser_mod.popup
+                      data:
+                        title: Big iPad Dashboard
+                        content:
+                          type: vertical-stack
+                          cards:
+                            - type: custom:mushroom-template-card
+                              primary: Battery Status
+                              secondary: "{{ states('sensor.at_dlxc313bk7m9_sped_battery_level') }}%"
+                              icon: mdi:battery
+                              icon_color: >
+                                [[[
+                                  const level = states['sensor.at_dlxc313bk7m9_sped_battery_level'].state;
+                                  if (level > 70) return 'green';
+                                  if (level > 30) return 'orange';
+                                  return 'red';
+                                ]]]
+                            - type: custom:mushroom-template-card
+                              primary: Find Big iPad
+                              icon: mdi:cellphone-sound
+                              tap_action:
+                                action: call-service
+                                service: notify.mobile_app_at_dlxc313bk7m9_sped
+                                service_data:
+                                  message: "Finding Big iPad"
+                                  data:
+                                    push:
+                                      sound:
+                                        name: default
+                                        critical: 1
+                                        volume: 1.0
+              # Computer Section (Visible when All or Computer is selected)
+              - type: conditional
+                conditions:
+                  - condition: or
+                    conditions:
+                      - entity: input_boolean.device_filter_all
+                        state: "on"
+                      - entity: input_boolean.device_filter_computer
+                        state: "on"
+                card:
+                  type: custom:button-card 
+                  template: device_card
+                  name: Printer
+                  icon: mdi:printer
+                  entity: sensor.mfc_j4335dw_status
+                  variables:
+                    color: "#bfbfbf"
+                    indicator_colors: ["#22c55e", "#3b82f6", "#f59e0b"]
+                  state_display: >
+                    [[[
+                      const status = states['sensor.mfc_j4335dw_status'].state;
+                      const blackInk = states['sensor.brother_mfc_j4335dw_bk'].state;
+                      return `${status} | Black Ink: ${blackInk}%`;
+                    ]]]
+                  tap_action:
+                    action: fire-dom-event
+                    browser_mod:
+                      service: browser_mod.popup
+                      data:
+                        title: Printer Status
+                        content:
+                          type: vertical-stack
+                          cards:
+                            # Status Card
+                            - type: custom:mushroom-template-card
+                              primary: Printer Status
+                              secondary: "{{ states('sensor.mfc_j4335dw_status') }}"
+                              icon: mdi:printer-check
+                              icon_color: >
+                                [[[
+                                  const status = states['sensor.mfc_j4335dw_status'].state;
+                                  if (status === 'ready') return 'green';
+                                  if (status === 'sleep') return 'blue';
+                                  return 'red';
+                                ]]]
+
+                            # Ink Levels Section Header
+                            - type: custom:mushroom-title-card
+                              title: Ink Levels
+                              subtitle: Current ink remaining by color
+
+                            # Ink Level Cards
+                            - type: grid
+                              columns: 2
+                              square: false
+                              cards:
+                                # Black Ink
+                                - type: custom:mushroom-template-card
+                                  primary: Black
+                                  secondary: '{{ states("sensor.brother_mfc_j4335dw_bk") }}%'
+                                  icon: mdi:water
+                                  icon_color: black
+                                  fill_container: true
+                                  layout: horizontal
+
+                                # Cyan Ink
+                                - type: custom:mushroom-template-card
+                                  primary: Cyan
+                                  secondary: '{{ states("sensor.brother_mfc_j4335dw_c") }}%'
+                                  icon: mdi:water
+                                  icon_color: cyan
+                                  fill_container: true
+                                  layout: horizontal
+
+                                # Magenta Ink
+                                - type: custom:mushroom-template-card
+                                  primary: Magenta
+                                  secondary: '{{ states("sensor.brother_mfc_j4335dw_m") }}%'
+                                  icon: mdi:water
+                                  icon_color: pink
+                                  fill_container: true
+                                  layout: horizontal
+
+                                # Yellow Ink
+                                - type: custom:mushroom-template-card
+                                  primary: Yellow
+                                  secondary: '{{ states("sensor.brother_mfc_j4335dw_y") }}%'
+                                  icon: mdi:water
+                                  icon_color: yellow
+                                  fill_container: true
+                                  layout: horizontal
+
+                            # Usage Statistics
+                            - type: custom:mushroom-title-card
+                              title: Usage Statistics
+                            
+                            # Stats Grid
+                            - type: grid
+                              columns: 2
+                              square: false
+                              cards:
+                                - type: custom:mushroom-template-card
+                                  primary: B&W Pages
+                                  secondary: '{{ states("sensor.mfc_j4335dw_b_w_pages") }}'
+                                  icon: mdi:file-document-outline
+                                  
+                                - type: custom:mushroom-template-card
+                                  primary: Color Pages
+                                  secondary: '{{ states("sensor.mfc_j4335dw_color_pages") }}'
+                                  icon: mdi:palette
+                                  
+                                - type: custom:mushroom-template-card
+                                  primary: Total Pages
+                                  secondary: '{{ states("sensor.mfc_j4335dw_page_counter") }}'
+                                  icon: mdi:counter
+                                  
+                                - type: custom:mushroom-template-card
+                                  primary: Uptime
+                                  secondary: '{{ states("sensor.brother_mfc_j4335dw_uptime") }}'
+                                  icon: mdi:clock-outline
+
+              # 3D Printer Card (Elegoo Centauri Carbon)
+              - type: conditional
+                conditions:
+                  - condition: or
+                    conditions:
+                      - entity: input_boolean.device_filter_all
+                        state: "on"
+                      - entity: input_boolean.device_filter_computer
+                        state: "on"
+                card:
+                  type: custom:button-card
+                  template: device_card
+                  name: 3D Printer
+                  icon: mdi:printer-3d
+                  entity: sensor.centauri_carbon_percent_complete
+                  variables:
+                    color: "#10b981"
+                    indicator_colors: ["#22c55e", "#3b82f6", "#f59e0b"]
+                  state_display: >
+                    [[[
+                      const status = states['sensor.centauri_carbon_current_status'].state;
+                      const percent = states['sensor.centauri_carbon_percent_complete'].state;
+                      if (status === 'printing') {
+                        return `${percent}% | Printing`;
+                      }
+                      return status.charAt(0).toUpperCase() + status.slice(1);
+                    ]]]
+                  tap_action:
+                    action: fire-dom-event
+                    browser_mod:
+                      service: browser_mod.popup
+                      data:
+                        title: Elegoo Centauri Carbon
+                        content:
+                          type: vertical-stack
+                          cards:
+                            # Camera Feed
+                            - type: picture-entity
+                              entity: camera.centauri_carbon_chamber_camera
+                              show_state: false
+                              show_name: false
+                              camera_view: live
+
+                            # Print Status Section
+                            - type: custom:mushroom-title-card
+                              title: Print Status
+
+                            - type: grid
+                              columns: 2
+                              square: false
+                              cards:
+                                - type: custom:mushroom-template-card
+                                  primary: Status
+                                  secondary: "{{ states('sensor.centauri_carbon_current_status') | title }}"
+                                  icon: mdi:printer-3d
+                                  icon_color: >
+                                    {% if states('sensor.centauri_carbon_current_status') == 'printing' %}
+                                      green
+                                    {% elif states('sensor.centauri_carbon_current_status') == 'idle' %}
+                                      grey
+                                    {% else %}
+                                      orange
+                                    {% endif %}
+                                  layout: horizontal
+                                  fill_container: true
+
+                                - type: custom:mushroom-template-card
+                                  primary: Progress
+                                  secondary: "{{ states('sensor.centauri_carbon_percent_complete') }}%"
+                                  icon: mdi:percent
+                                  icon_color: blue
+                                  layout: horizontal
+                                  fill_container: true
+
+                                - type: custom:mushroom-template-card
+                                  primary: Layer
+                                  secondary: "{{ states('sensor.centauri_carbon_current_layer') }} / {{ states('sensor.centauri_carbon_total_layers') }}"
+                                  icon: mdi:layers
+                                  icon_color: purple
+                                  layout: horizontal
+                                  fill_container: true
+
+                                - type: custom:mushroom-template-card
+                                  primary: Remaining
+                                  secondary: "{{ (states('sensor.centauri_carbon_remaining_print_time') | float / 60) | round(1) }}h"
+                                  icon: mdi:clock-outline
+                                  icon_color: orange
+                                  layout: horizontal
+                                  fill_container: true
+
+                            # Current File
+                            - type: custom:mushroom-template-card
+                              primary: Current File
+                              secondary: "{{ states('sensor.centauri_carbon_file_name') }}"
+                              icon: mdi:file-document
+
+                            # Temperatures Section
+                            - type: custom:mushroom-title-card
+                              title: Temperatures
+
+                            - type: grid
+                              columns: 3
+                              square: false
+                              cards:
+                                - type: custom:mushroom-template-card
+                                  primary: Nozzle
+                                  secondary: "{{ states('sensor.centauri_carbon_nozzle_temperature') | round(0) }}°F"
+                                  icon: mdi:printer-3d-nozzle-heat
+                                  icon_color: red
+                                  layout: horizontal
+                                  fill_container: true
+
+                                - type: custom:mushroom-template-card
+                                  primary: Bed
+                                  secondary: "{{ states('sensor.centauri_carbon_bed_temperature') | round(0) }}°F"
+                                  icon: mdi:radiator
+                                  icon_color: orange
+                                  layout: horizontal
+                                  fill_container: true
+
+                                - type: custom:mushroom-template-card
+                                  primary: Enclosure
+                                  secondary: "{{ states('sensor.centauri_carbon_box_temp') | round(0) }}°F"
+                                  icon: mdi:cube-outline
+                                  icon_color: blue
+                                  layout: horizontal
+                                  fill_container: true
+
+                            # Controls Section
+                            - type: custom:mushroom-title-card
+                              title: Controls
+
+                            - type: grid
+                              columns: 4
+                              square: false
+                              cards:
+                                - type: custom:mushroom-template-card
+                                  primary: Light
+                                  icon: mdi:lightbulb
+                                  icon_color: >
+                                    {% if states('light.centauri_carbon_chamber_light') == 'on' %}
+                                      yellow
+                                    {% else %}
+                                      grey
+                                    {% endif %}
+                                  tap_action:
+                                    action: toggle
+                                    entity: light.centauri_carbon_chamber_light
+                                  layout: vertical
+                                  fill_container: true
+
+                                - type: custom:mushroom-template-card
+                                  primary: Pause
+                                  icon: mdi:pause
+                                  icon_color: orange
+                                  tap_action:
+                                    action: call-service
+                                    service: button.press
+                                    service_data:
+                                      entity_id: button.centauri_carbon_pause_print
+                                  layout: vertical
+                                  fill_container: true
+
+                                - type: custom:mushroom-template-card
+                                  primary: Resume
+                                  icon: mdi:play
+                                  icon_color: green
+                                  tap_action:
+                                    action: call-service
+                                    service: button.press
+                                    service_data:
+                                      entity_id: button.centauri_carbon_resume_print
+                                  layout: vertical
+                                  fill_container: true
+
+                                - type: custom:mushroom-template-card
+                                  primary: Stop
+                                  icon: mdi:stop
+                                  icon_color: red
+                                  tap_action:
+                                    action: call-service
+                                    service: button.press
+                                    service_data:
+                                      entity_id: button.centauri_carbon_stop_print
+                                  layout: vertical
+                                  fill_container: true
+
+                            # Fan Speeds
+                            - type: custom:mushroom-title-card
+                              title: Fans
+
+                            - type: grid
+                              columns: 3
+                              square: false
+                              cards:
+                                - type: custom:mushroom-template-card
+                                  primary: Model
+                                  secondary: "{{ states('sensor.centauri_carbon_model_fan_speed') }}%"
+                                  icon: mdi:fan
+                                  icon_color: >
+                                    {% if states('fan.centauri_carbon_model_fan') == 'on' %}
+                                      cyan
+                                    {% else %}
+                                      grey
+                                    {% endif %}
+                                  layout: horizontal
+                                  fill_container: true
+
+                                - type: custom:mushroom-template-card
+                                  primary: Enclosure
+                                  secondary: "{{ states('sensor.centauri_carbon_enclosure_fan_speed') }}%"
+                                  icon: mdi:fan
+                                  icon_color: >
+                                    {% if states('fan.centauri_carbon_enclosure_fan') == 'on' %}
+                                      cyan
+                                    {% else %}
+                                      grey
+                                    {% endif %}
+                                  layout: horizontal
+                                  fill_container: true
+
+                                - type: custom:mushroom-template-card
+                                  primary: Auxiliary
+                                  secondary: "{{ states('sensor.centauri_carbon_auxiliary_fan_speed') }}%"
+                                  icon: mdi:fan
+                                  icon_color: >
+                                    {% if states('fan.centauri_carbon_auxiliary_fan') == 'on' %}
+                                      cyan
+                                    {% else %}
+                                      grey
+                                    {% endif %}
+                                  layout: horizontal
+                                  fill_container: true
