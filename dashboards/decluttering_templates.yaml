@@ -104,7 +104,50 @@ side_menu:
                 [[[ return window.location.pathname.endsWith('/tablet-dashboard/tasks')
                     ? 'rgb(249, 115, 22)'
                     : 'rgba(249, 115, 22, 0.6)' ]]]
-      # --- Button #3: Rooms ---
+      # --- Button #3: Meals ---
+      - type: custom:button-card
+        icon: mdi:silverware-fork-knife
+        tap_action:
+          action: navigate
+          navigation_path: /tablet-dashboard/meals
+        show_name: false
+        styles:
+          card:
+            - width: 60px
+            - height: 60px
+            - border-radius: 12px
+            - margin: 8px
+            - padding: 0px
+            - background-color: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/meals')
+                    ? 'rgb(254, 243, 199)'
+                    : 'rgba(254, 243, 199, 0.5)' ]]]
+            - box-shadow: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/meals')
+                    ? '0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06)'
+                    : 'none'
+                ]]]
+            - "&:before":
+                - content: "''"
+                - position: absolute
+                - left: -8px
+                - height: 24px
+                - width: 3px
+                - background-color: rgb(245, 158, 11)
+                - border-radius: 0 4px 4px 0
+                - opacity: >
+                    [[[
+                      if(window.location.pathname.endsWith('/tablet-dashboard/meals')) return '1';
+                      return '0';
+                    ]]]
+          icon:
+            - width: 30px
+            - height: 30px
+            - color: >
+                [[[ return window.location.pathname.endsWith('/tablet-dashboard/meals')
+                    ? 'rgb(245, 158, 11)'
+                    : 'rgba(245, 158, 11, 0.6)' ]]]
+      # --- Button #4: Rooms ---
       - type: custom:button-card
         icon: mdi:home
         tap_action:
@@ -147,7 +190,7 @@ side_menu:
                 [[[ return window.location.pathname.endsWith('/tablet-dashboard/rooms')
                     ? 'rgb(34, 97, 58)'
                     : 'rgba(34, 97, 58, 0.6)' ]]]
-      # --- Button #4: Devices ---
+      # --- Button #5: Devices ---
       - type: custom:button-card
         icon: mdi:devices
         tap_action:
@@ -190,7 +233,7 @@ side_menu:
                 [[[ return window.location.pathname.endsWith('/tablet-dashboard/devices')
                     ? 'rgb(220, 38, 38)'
                     : 'rgba(220, 38, 38, 0.6)' ]]]
-      # --- Button #5: People ---
+      # --- Button #6: People ---
       - type: custom:button-card
         icon: mdi:account-group
         tap_action:
