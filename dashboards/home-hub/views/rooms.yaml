@@ -1,0 +1,50 @@
+##############################################################################
+#                            Rooms View                                       #
+#  Two-static-layout approach to ensure correct sidebar sizing                #
+##############################################################################
+title: Rooms
+path: rooms
+type: panel
+
+cards:
+  - type: vertical-stack
+    cards:
+      # Expanded layout (260px)
+      - type: conditional
+        conditions:
+          - entity: input_boolean.sidebar_collapsed
+            state: "off"
+        card:
+          type: custom:layout-card
+          layout_type: custom:grid-layout
+          layout:
+            grid-template-columns: 198px 1fr
+            grid-template-rows: 1fr
+            margin: 0
+            padding: 0
+            grid-gap: 16px
+          cards:
+            - type: custom:decluttering-card
+              template: home_hub_sidebar_expanded
+            - type: custom:decluttering-card
+              template: home_hub_rooms_main
+
+      # Collapsed layout (64px)
+      - type: conditional
+        conditions:
+          - entity: input_boolean.sidebar_collapsed
+            state: "on"
+        card:
+          type: custom:layout-card
+          layout_type: custom:grid-layout
+          layout:
+            grid-template-columns: 64px 1fr
+            grid-template-rows: 1fr
+            margin: 0
+            padding: 0
+            grid-gap: 16px
+          cards:
+            - type: custom:decluttering-card
+              template: home_hub_sidebar_collapsed
+            - type: custom:decluttering-card
+              template: home_hub_rooms_main

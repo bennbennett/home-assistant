@@ -9,6 +9,7 @@ frontend:
   themes: !include_dir_merge_named themes
   extra_module_url:
     - /hacsfiles/lovelace-card-mod/card-mod.js
+    - /local/kiosk-mode/kiosk-mode.js
 
 # Dashboard configurations
 lovelace:
@@ -38,6 +39,14 @@ lovelace:
       filename: dashboards/mobile-redesign-v2.yaml
       require_admin: false  # Available to all users
 
+    home-hub:  # Modern iPad dashboard with collapsible sidebar
+      mode: yaml
+      title: Home Hub
+      icon: mdi:view-dashboard-variant
+      show_in_sidebar: true
+      filename: dashboards/home-hub.yaml
+      require_admin: false
+
 # Mobile app configuration
 mobile_app:
 
@@ -62,6 +71,36 @@ browser_mod:
 adaptive_lighting: !include adaptive_lighting.yaml
 
 template:
+  # Mealie Recipe List - populated by automation calling mealie.get_recipes
+  - trigger:
+      - platform: event
+        event_type: mealie_recipes_updated
+      - platform: homeassistant
+        event: start
+    sensor:
+      - name: "Mealie Recipe Browser"
+        unique_id: mealie_recipe_browser
+        state: "{{ trigger.event.data.recipes | default([]) | length if trigger.event is defined else 0 }}"
+        unit_of_measurement: "recipes"
+        attributes:
+          items: "{{ trigger.event.data.recipes | default([]) if trigger.event is defined else [] }}"
+          last_updated: "{{ now().isoformat() }}"
+
+  # Mealie Weekly Meal Plan - populated by automation calling mealie.get_mealplan
+  - trigger:
+      - platform: event
+        event_type: mealie_mealplan_updated
+      - platform: homeassistant
+        event: start
+    sensor:
+      - name: "Mealie Weekly Meal Plan"
+        unique_id: mealie_weekly_mealplan
+        state: "{{ trigger.event.data.meals | default([]) | length if trigger.event is defined else 0 }}"
+        unit_of_measurement: "meals"
+        attributes:
+          meals: "{{ trigger.event.data.meals | default([]) if trigger.event is defined else [] }}"
+          last_updated: "{{ now().isoformat() }}"
+
   - sensor:
       - name: "Current Month"
         state: "{{ now().strftime('%B %Y') }}"
@@ -496,6 +535,12 @@ input_boolean:
     initial: false
     icon: mdi:lightbulb-auto
 
+  # Home Hub Dashboard - Sidebar State
+  sidebar_collapsed:
+    name: Sidebar Collapsed
+    initial: false
+    icon: mdi:menu
+
 ############################################################
 #                   INPUT DATETIME                          #
 ############################################################
@@ -544,6 +589,12 @@ input_text:
     max: 100
     icon: mdi:food
 
+  recipe_import_url:
+    name: Recipe Import URL
+    initial: ""
+    max: 255
+    icon: mdi:link-plus
+
 ############################################################
 #                   INPUT BUTTON                            #
 ############################################################
@@ -574,6 +625,14 @@ input_select:
       - Saturday
       - Sunday
     icon: mdi:calendar
+
+  recipe_selector:
+    name: Recipe
+    options:
+      - Traditional Czech Řízek
+      - Mushroom Bourguignon
+      - Spaghetti Puttanesca (Spaghetti With Capers and Olives)
+    icon: mdi:food
 
 ############################################################
 #                   INPUT NUMBER                            #

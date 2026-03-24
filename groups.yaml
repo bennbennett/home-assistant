@@ -1,0 +1,26 @@
+# Garmin Watch Control Group
+# Used by HassControl app on Garmin watch
+# Requires: Tailscale on phone, HA accessible via MagicDNS
+# Updated: 2026-02-05
+
+garmin:
+  name: Garmin
+  entities:
+    # Quick Scenes (mood lighting)
+    - scene.front_house_nightlight
+    - scene.front_house_relax
+    - scene.front_house_energize
+    - scene.master_bedroom_nightlight
+
+    # Room Toggles (on/off)
+    - light.front_house
+    - light.master_bedroom
+    - light.outdoor_lights_dimmable
+    - light.kitchen
+
+    # Routines
+    - script.good_night_sequence
+    - script.good_morning_sequence
+
+    # Utility
+    - script.find_iphone

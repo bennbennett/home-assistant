@@ -63,7 +63,7 @@ cards:
                 icon: mdi:chef-hat
                 tap_action:
                   action: url
-                  url_path: "http://192.168.68.116:9925"
+                  url_path: "http://100.68.225.20:9925"
                 styles:
                   card:
                     - border-radius: 12px
@@ -402,7 +402,7 @@ cards:
               - type: custom:button-card
                 name: Shopping List
                 icon: mdi:cart
-                entity: todo.mealie_shopping_list
+                entity: todo.mealie_weekly_groceries
                 show_state: true
                 tap_action:
                   action: call-service
@@ -410,7 +410,7 @@ cards:
                   service_data:
                     content:
                       type: todo-list
-                      entity: todo.mealie_shopping_list
+                      entity: todo.mealie_weekly_groceries
                     style:
                       "--mdc-dialog-min-width": "50vw"
                 styles:

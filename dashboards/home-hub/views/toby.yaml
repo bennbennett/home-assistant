@@ -1,0 +1,371 @@
+##############################################################################
+#                            Toby View                                        #
+#  Toby's activities, checklists, and tools                                  #
+##############################################################################
+title: Toby
+path: toby
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: max-content 1fr
+      grid-template-rows: 1fr
+      margin: 0
+      padding: 0
+      grid-gap: 0
+    cards:
+      ##########################################################################
+      # Sidebar (top-level, explicit widths to avoid overlap)                  #
+      ##########################################################################
+      - type: conditional
+        view_layout:
+          grid-column: 1
+        conditions:
+          - entity: input_boolean.sidebar_collapsed
+            state: "off"
+        card:
+          type: custom:decluttering-card
+          template: home_hub_sidebar_expanded
+          card_mod:
+            style: |
+              :host {
+                width: 260px !important;
+                min-width: 260px !important;
+                max-width: 260px !important;
+              }
+
+      - type: conditional
+        view_layout:
+          grid-column: 1
+        conditions:
+          - entity: input_boolean.sidebar_collapsed
+            state: "on"
+        card:
+          type: custom:decluttering-card
+          template: home_hub_sidebar_collapsed
+          card_mod:
+            style: |
+              :host {
+                width: 64px !important;
+                min-width: 64px !important;
+                max-width: 64px !important;
+              }
+
+      ##########################################################################
+      # Main Content Area
+      ##########################################################################
+      - type: vertical-stack
+        view_layout:
+          grid-column: 2
+        card_mod:
+          style: |
+            :host {
+              padding: 24px 32px !important;
+              background: #F9FAFB;
+              min-height: calc(100vh - 48px);
+            }
+        cards:
+          # Page Header
+          - type: custom:button-card
+            template: home_hub_header
+            icon: mdi:human-child
+            name: Toby's Corner
+
+          # Activities Grid
+          - type: grid
+            columns: 4
+            square: false
+            card_mod:
+              style: |
+                ha-card {
+                  background: none;
+                  box-shadow: none;
+                  margin-top: 24px;
+                }
+            cards:
+              ##################################################################
+              # School Checklist
+              ##################################################################
+              - type: custom:button-card
+                template: home_hub_room_card
+                name: School
+                icon: mdi:school
+                variables:
+                  room_color: '#3B82F6'
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: School Checklist
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: School Checklist
+                            subtitle: Check off items as you pack
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-left: 4px solid #3B82F6;
+                                  padding-left: 16px;
+                                  background: rgba(59, 130, 246, 0.08);
+                                  border-radius: 12px;
+                                  margin-bottom: 12px;
+                                }
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_snack
+                            name: Snack
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_lunch
+                            name: Lunch
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_water
+                            name: Water bottle
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_jacket
+                            name: Jacket
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_binder
+                            name: Binder
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_chromebook
+                            name: Chromebook
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.school_homework
+                            name: Homework
+                            tap_action:
+                              action: toggle
+
+              ##################################################################
+              # Swimming Checklist
+              ##################################################################
+              - type: custom:button-card
+                template: home_hub_room_card
+                name: Swimming
+                icon: mdi:pool
+                variables:
+                  room_color: '#06B6D4'
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Swimming Checklist
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Swimming Checklist
+                            subtitle: Check off items as you pack
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-left: 4px solid #06B6D4;
+                                  padding-left: 16px;
+                                  background: rgba(6, 182, 212, 0.08);
+                                  border-radius: 12px;
+                                  margin-bottom: 12px;
+                                }
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_bag
+                            name: Swim bag
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_shirt
+                            name: Swim shirt
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_trunks
+                            name: Swim trunks
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_goggles
+                            name: Goggles
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_towel
+                            name: Towel
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_sunscreen
+                            name: Sunscreen
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_water
+                            name: Water bottle
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.swimming_snack
+                            name: Snack
+                            tap_action:
+                              action: toggle
+
+              ##################################################################
+              # Hockey Checklist
+              ##################################################################
+              - type: custom:button-card
+                template: home_hub_room_card
+                name: Hockey
+                icon: mdi:hockey-sticks
+                variables:
+                  room_color: '#EF4444'
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Hockey Checklist
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Hockey Checklist
+                            subtitle: Check off items as you pack
+                            card_mod:
+                              style: |
+                                ha-card {
+                                  border-left: 4px solid #EF4444;
+                                  padding-left: 16px;
+                                  background: rgba(239, 68, 68, 0.08);
+                                  border-radius: 12px;
+                                  margin-bottom: 12px;
+                                }
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_1
+                            name: Helmet
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_2
+                            name: Stick
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_3
+                            name: Shinguards
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_4
+                            name: Elbow Pads
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_5
+                            name: Skates
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_6
+                            name: Chestplate
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_jersey
+                            name: Jersey
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_7
+                            name: Water bottle
+                            tap_action:
+                              action: toggle
+                          - type: custom:mushroom-entity-card
+                            entity: input_boolean.hockey_8
+                            name: Snack
+                            tap_action:
+                              action: toggle
+
+              ##################################################################
+              # I'm Bored
+              ##################################################################
+              - type: custom:button-card
+                template: home_hub_room_card
+                name: I'm Bored
+                icon: mdi:dice-multiple
+                variables:
+                  room_color: '#F59E0B'
+                tap_action:
+                  action: navigate
+                  navigation_path: /tablet-dashboard/toby-bored
+
+          # Toby's Room Controls
+          - type: vertical-stack
+            card_mod:
+              style: |
+                ha-card {
+                  background: none;
+                  box-shadow: none;
+                  margin-top: 32px;
+                }
+            cards:
+              - type: custom:mushroom-title-card
+                title: Room Controls
+                subtitle: Control lights in Toby's room
+
+              - type: horizontal-stack
+                cards:
+                  - type: custom:mushroom-light-card
+                    entity: light.toby_s_room
+                    name: Room Light
+                    icon: mdi:ceiling-light
+                    show_brightness_control: true
+                    show_color_temp_control: true
+                    card_mod:
+                      style: |
+                        ha-card {
+                          background: white;
+                          border-radius: 16px;
+                          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                        }
+
+                  - type: custom:mushroom-light-card
+                    entity: light.dimmable_light_1
+                    name: Toby's Lamp
+                    icon: mdi:lamp
+                    show_brightness_control: true
+                    card_mod:
+                      style: |
+                        ha-card {
+                          background: white;
+                          border-radius: 16px;
+                          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                        }
+
+                  - type: custom:mushroom-template-card
+                    primary: Temperature
+                    secondary: "{{ states('sensor.toby_s_room_temp_temperature_2') }}°F"
+                    icon: mdi:thermometer
+                    icon_color: >
+                      {% set temp = states('sensor.toby_s_room_temp_temperature_2') | float %}
+                      {% if temp < 65 %}blue
+                      {% elif temp < 75 %}orange
+                      {% else %}red{% endif %}
+                    card_mod:
+                      style: |
+                        ha-card {
+                          background: white;
+                          border-radius: 16px;
+                          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                        }

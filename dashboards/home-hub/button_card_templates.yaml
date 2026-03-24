@@ -1,0 +1,965 @@
+##############################################################################
+#                    Home Hub Button Card Templates                          #
+#  Modern dashboard templates with sage green accent and collapsible sidebar #
+##############################################################################
+
+# Design System Colors:
+# Sage Green Primary:    #4A7C59
+# Sage Green Light:      #E8F0EA (active nav backgrounds)
+# Background:            #F9FAFB (off-white)
+# Cards:                 #FFFFFF (pure white)
+# Text Primary:          #1F2937
+# Text Secondary:        #6B7280
+# Text Muted:            #9CA3AF
+
+##############################################################################
+#                         Header Template                                     #
+##############################################################################
+home_hub_header:
+  show_icon: false
+  show_name: true
+  show_state: false
+  styles:
+    card:
+      - background: none
+      - box-shadow: none
+      - border: none
+      - padding: 8px 0
+    grid:
+      - grid-template-areas: '"n"'
+      - grid-template-columns: 1fr
+    name:
+      - font-size: 24px
+      - font-weight: 600
+      - color: '#1F2937'
+      - justify-self: start
+
+##############################################################################
+#                         Weather Widget (Expanded)                          #
+##############################################################################
+home_hub_weather_expanded:
+  show_icon: false
+  show_name: false
+  show_state: false
+  entity: weather.pirateweather
+  styles:
+    card:
+      - background: '#FFFFFF'
+      - border-radius: 12px
+      - padding: 16px
+      - margin: 8px 16px
+      - width: 188px
+      - box-sizing: border-box
+      - border: '1px solid #E5E7EB'
+      - box-shadow: none
+    grid:
+      - grid-template-areas: '"weather_content"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: 1fr
+      - justify-items: start
+    custom_fields:
+      weather_content:
+        - justify-self: start
+        - text-align: left
+        - width: 100%
+  custom_fields:
+    weather_content: |
+      [[[
+        const root = document.querySelector('home-assistant');
+        if (!root || !root.hass) return '';
+
+        const weather = root.hass.states['weather.pirateweather'];
+        if (!weather) return '<div style="color: #6B7280; font-size: 14px;">Weather unavailable</div>';
+
+        const temp = Math.round(weather.attributes.temperature) || '--';
+        const condition = weather.state || 'unknown';
+        const humidity = weather.attributes.humidity || '--';
+        const wind = Math.round(weather.attributes.wind_speed) || '--';
+
+        const forecast = weather.attributes.forecast || [];
+        let high = null, low = null;
+        if (forecast.length > 0) {
+          const h = forecast[0].temperature;
+          const l = forecast[0].templow;
+          if (h != null && !isNaN(h)) high = Math.round(h);
+          if (l != null && !isNaN(l)) low = Math.round(l);
+        }
+
+        const iconMap = {
+          'clear-night': 'mdi:weather-night',
+          'cloudy': 'mdi:weather-cloudy',
+          'fog': 'mdi:weather-fog',
+          'hail': 'mdi:weather-hail',
+          'lightning': 'mdi:weather-lightning',
+          'lightning-rainy': 'mdi:weather-lightning-rainy',
+          'partlycloudy': 'mdi:weather-partly-cloudy',
+          'pouring': 'mdi:weather-pouring',
+          'rainy': 'mdi:weather-rainy',
+          'snowy': 'mdi:weather-snowy',
+          'snowy-rainy': 'mdi:weather-snowy-rainy',
+          'sunny': 'mdi:weather-sunny',
+          'windy': 'mdi:weather-windy',
+          'windy-variant': 'mdi:weather-windy-variant',
+        };
+        const icon = iconMap[condition] || 'mdi:weather-cloudy';
+
+        // Format condition text nicely
+        const conditionText = condition.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
+
+        return `
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 48px; height: 48px; background: #E8F0EA; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <ha-icon icon="${icon}" style="--mdc-icon-size: 28px; color: #4A7C59;"></ha-icon>
+              </div>
+              <div>
+                <div style="display: flex; align-items: baseline; gap: 2px;">
+                  <span style="font-size: 32px; font-weight: 600; color: #1F2937;">${temp}</span>
+                  <span style="font-size: 16px; color: #6B7280;">°F</span>
+                </div>
+                <div style="font-size: 14px; color: #6B7280;">${conditionText}</div>
+              </div>
+            </div>
+            ${high !== null || low !== null ? `<div style="display: flex; gap: 12px; font-size: 13px; color: #6B7280; margin-top: 4px;">
+              ${high !== null ? `<span>H: <strong style="color: #1F2937;">${high}°</strong></span>` : ''}
+              ${low !== null ? `<span>L: <strong style="color: #1F2937;">${low}°</strong></span>` : ''}
+            </div>` : ''}
+            <div style="display: flex; gap: 16px; font-size: 12px; color: #9CA3AF; margin-top: 2px;">
+              <span><ha-icon icon="mdi:water-percent" style="--mdc-icon-size: 14px; vertical-align: middle;"></ha-icon> ${humidity}%</span>
+              <span><ha-icon icon="mdi:weather-windy" style="--mdc-icon-size: 14px; vertical-align: middle;"></ha-icon> ${wind} mph</span>
+            </div>
+          </div>
+        `;
+      ]]]
+  tap_action:
+    action: more-info
+    entity: weather.pirateweather
+
+##############################################################################
+#                         Weather Widget (Collapsed)                         #
+##############################################################################
+home_hub_weather_collapsed:
+  show_icon: false
+  show_name: false
+  show_state: false
+  entity: weather.pirateweather
+  styles:
+    card:
+      - background: transparent
+      - border-radius: 0
+      - padding: 12px 0
+      - margin: 0
+      - box-shadow: none
+      - width: 64px
+      - max-width: 64px
+      - display: flex
+      - justify-content: center
+      - align-items: center
+    grid:
+      - display: flex
+      - justify-content: center
+      - width: 100%
+    custom_fields:
+      weather_content:
+        - display: flex
+        - justify-content: center
+        - width: 100%
+  custom_fields:
+    weather_content: |
+      [[[
+        const root = document.querySelector('home-assistant');
+        if (!root || !root.hass) return '';
+
+        const weather = root.hass.states['weather.pirateweather'];
+        if (!weather) return '';
+
+        const temp = Math.round(weather.attributes.temperature) || '--';
+        const condition = weather.state || 'unknown';
+
+        const iconMap = {
+          'clear-night': 'mdi:weather-night',
+          'cloudy': 'mdi:weather-cloudy',
+          'fog': 'mdi:weather-fog',
+          'hail': 'mdi:weather-hail',
+          'lightning': 'mdi:weather-lightning',
+          'lightning-rainy': 'mdi:weather-lightning-rainy',
+          'partlycloudy': 'mdi:weather-partly-cloudy',
+          'pouring': 'mdi:weather-pouring',
+          'rainy': 'mdi:weather-rainy',
+          'snowy': 'mdi:weather-snowy',
+          'snowy-rainy': 'mdi:weather-snowy-rainy',
+          'sunny': 'mdi:weather-sunny',
+          'windy': 'mdi:weather-windy',
+          'windy-variant': 'mdi:weather-windy-variant',
+        };
+        const icon = iconMap[condition] || 'mdi:weather-cloudy';
+
+        return `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 64px; text-align: center;">
+            <ha-icon icon="${icon}" style="--mdc-icon-size: 22px; color: #6B7280;"></ha-icon>
+            <div style="font-size: 14px; font-weight: 600; color: #1F2937;">${temp}°</div>
+          </div>
+        `;
+      ]]]
+  tap_action:
+    action: more-info
+    entity: weather.pirateweather
+
+##############################################################################
+#                         Navigation Item (Expanded)                          #
+##############################################################################
+home_hub_nav_item:
+  show_icon: true
+  show_name: true
+  show_state: false
+  styles:
+    card:
+      - border-radius: 10px
+      - padding: 10px 12px
+      - margin: 2px 16px
+      - background-color: >
+          [[[
+            const path = variables.nav_path || '';
+            const isActive = window.location.pathname.includes('/home-hub/' + path);
+            return isActive ? '#E8F0EA' : 'transparent';
+          ]]]
+      - transition: all 0.2s ease-in-out
+    grid:
+      - grid-template-areas: '"i n"'
+      - grid-template-columns: 28px auto
+    icon:
+      - width: 20px
+      - height: 20px
+      - color: >
+          [[[
+            const path = variables.nav_path || '';
+            const isActive = window.location.pathname.includes('/home-hub/' + path);
+            return isActive ? '#4A7C59' : '#6B7280';
+          ]]]
+    name:
+      - font-size: 14px
+      - font-weight: 400
+      - padding-left: 8px
+      - justify-self: start
+      - color: >
+          [[[
+            const path = variables.nav_path || '';
+            const isActive = window.location.pathname.includes('/home-hub/' + path);
+            return isActive ? '#4A7C59' : '#374151';
+          ]]]
+  tap_action:
+    action: navigate
+    navigation_path: "[[[ return '/home-hub/' + (variables.nav_path || 'rooms') ]]]"
+
+##############################################################################
+#                         Navigation Item (Collapsed)                         #
+##############################################################################
+home_hub_nav_item_collapsed:
+  show_icon: true
+  show_name: false
+  show_state: false
+  styles:
+    card:
+      - width: 44px
+      - height: 44px
+      - border-radius: 10px
+      - padding: 0
+      - margin: 4px 10px
+      - display: flex
+      - align-items: center
+      - justify-content: center
+      - background-color: >
+          [[[
+            const path = variables.nav_path || '';
+            const isActive = window.location.pathname.includes('/home-hub/' + path);
+            return isActive ? '#E8F0EA' : 'transparent';
+          ]]]
+      - transition: all 0.2s ease-in-out
+    icon:
+      - width: 22px
+      - height: 22px
+      - color: >
+          [[[
+            const path = variables.nav_path || '';
+            const isActive = window.location.pathname.includes('/home-hub/' + path);
+            return isActive ? '#4A7C59' : '#6B7280';
+          ]]]
+  tap_action:
+    action: navigate
+    navigation_path: "[[[ return '/home-hub/' + (variables.nav_path || 'rooms') ]]]"
+
+##############################################################################
+#                         Room Card Template                                  #
+##############################################################################
+home_hub_room_card:
+  show_icon: false
+  show_name: false
+  show_state: false
+  styles:
+    card:
+      - background: white
+      - border-radius: 24px
+      - padding: 20px
+      - box-shadow: '0 1px 3px rgba(0,0,0,0.08)'
+      - position: relative
+      - overflow: hidden
+      - transition: all 0.2s ease-in-out
+      - height: 170px
+    grid:
+      - grid-template-areas: '"header status" "temp status" "icon status"'
+      - grid-template-columns: 1fr auto
+      - grid-template-rows: auto auto 1fr
+    custom_fields:
+      header:
+        - justify-self: start
+        - align-self: start
+      temp:
+        - justify-self: start
+        - align-self: start
+        - margin-top: 2px
+      icon:
+        - justify-self: start
+        - align-self: end
+      status:
+        - justify-self: end
+        - align-self: start
+  custom_fields:
+    header: |
+      [[[
+        return `<div style="font-size: 15px; font-weight: 500; color: #1F2937;">${variables.room_name || 'Room'}</div>`;
+      ]]]
+    temp: |
+      [[[
+        // Show temperature if available, otherwise show light status
+        if (variables.temp_entity) {
+          const tempState = states[variables.temp_entity];
+          if (tempState) {
+            const tempVal = parseFloat(tempState.state);
+            if (!isNaN(tempVal) && tempState.state !== 'unavailable' && tempState.state !== 'unknown') {
+              const thermometerSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c8493" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg>`;
+              return `<div style="display: flex; align-items: center; gap: 4px;">
+                ${thermometerSvg}
+                <span style="font-size: 14px; color: #7c8493;">${tempVal.toFixed(1)}°F</span>
+              </div>`;
+            }
+          }
+        }
+        // Fallback: show light status text
+        if (variables.light_entity) {
+          const ls = states[variables.light_entity];
+          if (ls) {
+            const on = ls.state === 'on';
+            return `<span style="font-size: 13px; color: ${on ? '#b08a28' : '#9CA3AF'};">${on ? 'Lights on' : 'Lights off'}</span>`;
+          }
+        }
+        return '';
+      ]]]
+    icon: |
+      [[[
+        // Lucide icon SVG paths (24x24 viewBox)
+        const lucideIcons = {
+          'home': '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+          'sofa': '<path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/><path d="M4 18v2"/><path d="M20 18v2"/><path d="M12 4v9"/>',
+          'chef-hat': '<path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z"/><path d="M6 17h12"/>',
+          'bed': '<path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M12 4v6"/><path d="M2 18h20"/>',
+          'layers': '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+          'cloud-sun-rain': '<path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/><path d="M8 19v2"/><path d="M8 13v2"/><path d="M12 19v2"/>'
+        };
+
+        // Map room_icon variable directly to Lucide icon key
+        const roomIcon = variables.room_icon || 'home';
+        const svgPath = lucideIcons[roomIcon] || lucideIcons['home'];
+        const iconColor = variables.room_icon_color || '#488cd0';
+
+        return `<div style="width: 56px; height: 64px; background: #f8f8f6; border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svgPath}</svg>
+        </div>`;
+      ]]]
+    status: |
+      [[[
+        let output = '<div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">';
+
+        // Lightbulb status
+        if (variables.light_entity) {
+          const lightState = states[variables.light_entity];
+          if (lightState) {
+            const isOn = lightState.state === 'on';
+            const lightbulbOn = '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>';
+            const lightbulbOff = '<path d="M16.8 11.2c.8-.9 1.2-2 1.2-3.2a6 6 0 0 0-9.3-5"/><path d="m2 2 20 20"/><path d="M6.3 6.3a4.67 4.67 0 0 0 1.2 5.2c.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>';
+            const svgPath = isOn ? lightbulbOn : lightbulbOff;
+            const iconColor = isOn ? '#f49f10' : '#D1D5DB';
+            const bgColor = isOn ? '#feebd6' : '#F3F4F6';
+            output += `<div style="width: 40px; height: 40px; background: ${bgColor}; border-radius: 50%; display: flex; align-items: center; justify-content: center;" title="Light: ${isOn ? 'On' : 'Off'}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svgPath}</svg>
+            </div>`;
+          }
+        }
+
+        // Door icons
+        const doorOpen = '<path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561Z"/>';
+        const doorClosed = '<path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"/><path d="M2 20h20"/><path d="M14 12v.01"/>';
+        const doorClosedLocked = '<path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"/><path d="M2 20h20"/><rect x="10" y="10" width="4" height="5" rx="1"/><circle cx="12" cy="12" r="0.5"/>';
+        const openIconColor = '#ef4444';
+        const openBgColor = '#fee2e2';
+        const closedIconColor = '#22c55e';
+        const closedBgColor = '#dcfce7';
+
+        // Gate (door_entity)
+        if (variables.door_entity) {
+          const doorState = states[variables.door_entity];
+          if (doorState) {
+            const isOpen = doorState.state === 'on';
+            const iconColor = isOpen ? openIconColor : closedIconColor;
+            const bgColor = isOpen ? openBgColor : closedBgColor;
+            const svgPath = isOpen ? doorOpen : doorClosedLocked;
+            output += `<div style="width: 40px; height: 40px; background: ${bgColor}; border-radius: 50%; display: flex; align-items: center; justify-content: center;" title="Gate: ${isOpen ? 'Open' : 'Closed'}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svgPath}</svg>
+            </div>`;
+          }
+        }
+
+        // Shed (door_entity_2)
+        if (variables.door_entity_2) {
+          const doorState2 = states[variables.door_entity_2];
+          if (doorState2) {
+            const isOpen2 = doorState2.state === 'on';
+            const iconColor2 = isOpen2 ? openIconColor : closedIconColor;
+            const bgColor2 = isOpen2 ? openBgColor : closedBgColor;
+            const svgPath2 = isOpen2 ? doorOpen : doorClosed;
+            output += `<div style="width: 40px; height: 40px; background: ${bgColor2}; border-radius: 50%; display: flex; align-items: center; justify-content: center;" title="Shed: ${isOpen2 ? 'Open' : 'Closed'}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${iconColor2}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svgPath2}</svg>
+            </div>`;
+          }
+        }
+
+        output += '</div>';
+        return output;
+      ]]]
+
+##############################################################################
+#                         Scene Button Template (Original)                    #
+##############################################################################
+home_hub_scene_button:
+  show_icon: true
+  show_name: true
+  show_state: false
+  styles:
+    card:
+      - border-radius: 12px
+      - padding: 12px 20px
+      - background: "[[[ return (variables.scene_color || '#4A7C59') + '15' ]]]"
+      - transition: all 0.2s ease-in-out
+    grid:
+      - grid-template-areas: '"i n"'
+      - grid-template-columns: min-content 1fr
+    icon:
+      - width: 20px
+      - height: 20px
+      - color: "[[[ return variables.scene_color || '#4A7C59' ]]]"
+    name:
+      - font-size: 14px
+      - font-weight: 500
+      - color: "[[[ return variables.scene_color || '#4A7C59' ]]]"
+      - padding-left: 8px
+  state:
+    - operator: default
+      styles:
+        card:
+          - background: "[[[ return (variables.scene_color || '#4A7C59') + '15' ]]]"
+
+##############################################################################
+#                         Scene Chip Template (Labeled Pills)                #
+##############################################################################
+home_hub_scene_chip:
+  show_icon: false
+  show_name: false
+  show_state: false
+  styles:
+    card:
+      - border-radius: 22px
+      - height: 40px
+      - padding: 0 16px
+      - background: '#FFFFFF'
+      - border: '1px solid #E5E7EB'
+      - box-shadow: none
+      - display: flex
+      - align-items: center
+      - justify-content: center
+      - transition: all 0.15s ease-in-out
+    grid:
+      - grid-template-areas: '"chip_content"'
+      - grid-template-columns: 1fr
+    custom_fields:
+      chip_content:
+        - display: flex
+        - align-items: center
+        - justify-content: center
+  custom_fields:
+    chip_content: |
+      [[[
+        // Lucide icon SVG paths
+        const lucideIcons = {
+          'moon': '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+          'sun': '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+          'sunrise': '<path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/>',
+          'lightbulb-off': '<path d="M16.8 11.2c.8-.9 1.2-2 1.2-3.2a6 6 0 0 0-9.3-5"/><path d="m2 2 20 20"/><path d="M6.3 6.3a4.67 4.67 0 0 0 1.2 5.2c.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+          'moon-star': '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/><path d="M19 3v4"/><path d="M21 5h-4"/>'
+        };
+
+        const iconKey = variables.chip_icon || 'moon';
+        const svgPath = lucideIcons[iconKey] || lucideIcons['moon'];
+        const iconColor = '#6B7280';
+        const label = variables.chip_label || '';
+
+        return `<div style="display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svgPath}</svg>
+          <span style="font-size: 13px; font-weight: 500; color: #374151;">${label}</span>
+        </div>`;
+      ]]]
+
+##############################################################################
+#                         Collapse/Expand Button                              #
+##############################################################################
+home_hub_collapse_button:
+  show_icon: true
+  show_name: true
+  show_state: false
+  entity: input_boolean.sidebar_collapsed
+  styles:
+    card:
+      - background: transparent
+      - border: '1px solid #E5E7EB'
+      - border-radius: 10px
+      - padding: 10px 16px
+      - margin: 8px
+      - transition: all 0.2s ease-in-out
+    grid:
+      - grid-template-areas: '"i n"'
+      - grid-template-columns: min-content 1fr
+    icon:
+      - width: 18px
+      - height: 18px
+      - color: '#6B7280'
+    name:
+      - font-size: 13px
+      - font-weight: 500
+      - color: '#6B7280'
+      - padding-left: 8px
+  tap_action:
+    action: call-service
+    service: input_boolean.toggle
+    service_data:
+      entity_id: input_boolean.sidebar_collapsed
+
+home_hub_expand_button:
+  show_icon: true
+  show_name: false
+  show_state: false
+  icon: mdi:chevron-right
+  entity: input_boolean.sidebar_collapsed
+  styles:
+    card:
+      - background: transparent
+      - width: 40px
+      - height: 40px
+      - border-radius: 8px
+      - margin: 8px auto
+      - padding: 0
+      - display: flex
+      - align-items: center
+      - justify-content: center
+    icon:
+      - width: 24px
+      - height: 24px
+      - color: '#6B7280'
+  tap_action:
+    action: call-service
+    service: input_boolean.toggle
+    service_data:
+      entity_id: input_boolean.sidebar_collapsed
+
+##############################################################################
+#                         Sidebar Logo (Expanded)                             #
+##############################################################################
+home_hub_logo_expanded:
+  show_icon: true
+  show_name: true
+  show_state: false
+  icon: mdi:home
+  name: Home Hub
+  styles:
+    card:
+      - background: none
+      - box-shadow: none
+      - padding: 20px 16px
+    grid:
+      - grid-template-areas: '"i n"'
+      - grid-template-columns: min-content 1fr
+    icon:
+      - width: 24px
+      - height: 24px
+      - color: white
+      - background: '#4A7C59'
+      - padding: 12px
+      - border-radius: 12px
+    name:
+      - font-size: 18px
+      - font-weight: 700
+      - color: '#1F2937'
+      - padding-left: 12px
+  tap_action:
+    action: navigate
+    navigation_path: /home-hub/rooms
+
+##############################################################################
+#                         Sidebar Logo (Collapsed)                            #
+##############################################################################
+home_hub_logo_collapsed:
+  show_icon: true
+  show_name: false
+  show_state: false
+  icon: mdi:home
+  styles:
+    card:
+      - background: '#4A7C59'
+      - box-shadow: none
+      - width: 48px
+      - height: 48px
+      - margin: 16px auto
+      - padding: 0
+      - border-radius: 12px
+      - display: flex
+      - align-items: center
+      - justify-content: center
+    icon:
+      - width: 24px
+      - height: 24px
+      - color: white
+  tap_action:
+    action: navigate
+    navigation_path: /home-hub/rooms
+
+##############################################################################
+#                         Meal Card Template                                  #
+##############################################################################
+home_hub_meal_card:
+  show_icon: true
+  show_name: true
+  show_state: false
+  styles:
+    card:
+      - background: white
+      - border-radius: 12px
+      - padding: 12px
+      - box-shadow: '0 1px 2px rgba(0,0,0,0.05)'
+      - border: '1px solid #F3F4F6'
+    grid:
+      - grid-template-areas: '"i n" "i s"'
+      - grid-template-columns: auto 1fr
+    icon:
+      - width: 32px
+      - height: 32px
+      - color: '#F59E0B'
+      - background: 'rgba(245, 158, 11, 0.1)'
+      - border-radius: 8px
+      - padding: 6px
+    name:
+      - font-size: 14px
+      - font-weight: 500
+      - color: '#1F2937'
+      - padding-left: 10px
+      - justify-self: start
+    state:
+      - font-size: 12px
+      - color: '#9CA3AF'
+      - padding-left: 10px
+      - justify-self: start
+
+##############################################################################
+#                         Filter Pill Template                                #
+##############################################################################
+home_hub_filter_pill:
+  show_icon: true
+  show_name: true
+  show_state: false
+  styles:
+    card:
+      - border-radius: 20px
+      - padding: 6px 14px
+      - height: 36px
+      - background: >
+          [[[
+            return entity.state === 'on' ? '#4A7C59' : 'white';
+          ]]]
+      - border: >
+          [[[
+            return entity.state === 'on' ? '1px solid #4A7C59' : '1px solid #E5E7EB';
+          ]]]
+      - box-shadow: none
+      - transition: all 0.2s ease-in-out
+    grid:
+      - grid-template-areas: '"i n"'
+      - grid-template-columns: min-content 1fr
+    icon:
+      - width: 16px
+      - height: 16px
+      - color: >
+          [[[
+            return entity.state === 'on' ? 'white' : '#374151';
+          ]]]
+    name:
+      - font-size: 13px
+      - font-weight: 600
+      - color: >
+          [[[
+            return entity.state === 'on' ? 'white' : '#374151';
+          ]]]
+      - padding-left: 6px
+
+##############################################################################
+#                         Device Card Template                                #
+##############################################################################
+home_hub_device_card:
+  show_icon: false
+  show_name: false
+  show_state: false
+  styles:
+    card:
+      - background: white
+      - border-radius: 12px
+      - padding: 24px
+      - box-shadow: '0 1px 3px rgba(0,0,0,0.05)'
+      - height: 180px
+      - position: relative
+      - border: '1px solid #F3F4F6'
+    grid:
+      - grid-template-areas: '"header" "sub" "icon"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: auto auto 1fr
+    custom_fields:
+      header:
+        - justify-self: start
+      sub:
+        - justify-self: start
+        - margin-top: 4px
+      icon:
+        - justify-self: start
+        - align-self: end
+      wifi:
+        - position: absolute
+        - top: 24px
+        - right: 24px
+  custom_fields:
+    header: |
+      [[[
+        return `<div style="font-size: 16px; font-weight: 600; color: #1F2937;">${variables.name || 'Device'}</div>`;
+      ]]]
+    sub: |
+      [[[
+        let battery = '';
+        if (variables.battery_entity) {
+          const battState = states[variables.battery_entity];
+          if (battState) {
+            const val = battState.state;
+            battery = `<span style="display: flex; align-items: center; gap: 4px;"><ha-icon icon="mdi:battery" style="--mdc-icon-size: 14px; color: #5aa287;"></ha-icon> ${val}%</span>`;
+          }
+        }
+        
+        let status = variables.status_text || '';
+        if (entity) {
+          status = entity.state === 'home' ? 'home' : (entity.state === 'not_home' ? 'away' : entity.state);
+        }
+
+        let divider = (battery && status) ? '<span style="margin: 0 4px;">•</span>' : '';
+        
+        return `<div style="font-size: 13px; color: #9CA3AF; display: flex; align-items: center;">${battery}${divider}${status}</div>`;
+      ]]]
+    icon: |
+      [[[
+        const icon = variables.icon || 'mdi:cellphone';
+        const color = variables.device_color || '#a386d7';
+        return `
+          <div style="width: 56px; height: 56px; background: ${color}20; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            <ha-icon icon="${icon}" style="--mdc-icon-size: 24px; color: ${color};"></ha-icon>
+          </div>
+        `;
+      ]]]
+    wifi: |
+      [[[
+        return `<ha-icon icon="mdi:wifi" style="--mdc-icon-size: 18px; color: #5aa287;"></ha-icon>`;
+      ]]]
+
+##############################################################################
+#                         Person Card Template                                #
+##############################################################################
+home_hub_person_card:
+  show_icon: false
+  show_name: true
+  show_state: true
+  styles:
+    card:
+      - background: white
+      - border-radius: 16px
+      - padding: 20px
+      - box-shadow: '0 1px 3px rgba(0,0,0,0.1)'
+      - height: 140px
+    grid:
+      - grid-template-areas: '"avatar" "n" "s"'
+      - grid-template-rows: 1fr auto auto
+    name:
+      - font-size: 16px
+      - font-weight: 600
+      - color: '#1F2937'
+      - justify-self: center
+      - margin-top: 8px
+    state:
+      - font-size: 13px
+      - color: '#6B7280'
+      - justify-self: center
+  custom_fields:
+    avatar: |
+      [[[
+        const color = variables.person_color || '#6D28D9';
+        const initial = (variables.person_initial || 'U').charAt(0).toUpperCase();
+        return `
+          <div style="
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: ${color}20;
+            color: ${color};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 auto;
+          ">${initial}</div>
+        `;
+      ]]]
+
+##############################################################################
+#                         Task Item Template                                  #
+##############################################################################
+home_hub_task_item:
+  show_icon: true
+  show_name: true
+  show_state: false
+  styles:
+    card:
+      - background: white
+      - border-radius: 10px
+      - padding: 12px 16px
+      - margin: 4px 0
+      - box-shadow: '0 1px 2px rgba(0,0,0,0.05)'
+    grid:
+      - grid-template-areas: '"i n"'
+      - grid-template-columns: 32px 1fr
+    icon:
+      - width: 20px
+      - height: 20px
+      - color: >
+          [[[
+            const root = document.querySelector('home-assistant');
+            if (!root || !root.hass || !entity) return '#D1D5DB';
+            const state = root.hass.states[entity];
+            return state && state.state === 'on' ? '#4A7C59' : '#D1D5DB';
+          ]]]
+    name:
+      - font-size: 14px
+      - font-weight: 500
+      - color: >
+          [[[
+            const root = document.querySelector('home-assistant');
+            if (!root || !root.hass || !entity) return '#1F2937';
+            const state = root.hass.states[entity];
+            return state && state.state === 'on' ? '#9CA3AF' : '#1F2937';
+          ]]]
+      - text-decoration: >
+          [[[
+            const root = document.querySelector('home-assistant');
+            if (!root || !root.hass || !entity) return 'none';
+            const state = root.hass.states[entity];
+            return state && state.state === 'on' ? 'line-through' : 'none';
+          ]]]
+      - padding-left: 8px
+  tap_action:
+    action: toggle
+
+##############################################################################
+#                         Meal Day Pill Template                              #
+##############################################################################
+home_hub_meal_day_pill:
+  show_icon: false
+  show_name: false
+  show_state: false
+  triggers_update:
+    - sensor.mealie_weekly_meal_plan
+  styles:
+    card:
+      - background: transparent
+      - border-radius: 10px
+      - padding: 0
+      - border: none
+      - box-shadow: none
+      - cursor: pointer
+      - transition: all 0.15s ease
+    custom_fields:
+      pill:
+        - width: 100%
+  custom_fields:
+    pill: |
+      [[[
+        const dayIndex = variables.day_index !== undefined ? variables.day_index : 0;
+        const dayAbbrevs = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const dayAbbrev = dayAbbrevs[dayIndex];
+        const now = new Date();
+        const currentDay = now.getDay();
+        const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+        const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + mondayOffset);
+        const targetDate = new Date(monday);
+        targetDate.setDate(monday.getDate() + dayIndex);
+        const yr = targetDate.getFullYear();
+        const mo = String(targetDate.getMonth() + 1).padStart(2, '0');
+        const dy = String(targetDate.getDate()).padStart(2, '0');
+        const dateStr = yr + '-' + mo + '-' + dy;
+        const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        const isToday = dateStr === todayStr;
+        let mealName = '';
+        const mealplan = states['sensor.mealie_weekly_meal_plan'];
+        if (mealplan && mealplan.attributes && mealplan.attributes.meals) {
+          const meals = mealplan.attributes.meals;
+          if (Array.isArray(meals)) {
+            for (const m of meals) {
+              if ((m.date || '') === dateStr) {
+                mealName = m.recipe_name || m.title || '';
+                break;
+              }
+            }
+          }
+        }
+        const forkKnife = '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>';
+        const plusSvg = '<path d="M5 12h14"/><path d="M12 5v14"/>';
+        const dayColor = isToday ? '#4A7C59' : '#6B7280';
+        const dayWeight = isToday ? '700' : '600';
+        if (mealName) {
+          const truncated = mealName.length > 13 ? mealName.substring(0, 10) + '...' : mealName;
+          return '<div style="text-align:center;">'
+            + '<div style="font-size:12px;font-weight:' + dayWeight + ';color:' + dayColor + ';margin-bottom:8px;">' + dayAbbrev + '</div>'
+            + '<div style="height:38px;padding:0 8px;border-radius:11px;background:#F3F4F6;border:1px solid #EEF1F3;display:flex;align-items:center;gap:6px;">'
+            + '<span style="width:24px;height:24px;background:#E8F0EA;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+            + '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#74A38A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + forkKnife + '</svg>'
+            + '</span>'
+            + '<span style="font-size:12px;font-weight:600;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + truncated + '</span>'
+            + '</div>'
+            + '</div>';
+        } else {
+          return '<div style="text-align:center;">'
+            + '<div style="font-size:12px;font-weight:' + dayWeight + ';color:' + dayColor + ';margin-bottom:8px;">' + dayAbbrev + '</div>'
+            + '<div style="height:38px;padding:0 10px;border-radius:11px;background:#FFFFFF;border:1px dashed #D1D5DB;display:flex;align-items:center;gap:6px;justify-content:center;">'
+            + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + plusSvg + '</svg>'
+            + '<span style="font-size:12px;color:#9CA3AF;font-weight:500;">Dinner</span>'
+            + '</div>'
+            + '</div>';
+        }
+      ]]]

@@ -698,9 +698,9 @@ views:
                             show_state: false
                             show_name: false
 
-              # Whole House
+              # Front House
               - type: custom:button-card
-                name: Whole House
+                name: Front House
                 icon: mdi:home
                 entity: sensor.living_room_temp_temperature
                 template: mobile_room_card
@@ -714,7 +714,7 @@ views:
                   browser_mod:
                     service: browser_mod.popup
                     data:
-                      title: Whole House
+                      title: Front House
                       content:
                         type: vertical-stack
                         cards:

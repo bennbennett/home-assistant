@@ -1,0 +1,41 @@
+##############################################################################
+#                            Home Hub Dashboard                               #
+#  Modern iPad dashboard with collapsible sidebar and sage green theme       #
+##############################################################################
+title: Home Hub
+
+##############################################################################
+#                           Kiosk Mode                                        #
+# Hides HA header bar, tab bar, and sidebar on this dashboard                #
+# Uses kiosk-mode (manual install in /www/kiosk-mode/)                       #
+##############################################################################
+# kiosk_mode:
+#   kiosk: true
+
+##############################################################################
+#                           1) Lovelace Resources                             #
+# Shared resources from main dashboard                                        #
+##############################################################################
+resources: !include resources.yaml
+
+##############################################################################
+#                      2) Button Card Templates                               #
+##############################################################################
+button_card_templates: !include home-hub/button_card_templates.yaml
+
+##############################################################################
+#                      3) Decluttering Templates                              #
+##############################################################################
+decluttering_templates: !include home-hub/decluttering_templates.yaml
+
+##############################################################################
+#                      4) Define Views                                        #
+##############################################################################
+views:
+  - !include home-hub/views/rooms.yaml
+  - !include home-hub/views/calendar.yaml
+  - !include home-hub/views/tasks.yaml
+  - !include home-hub/views/meals.yaml
+  - !include home-hub/views/devices.yaml
+  - !include home-hub/views/family.yaml
+  - !include home-hub/views/toby.yaml

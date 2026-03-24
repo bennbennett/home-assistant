@@ -1,0 +1,2276 @@
+##############################################################################
+#                    Home Hub Decluttering Templates                          #
+#  Templates for collapsible sidebar and reusable card assemblies            #
+##############################################################################
+
+# Expanded Sidebar (198px width)
+home_hub_sidebar_expanded:
+  card:
+    type: vertical-stack
+    card_mod:
+      style: |
+        ha-card {
+          height: calc(100vh - 16px);
+          width: 198px !important;
+          min-width: 198px !important;
+          max-width: 198px !important;
+          display: flex;
+          flex-direction: column;
+          background: #FFFFFF;
+          border-right: 1px solid #F3F4F6;
+          border-radius: 0;
+          margin: 0;
+          padding: 0;
+          box-shadow: none;
+          overflow: hidden;
+          transition: width 0.25s ease-in-out;
+        }
+        ha-card > * {
+          transition: opacity 0.2s ease-in-out;
+          max-width: 198px;
+          box-sizing: border-box;
+        }
+    cards:
+      # Logo
+      - type: custom:button-card
+        template: home_hub_logo_expanded
+
+      # Weather Widget
+      - type: custom:button-card
+        template: home_hub_weather_expanded
+
+      # Navigation Section
+      - type: vertical-stack
+        card_mod:
+          style: |
+            ha-card {
+              background: none;
+              box-shadow: none;
+              padding: 16px 0;
+              flex-grow: 1;
+            }
+        cards:
+          # Calendar
+          - type: custom:button-card
+            template: home_hub_nav_item
+            icon: mdi:calendar-blank-outline
+            name: Calendar
+            variables:
+              nav_path: calendar
+
+          # Tasks
+          - type: custom:button-card
+            template: home_hub_nav_item
+            icon: mdi:format-list-checks
+            name: Tasks
+            variables:
+              nav_path: tasks
+
+          # Home (Rooms)
+          - type: custom:button-card
+            template: home_hub_nav_item
+            icon: mdi:home-outline
+            name: Home
+            variables:
+              nav_path: rooms
+
+          # Devices
+          - type: custom:button-card
+            template: home_hub_nav_item
+            icon: mdi:laptop
+            name: Devices
+            variables:
+              nav_path: devices
+
+          # Family
+          - type: custom:button-card
+            template: home_hub_nav_item
+            icon: mdi:account-multiple-outline
+            name: Family
+            variables:
+              nav_path: family
+
+          # Meals
+          - type: custom:button-card
+            template: home_hub_nav_item
+            icon: mdi:silverware-fork-knife
+            name: Meals
+            variables:
+              nav_path: meals
+
+      # Collapse Button at bottom
+      - type: custom:button-card
+        template: home_hub_collapse_button
+        icon: mdi:chevron-left
+        name: Collapse
+        card_mod:
+          style: |
+            ha-card {
+              margin-top: auto;
+            }
+
+# Collapsed Sidebar (64px width)
+home_hub_sidebar_collapsed:
+  card:
+    type: vertical-stack
+    card_mod:
+      style: |
+        ha-card {
+          height: calc(100vh - 16px);
+          width: 64px !important;
+          min-width: 64px !important;
+          max-width: 64px !important;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          background: #FFFFFF;
+          border-right: 1px solid #F3F4F6;
+          border-radius: 0;
+          margin: 0;
+          padding: 8px 0;
+          box-shadow: none;
+          overflow: hidden;
+          transition: width 0.25s ease-in-out;
+        }
+        ha-card > * {
+          transition: opacity 0.2s ease-in-out;
+          width: 64px;
+          max-width: 64px;
+          display: flex;
+          justify-content: center;
+          box-sizing: border-box;
+        }
+    cards:
+      # Logo (collapsed - just icon)
+      - type: custom:button-card
+        template: home_hub_logo_collapsed
+
+      # Weather Widget (collapsed)
+      - type: custom:button-card
+        template: home_hub_weather_collapsed
+
+      # Navigation Section
+      - type: vertical-stack
+        card_mod:
+          style: |
+            ha-card {
+              background: none;
+              box-shadow: none;
+              padding: 16px 0;
+              flex-grow: 1;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              width: 64px !important;
+            }
+        cards:
+          # Calendar
+          - type: custom:button-card
+            template: home_hub_nav_item_collapsed
+            icon: mdi:calendar-blank-outline
+            variables:
+              nav_path: calendar
+
+          # Tasks
+          - type: custom:button-card
+            template: home_hub_nav_item_collapsed
+            icon: mdi:format-list-checks
+            variables:
+              nav_path: tasks
+
+          # Home (Rooms)
+          - type: custom:button-card
+            template: home_hub_nav_item_collapsed
+            icon: mdi:home-outline
+            variables:
+              nav_path: rooms
+
+          # Devices
+          - type: custom:button-card
+            template: home_hub_nav_item_collapsed
+            icon: mdi:laptop
+            variables:
+              nav_path: devices
+
+          # Family
+          - type: custom:button-card
+            template: home_hub_nav_item_collapsed
+            icon: mdi:account-multiple-outline
+            variables:
+              nav_path: family
+
+          # Meals
+          - type: custom:button-card
+            template: home_hub_nav_item_collapsed
+            icon: mdi:silverware-fork-knife
+            variables:
+              nav_path: meals
+
+      # Expand Button at bottom
+      - type: custom:button-card
+        template: home_hub_expand_button
+        card_mod:
+          style: |
+            ha-card {
+              margin-top: auto;
+            }
+
+# Main sidebar template that switches based on collapse state
+home_hub_sidebar:
+  card:
+    type: conditional
+    conditions:
+      - entity: input_boolean.sidebar_collapsed
+        state: "off"
+    card:
+      type: custom:decluttering-card
+      template: home_hub_sidebar_expanded
+
+home_hub_sidebar_alt:
+  card:
+    type: conditional
+    conditions:
+      - entity: input_boolean.sidebar_collapsed
+        state: "on"
+    card:
+      type: custom:decluttering-card
+  template: home_hub_sidebar_collapsed
+          
+# Rooms main content (as a single card)
+home_hub_rooms_main:
+  card:
+    type: vertical-stack
+    view_layout:
+      grid-column: 2
+    card_mod:
+      style: |
+        :host {
+          padding: 24px 32px !important;
+          background: #fbfaf9;
+          min-height: calc(100vh - 48px);
+          position: relative;
+          z-index: 0;
+        }
+    cards:
+      - type: custom:button-card
+        template: home_hub_header
+        name: Home
+
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: repeat(5, auto) 1fr
+          grid-gap: 8px
+          justify-content: start
+        cards:
+          - type: custom:button-card
+            template: home_hub_scene_chip
+            variables:
+              chip_icon: moon
+              chip_label: Relax
+            tap_action:
+              action: call-service
+              service: scene.turn_on
+              service_data:
+                entity_id: scene.front_house_relax
+
+          - type: custom:button-card
+            template: home_hub_scene_chip
+            variables:
+              chip_icon: lightbulb-off
+              chip_label: All Off
+            tap_action:
+              action: call-service
+              service: light.turn_off
+              target:
+                entity_id:
+                  - light.living_room_color
+                  - light.extended_color_light_1
+                  - light.bedroom
+                  - light.kitchen_table
+                  - light.kitchen
+                  - light.outdoor_lights_dimmable
+                  - light.front_house
+                  - light.bedrooms
+                  - light.master_bedroom
+                  - light.toby_s_room
+                  - light.dining_kitchen_zone
+
+          - type: custom:button-card
+            template: home_hub_scene_chip
+            variables:
+              chip_icon: sun
+              chip_label: Bright
+            tap_action:
+              action: call-service
+              service: scene.turn_on
+              service_data:
+                entity_id: scene.front_house_concentrate
+
+          - type: custom:button-card
+            template: home_hub_scene_chip
+            variables:
+              chip_icon: sunrise
+              chip_label: Morning
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              service_data:
+                entity_id: script.good_morning_sequence
+
+          - type: custom:button-card
+            template: home_hub_scene_chip
+            variables:
+              chip_icon: moon-star
+              chip_label: Good Night
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              service_data:
+                entity_id: script.good_night_sequence
+
+      - type: grid
+        columns: 3
+        square: false
+        card_mod:
+          style: |
+            ha-card {
+              background: none;
+              box-shadow: none;
+              margin-top: 24px;
+            }
+        cards:
+          - type: custom:button-card
+            template: home_hub_room_card
+            entity: light.front_house
+            triggers_update:
+              - sensor.living_room_temp_temperature
+              - light.front_house
+            variables:
+              room_name: Front House
+              room_icon: home
+              room_icon_color: '#488cd0'
+              temp_entity: sensor.living_room_temp_temperature
+              light_entity: light.front_house
+            custom_fields:
+              status:
+                card:
+                  type: custom:button-card
+                  entity: light.front_house
+                  show_icon: false
+                  show_name: false
+                  show_state: false
+                  tap_action:
+                    action: toggle
+                  styles:
+                    card:
+                      - width: 40px
+                      - height: 40px
+                      - border-radius: 50%
+                      - padding: 0
+                      - box-shadow: none
+                      - background: >
+                          [[[ return states['light.front_house']?.state === 'on' ? '#feebd6' : '#F3F4F6'; ]]]
+                    grid:
+                      - display: flex
+                      - place-items: center
+                  custom_fields:
+                    icon: |
+                      [[[
+                        const isOn = states['light.front_house']?.state === 'on';
+                        const iconColor = isOn ? '#f49f10' : '#D1D5DB';
+                        const lightbulbOn = '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>';
+                        const lightbulbOff = '<path d="M16.8 11.2c.8-.9 1.2-2 1.2-3.2a6 6 0 0 0-9.3-5"/><path d="m2 2 20 20"/><path d="M6.3 6.3a4.67 4.67 0 0 0 1.2 5.2c.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>';
+                        const svgPath = isOn ? lightbulbOn : lightbulbOff;
+                        return `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svgPath}</svg>`;
+                      ]]]
+            styles:
+              custom_fields:
+                status:
+                  - justify-self: end
+                  - align-self: start
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: ""
+                  popup_styles:
+                    - style: all
+                      styles: |
+                        ha-dialog {
+                          --ha-dialog-border-radius: 24px;
+                        }
+                        ha-dialog-header h2 {
+                          display: none;
+                        }
+                  content: !include /config/dashboards/popups/front_house_popup.yaml
+
+          - type: custom:button-card
+            template: home_hub_room_card
+            entity: light.living_room_color
+            triggers_update:
+              - sensor.living_room_temp_temperature
+              - light.living_room_color
+            variables:
+              room_name: Living Room
+              room_icon: sofa
+              room_icon_color: '#a386d7'
+              temp_entity: sensor.living_room_temp_temperature
+              light_entity: light.living_room_color
+            tap_action:
+              action: toggle
+            hold_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: Living Room Controls
+                  content:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-title-card
+                        title: Living Room
+                        subtitle: "Current Temperature: {{ states('sensor.living_room_temp_temperature') }}°F"
+                        card_mod:
+                          style: |
+                            ha-card {
+                              border-left: 4px solid #ec4899;
+                              padding-left: 16px;
+                              background: rgba(236, 72, 153, 0.08);
+                              border-radius: 12px;
+                              margin-bottom: 12px;
+                            }
+                      - type: custom:mushroom-light-card
+                        entity: light.living_room_color
+                        name: Main Light
+                        icon: mdi:ceiling-light
+                        show_brightness_control: true
+                        show_color_temp_control: true
+                        use_light_color: true
+                        card_mod:
+                          style: |
+                            ha-card { border-radius: 12px; margin-bottom: 8px; }
+                      - type: custom:mushroom-light-card
+                        entity: light.extended_color_light_1
+                        name: LED Strip
+                        icon: mdi:led-strip-variant
+                        show_brightness_control: true
+                        show_color_control: true
+                        use_light_color: true
+                        card_mod:
+                          style: |
+                            ha-card { border-radius: 12px; }
+
+          - type: custom:button-card
+            template: home_hub_room_card
+            entity: light.dining_kitchen_zone
+            triggers_update:
+              - light.dining_kitchen_zone
+            variables:
+              room_name: Kitchen
+              room_icon: chef-hat
+              room_icon_color: '#5aa287'
+              light_entity: light.dining_kitchen_zone
+            tap_action:
+              action: toggle
+            hold_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: Kitchen & Dining Controls
+                  content:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-title-card
+                        title: Kitchen & Dining
+                        card_mod:
+                          style: |
+                            ha-card {
+                              border-left: 4px solid #14b8a6;
+                              padding-left: 16px;
+                              background: rgba(20, 184, 166, 0.08);
+                              border-radius: 12px;
+                              margin-bottom: 12px;
+                            }
+                      - type: custom:mushroom-light-card
+                        entity: light.dining_kitchen_zone
+                        name: Lights
+                        icon: mdi:ceiling-light
+                        show_brightness_control: true
+                        show_color_temp_control: true
+
+          - type: custom:button-card
+            template: home_hub_room_card
+            entity: light.bedrooms
+            triggers_update:
+              - light.bedrooms
+            variables:
+              room_name: Bedroom
+              room_icon: bed
+              room_icon_color: '#5aa287'
+              light_entity: light.bedrooms
+            tap_action:
+              action: toggle
+            hold_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: Bedroom
+                  content:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-title-card
+                        title: Master Bedroom
+                        subtitle: "{{ states('sensor.bedroom_temp_humidity_temperature') }}°F"
+                      - type: custom:mushroom-light-card
+                        entity: light.master_bedroom
+                        name: Bedroom Lights
+                        show_brightness_control: true
+                        show_color_temp_control: true
+                      - type: custom:mushroom-light-card
+                        entity: light.hue_color_lamp_1_3
+                        name: Petra's Lamp
+                        show_brightness_control: true
+                        show_color_temp_control: true
+
+          - type: custom:button-card
+            template: home_hub_room_card
+            entity: light.toby_s_room
+            triggers_update:
+              - light.toby_s_room
+            variables:
+              room_name: Toby's Room
+              room_icon: layers
+              room_icon_color: '#f4b143'
+              light_entity: light.toby_s_room
+            tap_action:
+              action: toggle
+            hold_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: Toby's Room
+                  content:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-title-card
+                        title: Toby's Room
+                        card_mod:
+                          style: |
+                            ha-card {
+                              border-left: 4px solid #f59e0b;
+                              padding-left: 16px;
+                              background: rgba(245, 158, 11, 0.08);
+                              border-radius: 12px;
+                              margin-bottom: 12px;
+                            }
+                      - type: custom:mushroom-light-card
+                        entity: light.toby_s_room
+                        name: Room Lights
+                        show_brightness_control: true
+
+          - type: custom:button-card
+            template: home_hub_room_card
+            entity: light.outdoor_lights_dimmable
+            triggers_update:
+              - binary_sensor.outside_door
+              - binary_sensor.door_sensor_shed
+              - light.outdoor_lights_dimmable
+              - sensor.outside_temperature_temperature
+            variables:
+              room_name: Outside
+              room_icon: cloud-sun-rain
+              room_icon_color: '#549f82'
+              temp_entity: sensor.outside_temperature_temperature
+              light_entity: light.outdoor_lights_dimmable
+              door_entity: binary_sensor.outside_door
+              door_entity_2: binary_sensor.door_sensor_shed
+            tap_action:
+              action: toggle
+            hold_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: Outside
+                  content:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-title-card
+                        title: Outside
+                        subtitle: "Temperature: {{ states('sensor.outside_temperature_temperature') }}°F"
+                      - type: custom:mushroom-light-card
+                        entity: light.outdoor_lights_dimmable
+                        name: Outdoor Lights
+                        icon: mdi:string-lights
+                        show_brightness_control: true
+                      - type: custom:mushroom-template-card
+                        primary: Outside Gate
+                        secondary: "{{ 'Open' if is_state('binary_sensor.outside_door', 'on') else 'Closed' }}"
+                        icon: "{{ 'mdi:gate-open' if is_state('binary_sensor.outside_door', 'on') else 'mdi:gate' }}"
+                        icon_color: "{{ 'red' if is_state('binary_sensor.outside_door', 'on') else 'green' }}"
+                        card_mod:
+                          style: |
+                            ha-card { border-radius: 12px; margin-bottom: 8px; }
+                      - type: custom:mushroom-template-card
+                        primary: Shed Door
+                        secondary: "{{ 'Open' if is_state('binary_sensor.door_sensor_shed', 'on') else 'Closed' }}"
+                        icon: "{{ 'mdi:door-open' if is_state('binary_sensor.door_sensor_shed', 'on') else 'mdi:door-closed' }}"
+                        icon_color: "{{ 'red' if is_state('binary_sensor.door_sensor_shed', 'on') else 'green' }}"
+                        card_mod:
+                          style: |
+                            ha-card { border-radius: 12px; }
+
+##############################################################################
+#                    View Main Templates (Calendar/Tasks/Devices/...)        #
+##############################################################################
+
+home_hub_calendar_main:
+  card:
+    type: vertical-stack
+    view_layout:
+      grid-column: 2
+    card_mod:
+      style: |
+        :host { padding: 24px 32px; background: #F9FAFB; min-height: calc(100vh - 48px); }
+    cards:
+      - type: custom:button-card
+        template: home_hub_header
+        icon: mdi:calendar-month
+        name: Calendar
+
+      - type: horizontal-stack
+        cards:
+          - type: custom:button-card
+            template: home_hub_scene_button
+            icon: mdi:view-week
+            name: Week
+            entity: input_boolean.calendar_week_view
+            variables:
+              scene_color: '#3B82F6'
+            tap_action:
+              action: call-service
+              service: script.toggle_week_view
+            styles:
+              card:
+                - background-color: >
+                    [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                        ? 'rgba(59, 130, 246, 0.2)'
+                        : 'rgba(59, 130, 246, 0.1)' ]]]
+
+          - type: custom:button-card
+            template: home_hub_scene_button
+            icon: mdi:calendar-month
+            name: Month
+            entity: input_boolean.calendar_month_view
+            variables:
+              scene_color: '#3B82F6'
+            tap_action:
+              action: call-service
+              service: script.toggle_month_view
+            styles:
+              card:
+                - background-color: >
+                    [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                        ? 'rgba(59, 130, 246, 0.2)'
+                        : 'rgba(59, 130, 246, 0.1)' ]]]
+
+          - type: custom:button-card
+            template: home_hub_scene_button
+            icon: mdi:calendar-plus
+            name: Add Event
+            variables:
+              scene_color: '#4A7C59'
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: Add Calendar Event
+                  size: normal
+                  content: !include /config/dashboards/popups/calendar_event_popup.yaml
+
+      - type: conditional
+        conditions:
+          - entity: input_boolean.calendar_week_view
+            state: "on"
+        card:
+          type: custom:week-planner-card
+          calendars:
+            - entity: calendar.home_calendar
+              color: "#4A7C59"
+              name: Home
+            - entity: calendar.birthdays_anniversaries
+              color: "#9333EA"
+              name: Birthdays & Anniversaries
+          weather:
+            entity: weather.pirateweather
+            showCondition: true
+            showTemperature: false
+            showLowTemperature: false
+          days: 7
+          startingDay: monday
+          startingDayOffset: 0
+          compact: false
+          showLegend: true
+          legendToggle: true
+          showNavigation: true
+          showLocation: false
+          showDescription: false
+          updateInterval: 60
+          locale: en
+          card_mod:
+            style: |
+              ha-card {
+                font-size: 14px !important;
+                padding: 16px !important;
+                margin-top: 24px !important;
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                --legend-spacing: 15px;
+                --legend-dot-size: 12px;
+              }
+              .navigation { margin-bottom: 12px; }
+              .navigation .previous,
+              .navigation .next {
+                color: #4A7C59;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 8px;
+                transition: background-color 0.2s;
+              }
+              .navigation .previous:hover,
+              .navigation .next:hover { background-color: #E8F0EA; }
+              .today { background-color: #E8F0EA; border-radius: 12px; }
+
+      - type: conditional
+        conditions:
+          - entity: input_boolean.calendar_month_view
+            state: "on"
+        card:
+          type: custom:week-planner-card
+          days: month
+          startingDay: monday
+          maxDayEvents: 5
+          updateInterval: 600
+          noCardBackground: false
+          showLegend: true
+          legendToggle: true
+          showNavigation: true
+          showLocation: false
+          showDescription: false
+          calendars:
+            - entity: calendar.home_calendar
+              color: "#4A7C59"
+              name: Home
+            - entity: calendar.birthdays_anniversaries
+              color: "#9333EA"
+              name: Birthdays & Anniversaries
+          card_mod:
+            style: |
+              ha-card {
+                padding: 16px;
+                margin-top: 24px;
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                font-size: 12px !important;
+              }
+              .navigation { margin-bottom: 12px; }
+              .navigation .previous,
+              .navigation .next {
+                color: #4A7C59;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 8px;
+                transition: background-color 0.2s;
+              }
+              .navigation .previous:hover,
+              .navigation .next:hover { background-color: #E8F0EA; }
+              .today { background-color: #E8F0EA; border-radius: 12px; }
+
+      # Fallback: show Month when both toggles are OFF (prevents blank view)
+      - type: conditional
+        conditions:
+          - entity: input_boolean.calendar_week_view
+            state: "off"
+          - entity: input_boolean.calendar_month_view
+            state: "off"
+        card:
+          type: custom:week-planner-card
+          days: month
+          startingDay: monday
+          maxDayEvents: 5
+          updateInterval: 600
+          noCardBackground: false
+          showLegend: true
+          legendToggle: true
+          showNavigation: true
+          showLocation: false
+          showDescription: false
+          calendars:
+            - entity: calendar.home_calendar
+              color: "#4A7C59"
+              name: Home
+            - entity: calendar.birthdays_anniversaries
+              color: "#9333EA"
+              name: Birthdays & Anniversaries
+          card_mod:
+            style: |
+              ha-card {
+                padding: 16px;
+                margin-top: 24px;
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                font-size: 12px !important;
+              }
+              .navigation { margin-bottom: 12px; }
+              .navigation .previous,
+              .navigation .next {
+                color: #4A7C59;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 8px;
+                transition: background-color 0.2s;
+              }
+              .navigation .previous:hover,
+              .navigation .next:hover { background-color: #E8F0EA; }
+              .today { background-color: #E8F0EA; border-radius: 12px; }
+
+home_hub_tasks_main:
+  card:
+    type: vertical-stack
+    view_layout:
+      grid-column: 2
+    card_mod:
+      style: |
+        :host { padding: 24px 32px; background: #F9FAFB; min-height: calc(100vh - 48px); }
+    cards:
+      - type: custom:button-card
+        template: home_hub_header
+        icon: mdi:checkbox-marked-outline
+        name: Tasks
+
+      - type: grid
+        columns: 2
+        square: false
+        card_mod:
+          style: |
+            ha-card { background: none; box-shadow: none; margin-top: 24px; }
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: custom:mushroom-template-card
+                primary: Shopping List
+                secondary: >
+                  {{ state_attr('todo.google_keep_shopping_list', 'items') | count }} items
+                icon: mdi:cart
+                icon_color: orange
+                card_mod:
+                  style: |
+                    ha-card { margin-bottom: 8px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+                    .icon { background: rgba(249, 115, 22, 0.1) !important; }
+
+              - type: todo-list
+                entity: todo.google_keep_shopping_list
+                hide_completed: true
+                card_mod:
+                  style: |
+                    ha-card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #F97316; }
+                    .add-item { padding: 16px; border-bottom: 1px solid #F3F4F6; }
+                    .add-item ha-icon { color: #F97316; }
+                    .items { padding: 8px 16px; }
+
+home_hub_devices_main:
+  card:
+    type: vertical-stack
+    view_layout:
+      grid-column: 2
+    card_mod:
+      style: |
+        :host { padding: 24px 32px; background: #F9FAFB; min-height: calc(100vh - 48px); }
+    cards:
+      - type: custom:button-card
+        template: home_hub_header
+        icon: mdi:devices
+        name: Devices
+
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: repeat(4, auto) 1fr
+          grid-gap: 12px
+        cards:
+          - type: custom:button-card
+            template: home_hub_filter_pill
+            icon: mdi:archive-outline
+            name: All
+            entity: input_boolean.device_filter_all
+            tap_action:
+              action: call-service
+              service: script.toggle_device_filter_all
+
+          - type: custom:button-card
+            template: home_hub_filter_pill
+            icon: mdi:cellphone
+            name: Phones
+            entity: input_boolean.device_filter_phones
+            tap_action:
+              action: call-service
+              service: script.toggle_device_filter_phones
+
+          - type: custom:button-card
+            template: home_hub_filter_pill
+            icon: mdi:tablet-ipad
+            name: Tablets
+            entity: input_boolean.device_filter_tablets
+            tap_action:
+              action: call-service
+              service: script.toggle_device_filter_tablets
+
+          - type: custom:button-card
+            template: home_hub_filter_pill
+            icon: mdi:desktop-tower-monitor
+            name: Computer
+            entity: input_boolean.device_filter_computer
+            tap_action:
+              action: call-service
+              service: script.toggle_device_filter_computer
+
+      - type: grid
+        columns: 3
+        square: false
+        card_mod:
+          style: |
+            ha-card { background: none; box-shadow: none; margin-top: 24px; }
+        cards:
+          # iPhone
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - entity: input_boolean.device_filter_all
+                    state: "on"
+                  - entity: input_boolean.device_filter_phones
+                    state: "on"
+            card:
+              type: custom:button-card
+              template: home_hub_device_card
+              entity: device_tracker.iphone
+              variables:
+                name: iPhone
+                icon: mdi:cellphone
+                device_color: '#a386d7'
+                battery_entity: sensor.iphone_battery_level
+              tap_action:
+                action: fire-dom-event
+                browser_mod:
+                  service: browser_mod.popup
+                  data:
+                    title: iPhone
+                    content:
+                      type: vertical-stack
+                      cards:
+                        # Header Section
+                        - type: custom:button-card
+                          show_icon: false
+                          show_name: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: 0]
+                            grid:
+                              - grid-template-areas: '"icon title"'
+                              - grid-template-columns: 80px 1fr
+                            custom_fields:
+                              icon: [justify-self: start]
+                              title: [justify-self: start, align-self: center]
+                          custom_fields:
+                            icon: |
+                              [[[
+                                return `<div style=\"width: 64px; height: 64px; background: #f8f8f6; border-radius: 16px; display: flex; align-items: center; justify-content: center;\">
+                                  <ha-icon icon=\"mdi:cellphone\" style=\"--mdc-icon-size: 32px; color: #a386d7;\"></ha-icon>
+                                </div>`;
+                              ]]]
+                            title: |
+                              [[[
+                                return `<div style=\"display: flex; flex-direction: column;\">
+                                  <div style=\"font-size: 24px; font-weight: 600; color: #1F2937;\">iPhone</div>
+                                  <div style=\"font-size: 16px; color: #9CA3AF;\">Online</div>
+                                </div>`;
+                              ]]]
+
+                        # Battery Section
+                        - type: custom:button-card
+                          entity: sensor.iphone_battery_level
+                          show_name: false
+                          show_icon: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: "24px 0 0 0"]
+                            custom_fields:
+                              bar: [width: 100%]
+                          custom_fields:
+                            bar: |
+                              [[[
+                                const val = entity.state;
+                                return `<div style=\"display: flex; flex-direction: column; gap: 8px;\">
+                                  <div style=\"display: flex; justify-content: space-between; align-items: center;\">
+                                    <div style=\"display: flex; align-items: center; gap: 8px; font-size: 16px; color: #1F2937;\">
+                                      <ha-icon icon=\"mdi:battery\" style=\"--mdc-icon-size: 20px; color: #5aa287;\"></ha-icon>
+                                      <span>Battery</span>
+                                    </div>
+                                    <div style=\"font-size: 16px; color: #5aa287; font-weight: 500;\">${val}%</div>
+                                  </div>
+                                  <div style=\"width: 100%; height: 8px; background: #f2f1ed; border-radius: 4px; overflow: hidden;\">
+                                    <div style=\"width: ${val}%; height: 100%; background: #5aa287;\"></div>
+                                  </div>
+                                </div>`;
+                              ]]]
+
+                        # Network Section
+                        - type: custom:mushroom-template-card
+                          primary: Network
+                          secondary: "{{ states('sensor.iphone_connection_type') }}"
+                          icon: mdi:wifi
+                          icon_color: green
+                          layout: horizontal
+                          card_mod:
+                            style: |
+                              ha-card { background: #f8f8f6; border-radius: 16px; margin-top: 24px; border: none; box-shadow: none; }
+
+                        # Location Section
+                        - type: custom:mushroom-template-card
+                          primary: Location
+                          secondary: "{{ 'Home' if is_state('device_tracker.iphone', 'home') else 'Away' }}"
+                          icon: mdi:map-marker
+                          icon_color: green
+                          layout: horizontal
+                          card_mod:
+                            style: |
+                              ha-card { background: #f8f8f6; border-radius: 16px; margin-top: 12px; border: none; box-shadow: none; }
+
+                        # Quick Actions Header
+                        - type: custom:mushroom-title-card
+                          title: Quick Actions
+                          card_mod:
+                            style: |
+                              ha-card { margin-top: 12px; }
+
+                        # Quick Actions Grid
+                        - type: grid
+                          columns: 2
+                          square: false
+                          cards:
+                            - type: custom:mushroom-template-card
+                              primary: Ring Device
+                              icon: mdi:bell-outline
+                              tap_action:
+                                action: call-service
+                                service: script.find_iphone
+                              card_mod:
+                                style: |
+                                  ha-card { background: white; border: 1px solid #f2f1ed; border-radius: 12px; box-shadow: none; }
+                            - type: custom:mushroom-template-card
+                              primary: Play Sound
+                              icon: mdi:volume-high
+                              card_mod:
+                                style: |
+                                  ha-card { background: white; border: 1px solid #f2f1ed; border-radius: 12px; box-shadow: none; }
+                            - type: custom:mushroom-template-card
+                              primary: Lock Device
+                              icon: mdi:lock-outline
+                              card_mod:
+                                style: |
+                                  ha-card { background: white; border: 1px solid #f2f1ed; border-radius: 12px; box-shadow: none; }
+                            - type: custom:mushroom-template-card
+                              primary: Sync Now
+                              icon: mdi:refresh
+                              card_mod:
+                                style: |
+                                  ha-card { background: white; border: 1px solid #f2f1ed; border-radius: 12px; box-shadow: none; }
+
+                        # Footer
+                        - type: custom:button-card
+                          show_icon: false
+                          show_name: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: "16px 0 0 0"]
+                          custom_fields:
+                            footer: |
+                              [[[
+                                const lastSeen = states['device_tracker.iphone'].last_changed;
+                                const date = new Date(lastSeen);
+                                const now = new Date();
+                                const diff = Math.floor((now - date) / 60000);
+                                const timeStr = diff < 1 ? 'Just now' : (diff < 60 ? `${diff}m ago` : `${Math.floor(diff/60)}h ago`);
+                                return `<div style=\"border-top: 1px solid #f2f1ed; padding-top: 12px; font-size: 14px; color: #9CA3AF;\">
+                                  Last seen: ${timeStr} • Model: iPhone
+                                </div>`;
+                              ]]]
+
+          # Pixel 10
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - entity: input_boolean.device_filter_all
+                    state: "on"
+                  - entity: input_boolean.device_filter_phones
+                    state: "on"
+            card:
+              type: custom:button-card
+              template: home_hub_device_card
+              entity: device_tracker.pixel_10
+              variables:
+                name: Pixel 10
+                icon: mdi:cellphone
+                device_color: '#a386d7'
+                battery_entity: sensor.pixel_10_battery_level
+              tap_action:
+                action: more-info
+
+          # Small iPad
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - entity: input_boolean.device_filter_all
+                    state: "on"
+                  - entity: input_boolean.device_filter_tablets
+                    state: "on"
+            card:
+              type: custom:button-card
+              template: home_hub_device_card
+              entity: device_tracker.benjamins_ipad
+              variables:
+                name: Small iPad
+                icon: mdi:tablet-ipad
+                device_color: '#3B82F6'
+                battery_entity: sensor.benjamins_ipad_battery_level
+              tap_action:
+                action: more-info
+
+          # Big iPad
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - entity: input_boolean.device_filter_all
+                    state: "on"
+                  - entity: input_boolean.device_filter_tablets
+                    state: "on"
+            card:
+              type: custom:button-card
+              template: home_hub_device_card
+              entity: device_tracker.ipad
+              variables:
+                name: Big iPad
+                icon: mdi:tablet-ipad
+                device_color: '#3B82F6'
+                battery_entity: sensor.ipad_battery_level
+              tap_action:
+                action: more-info
+
+          # Printer
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - entity: input_boolean.device_filter_all
+                    state: "on"
+                  - entity: input_boolean.device_filter_computer
+                    state: "on"
+            card:
+              type: custom:button-card
+              template: home_hub_device_card
+              variables:
+                name: Printer
+                icon: mdi:printer
+                device_color: '#5aa287'
+                status_text: 'Black Ink: 88%'
+              tap_action:
+                action: more-info
+
+          # 3D Printer
+          - type: conditional
+            conditions:
+              - condition: or
+                conditions:
+                  - entity: input_boolean.device_filter_all
+                    state: "on"
+                  - entity: input_boolean.device_filter_computer
+                    state: "on"
+            card:
+              type: custom:button-card
+              template: home_hub_device_card
+              entity: sensor.centauri_carbon_print_status
+              variables:
+                name: 3D Printer
+                icon: mdi:printer-3d
+                device_color: '#5aa287'
+                status_text: "[[[ return states['sensor.centauri_carbon_percent_complete'].state + '% | ' + entity.state ]]]"
+              tap_action:
+                action: fire-dom-event
+                browser_mod:
+                  service: browser_mod.popup
+                  data:
+                    title: 3D Printer
+                    content:
+                      type: vertical-stack
+                      cards:
+                        - type: custom:mushroom-title-card
+                          title: Centauri Carbon
+                          subtitle: "Status: {{ states('sensor.centauri_carbon_print_status') }}"
+                          card_mod:
+                            style: |
+                              ha-card { border-left: 4px solid #F59E0B; padding-left: 16px; background: rgba(245, 158, 11, 0.08); border-radius: 12px; margin-bottom: 12px; }
+                        - type: picture-entity
+                          entity: camera.centauri_carbon_chamber_camera
+                          camera_view: live
+                          card_mod:
+                            style: |
+                              ha-card { border-radius: 12px; margin-bottom: 8px; }
+                        - type: entities
+                          entities:
+                            - entity: sensor.centauri_carbon_percent_complete
+                              name: Progress
+                            - entity: sensor.centauri_carbon_current_layer
+                              name: Current Layer
+                            - entity: sensor.centauri_carbon_remaining_print_time
+                              name: Time Remaining
+                            - entity: sensor.centauri_carbon_nozzle_temperature
+                              name: Nozzle Temp
+                            - entity: sensor.centauri_carbon_bed_temperature
+                              name: Bed Temp
+                            - entity: select.centauri_carbon_print_speed
+                              name: Print Speed
+                          card_mod:
+                            style: |
+                              ha-card { border-radius: 12px; margin-bottom: 8px; }
+                        - type: horizontal-stack
+                          cards:
+                            - type: custom:mushroom-template-card
+                              icon: mdi:pause
+                              primary: Pause
+                              tap_action:
+                                action: call-service
+                                service: button.press
+                                target:
+                                  entity_id: button.centauri_carbon_pause_print
+                            - type: custom:mushroom-template-card
+                              icon: mdi:play
+                              primary: Resume
+                              tap_action:
+                                action: call-service
+                                service: button.press
+                                target:
+                                  entity_id: button.centauri_carbon_resume_print
+                            - type: custom:mushroom-template-card
+                              icon: mdi:stop
+                              primary: Stop
+                              tap_action:
+                                action: call-service
+                                service: button.press
+                                target:
+                                  entity_id: button.centauri_carbon_stop_print
+                        - type: custom:mushroom-light-card
+                          entity: light.centauri_carbon_chamber_light
+                          name: Chamber Light
+                          icon: mdi:lightbulb
+                          show_brightness_control: true
+                          card_mod:
+                            style: |
+                              ha-card { border-radius: 12px; }
+
+home_hub_family_main:
+  card:
+    type: vertical-stack
+    view_layout:
+      grid-column: 2
+    card_mod:
+      style: |
+        :host { padding: 24px 32px; background: #F9FAFB; min-height: calc(100vh - 48px); }
+    cards:
+      - type: custom:button-card
+        template: home_hub_header
+        icon: mdi:account-group-outline
+        name: Family
+
+      - type: grid
+        columns: 3
+        square: false
+        card_mod:
+          style: |
+            ha-card { background: none; box-shadow: none; margin-top: 24px; }
+        cards:
+          - type: custom:button-card
+            template: home_hub_person_card
+            name: Toby
+            entity: person.toby
+            show_state: true
+            variables:
+              person_color: '#06B6D4'
+              person_initial: 'T'
+            tap_action:
+              action: navigate
+              navigation_path: /home-hub/toby
+            styles:
+              card:
+                - cursor: pointer
+
+          - type: custom:button-card
+            template: home_hub_person_card
+            name: Ben
+            entity: person.ben
+            show_state: true
+            variables:
+              person_color: '#4A7C59'
+              person_initial: 'B'
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: Ben
+                  content:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-title-card
+                        title: Ben
+                        subtitle: "Location: {{ states('person.ben') }}"
+                        card_mod:
+                          style: |
+                            ha-card { border-left: 4px solid #4A7C59; padding-left: 16px; background: rgba(74, 124, 89, 0.08); border-radius: 12px; margin-bottom: 12px; }
+                      - type: map
+                        entities:
+                          - entity: person.ben
+                        hours_to_show: 24
+                        card_mod:
+                          style: |
+                            ha-card { border-radius: 12px; height: 300px; }
+                      - type: custom:mushroom-template-card
+                        primary: Phone
+                        secondary: "{{ states('device_tracker.pixel_10') }}"
+                        icon: mdi:cellphone
+                        icon_color: green
+                        card_mod:
+                          style: |
+                            ha-card { border-radius: 12px; margin-top: 8px; }
+
+          - type: custom:button-card
+            template: home_hub_person_card
+            name: Petra
+            entity: person.petra
+            show_state: true
+            variables:
+              person_color: '#EC4899'
+              person_initial: 'P'
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: Petra
+                  content:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-title-card
+                        title: Petra
+                        subtitle: "Location: {{ states('person.petra') }}"
+                        card_mod:
+                          style: |
+                            ha-card { border-left: 4px solid #EC4899; padding-left: 16px; background: rgba(236, 72, 153, 0.08); border-radius: 12px; margin-bottom: 12px; }
+                      - type: map
+                        entities:
+                          - entity: person.petra
+                        hours_to_show: 24
+                        card_mod:
+                          style: |
+                            ha-card { border-radius: 12px; height: 300px; }
+                      - type: custom:mushroom-template-card
+                        primary: Phone
+                        secondary: "{{ states('device_tracker.sm_s918u') }}"
+                        icon: mdi:cellphone
+                        icon_color: pink
+                        card_mod:
+                          style: |
+                            ha-card { border-radius: 12px; margin-top: 8px; }
+
+      - type: vertical-stack
+        card_mod:
+          style: |
+            ha-card { background: none; box-shadow: none; margin-top: 24px; }
+        cards:
+          - type: custom:mushroom-title-card
+            title: Location Overview
+            subtitle: Where is everyone?
+          - type: map
+            entities:
+              - entity: person.ben
+              - entity: person.petra
+              - entity: person.toby
+            hours_to_show: 24
+
+          - type: vertical-stack
+            cards:
+              - type: custom:mushroom-template-card
+                primary: Family Todo
+                secondary: Family tasks and reminders
+                icon: mdi:checkbox-marked-outline
+                icon_color: blue
+                card_mod:
+                  style: |
+                    ha-card { margin-bottom: 8px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+                    .icon { background: rgba(59, 130, 246, 0.1) !important; }
+
+              - type: todo-list
+                entity: todo.google_keep_family_todo
+                hide_completed: true
+                card_mod:
+                  style: |
+                    ha-card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #3B82F6; }
+                    .add-item { padding: 16px; border-bottom: 1px solid #F3F4F6; }
+                    .add-item ha-icon { color: #3B82F6; }
+                    .items { padding: 8px 16px; }
+
+##############################################################################
+#                    Meals Main Content                                      #
+##############################################################################
+home_hub_meals_main:
+  card:
+    type: vertical-stack
+    view_layout:
+      grid-column: 2
+    card_mod:
+      style: |
+        :host {
+          padding: 24px 32px !important;
+          background: #fbfaf9;
+          min-height: calc(100vh - 48px);
+          position: relative;
+          z-index: 0;
+        }
+    cards:
+      # Header with title/subtitle and "This Week" badge
+      - type: custom:button-card
+        show_icon: false
+        show_name: false
+        show_state: false
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - padding: 8px 0
+          grid:
+            - grid-template-areas: '"header"'
+            - grid-template-columns: 1fr
+          custom_fields:
+            header:
+              - width: 100%
+        custom_fields:
+          header: |
+            [[[
+              return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">'
+                + '<div>'
+                + '<div style="font-size:24px;font-weight:600;line-height:1.2;color:#1F2937;">Meal Planner</div>'
+                + '<div style="font-size:14px;color:#6B7280;margin-top:4px;">Plan your weekly dinners and browse recipes</div>'
+                + '</div>'
+                + '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:white;border-radius:10px;border:1px solid #E5E7EB;">'
+                + '<ha-icon icon="mdi:chevron-left" style="--mdc-icon-size:18px;color:#6B7280;"></ha-icon>'
+                + '<span style="font-size:14px;font-weight:600;color:#1F2937;">This Week</span>'
+                + '<ha-icon icon="mdi:chevron-right" style="--mdc-icon-size:18px;color:#6B7280;"></ha-icon>'
+                + '</div>'
+                + '</div>';
+            ]]]
+
+      # Weekly Dinners container
+      - type: custom:mod-card
+        card_mod:
+          style: |
+            ha-card {
+              background: white;
+              border: 1px solid #E5E7EB;
+              border-radius: 16px;
+              box-shadow: none;
+              padding: 18px 20px 20px 20px;
+              margin-top: 16px;
+            }
+        card:
+          type: vertical-stack
+          cards:
+          # Weekly Dinners header with Grocery List button
+          - type: custom:layout-card
+            layout_type: custom:grid-layout
+            layout:
+              grid-template-columns: 1fr auto
+              grid-gap: 8px
+              align-items: center
+            card_mod:
+              style: |
+                ha-card { background: none; box-shadow: none; padding: 0 0 12px 0; }
+            cards:
+              # Section title
+              - type: custom:button-card
+                show_icon: false
+                show_name: false
+                show_state: false
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 0
+                  grid:
+                    - grid-template-areas: '"section"'
+                    - grid-template-columns: 1fr
+                  custom_fields:
+                    section:
+                      - justify-self: start
+                custom_fields:
+                  section: |
+                    [[[
+                      const forkKnife = '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>';
+                      return '<div style="display:flex;align-items:center;gap:8px;">'
+                        + '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + forkKnife + '</svg>'
+                        + '<span style="font-size:16px;font-weight:600;color:#1F2937;">Weekly Dinners</span>'
+                        + '</div>';
+                    ]]]
+
+              # Grocery List button
+              - type: custom:button-card
+                entity: todo.mealie_weekly_groceries
+                show_icon: false
+                show_name: false
+                show_state: false
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 0
+                  grid:
+                    - grid-template-areas: '"btn"'
+                    - grid-template-columns: auto
+                  custom_fields:
+                    btn:
+                      - justify-self: end
+                custom_fields:
+                  btn: |
+                    [[[
+                      const cartIcon = '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>';
+                      const groceryEntity = states['todo.mealie_weekly_groceries'];
+                      const count = groceryEntity ? parseInt(groceryEntity.state) || 0 : 0;
+                      const badge = count > 0
+                        ? '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;background:#4A7C59;color:white;font-size:11px;font-weight:600;padding:0 5px;margin-left:6px;">' + count + '</span>'
+                        : '';
+                      return '<div style="display:inline-flex;align-items:center;padding:6px 14px;background:#f2f1ed;border-radius:10px;cursor:pointer;">'
+                        + '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + cartIcon + '</svg>'
+                        + '<span style="font-size:13px;font-weight:600;color:#4A7C59;margin-left:6px;">Grocery List</span>'
+                        + badge
+                        + '</div>';
+                    ]]]
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Weekly Groceries
+                      size: normal
+                      content: !include /config/dashboards/popups/grocery_list_popup.yaml
+
+          - type: custom:layout-card
+            layout_type: custom:grid-layout
+            layout:
+              grid-template-columns: repeat(7, minmax(0, 1fr))
+              grid-gap: 10px
+            cards:
+              - type: custom:button-card
+                template: home_hub_meal_day_pill
+                entity: sensor.mealie_weekly_meal_plan
+                variables:
+                  day_name: Monday
+                  day_index: 0
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.sequence
+                    data:
+                      sequence:
+                        - service: input_select.select_option
+                          data:
+                            entity_id: input_select.meal_day_selector
+                            option: Monday
+                        - service: browser_mod.popup
+                          data:
+                            title: Select Dinner for Monday
+                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+
+              - type: custom:button-card
+                template: home_hub_meal_day_pill
+                entity: sensor.mealie_weekly_meal_plan
+                variables:
+                  day_name: Tuesday
+                  day_index: 1
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.sequence
+                    data:
+                      sequence:
+                        - service: input_select.select_option
+                          data:
+                            entity_id: input_select.meal_day_selector
+                            option: Tuesday
+                        - service: browser_mod.popup
+                          data:
+                            title: Select Dinner for Tuesday
+                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+
+              - type: custom:button-card
+                template: home_hub_meal_day_pill
+                entity: sensor.mealie_weekly_meal_plan
+                variables:
+                  day_name: Wednesday
+                  day_index: 2
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.sequence
+                    data:
+                      sequence:
+                        - service: input_select.select_option
+                          data:
+                            entity_id: input_select.meal_day_selector
+                            option: Wednesday
+                        - service: browser_mod.popup
+                          data:
+                            title: Select Dinner for Wednesday
+                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+
+              - type: custom:button-card
+                template: home_hub_meal_day_pill
+                entity: sensor.mealie_weekly_meal_plan
+                variables:
+                  day_name: Thursday
+                  day_index: 3
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.sequence
+                    data:
+                      sequence:
+                        - service: input_select.select_option
+                          data:
+                            entity_id: input_select.meal_day_selector
+                            option: Thursday
+                        - service: browser_mod.popup
+                          data:
+                            title: Select Dinner for Thursday
+                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+
+              - type: custom:button-card
+                template: home_hub_meal_day_pill
+                entity: sensor.mealie_weekly_meal_plan
+                variables:
+                  day_name: Friday
+                  day_index: 4
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.sequence
+                    data:
+                      sequence:
+                        - service: input_select.select_option
+                          data:
+                            entity_id: input_select.meal_day_selector
+                            option: Friday
+                        - service: browser_mod.popup
+                          data:
+                            title: Select Dinner for Friday
+                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+
+              - type: custom:button-card
+                template: home_hub_meal_day_pill
+                entity: sensor.mealie_weekly_meal_plan
+                variables:
+                  day_name: Saturday
+                  day_index: 5
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.sequence
+                    data:
+                      sequence:
+                        - service: input_select.select_option
+                          data:
+                            entity_id: input_select.meal_day_selector
+                            option: Saturday
+                        - service: browser_mod.popup
+                          data:
+                            title: Select Dinner for Saturday
+                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+
+              - type: custom:button-card
+                template: home_hub_meal_day_pill
+                entity: sensor.mealie_weekly_meal_plan
+                variables:
+                  day_name: Sunday
+                  day_index: 6
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.sequence
+                    data:
+                      sequence:
+                        - service: input_select.select_option
+                          data:
+                            entity_id: input_select.meal_day_selector
+                            option: Sunday
+                        - service: browser_mod.popup
+                          data:
+                            title: Select Dinner for Sunday
+                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+
+      # "Recipe Browser" section header with Add Recipe button
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 1fr auto
+          grid-gap: 16px
+          margin: 24px 0 8px 0
+        card_mod:
+          style: |
+            ha-card { width: 100%; background: none; box-shadow: none; }
+        cards:
+          # Section title
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 0
+              grid:
+                - grid-template-areas: '"section"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                section:
+                  - justify-self: start
+                  - align-self: center
+            custom_fields:
+              section: |
+                [[[
+                  const bookIcon = '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>';
+                  return '<div style="display:flex;align-items:center;gap:8px;">'
+                    + '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + bookIcon + '</svg>'
+                    + '<span style="font-size:16px;font-weight:600;color:#1F2937;">Recipe Browser</span>'
+                    + '</div>';
+                ]]]
+
+          # Add Recipe button
+          - type: custom:button-card
+            name: "+ Add Recipe"
+            show_icon: true
+            icon: mdi:plus
+            styles:
+              card:
+                - background: '#4A7C59'
+                - border-radius: 10px
+                - padding: 10px 18px
+                - box-shadow: none
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+              icon:
+                - color: white
+                - width: 14px
+                - height: 14px
+              name:
+                - color: white
+                - font-size: 14px
+                - font-weight: 600
+                - padding-left: 6px
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: Import Recipe
+                  size: normal
+                  content: !include /config/dashboards/popups/recipe_import_popup.yaml
+
+      # Search, filter chips, and recipe grid
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        hold_action:
+          action: none
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - padding: 0
+          grid:
+            - grid-template-areas: '"browser"'
+            - grid-template-columns: 1fr
+          custom_fields:
+            browser:
+              - width: 100%
+              - pointer-events: auto
+        custom_fields:
+          browser: |
+            [[[
+              const recipeSensor = states['sensor.mealie_recipe_browser'];
+              const items = recipeSensor && recipeSensor.attributes && Array.isArray(recipeSensor.attributes.items)
+                ? recipeSensor.attributes.items
+                : [];
+              const esc = (s) => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+              if (items.length === 0) return '<div style="color:#6B7280;padding:20px;text-align:center;">No recipes found. Add some in Mealie!</div>';
+
+              const parseMinutes = (text) => {
+                if (!text) return 0;
+                let mins = 0;
+                const h = text.match(/(\\d+)\\s*hour/i);
+                const m = text.match(/(\\d+)\\s*minute/i);
+                if (h) mins += Number(h[1]) * 60;
+                if (m) mins += Number(m[1]);
+                return mins;
+              };
+
+              const mapTextToCategory = (text) => {
+                const hay = (text || '').toLowerCase();
+                if (/(shrimp|salmon|tuna|cod|halibut|tilapia|fish|scallop|clam|mussel|anchovy|crab|lobster|prawn|seafood)/.test(hay)) return 'seafood';
+                if (/(chicken|thigh|drumstick|poultry)/.test(hay)) return 'chicken';
+                if (/(beef|steak|brisket|sirloin|ground beef|short rib)/.test(hay)) return 'beef';
+                if (/(pork|bacon|ham|prosciutto|sausage|chorizo)/.test(hay)) return 'pork';
+                if (/(vegetarian|vegan|tofu|lentil|chickpea|mushroom|eggplant|cauliflower)/.test(hay)) return 'vegetarian';
+                return '';
+              };
+
+              const flattenLabels = (value) => {
+                if (!value) return [];
+                if (Array.isArray(value)) {
+                  return value.flatMap((entry) => {
+                    if (!entry) return [];
+                    if (typeof entry === 'string') return [entry];
+                    const fromObj = entry.name || entry.label || entry.title || entry.category || entry.slug || '';
+                    return fromObj ? [fromObj] : [];
+                  });
+                }
+                if (typeof value === 'string') return [value];
+                if (typeof value === 'object') {
+                  const fromObj = value.name || value.label || value.title || value.category || value.slug || '';
+                  return fromObj ? [fromObj] : [];
+                }
+                return [];
+              };
+
+              const classify = (recipe) => {
+                const directFields = [
+                  recipe.category_key,
+                  recipe.category,
+                  recipe.category_name,
+                  recipe.recipe_category,
+                  recipe.meal_type
+                ].filter(Boolean);
+
+                const tagFields = [
+                  ...flattenLabels(recipe.tags),
+                  ...flattenLabels(recipe.recipe_tags),
+                  ...flattenLabels(recipe.categories),
+                  ...flattenLabels(recipe.recipe_categories)
+                ];
+
+                for (const text of [...directFields, ...tagFields]) {
+                  const mapped = mapTextToCategory(text);
+                  if (mapped) return mapped;
+                }
+
+                const fallback = mapTextToCategory((recipe.name || '') + ' ' + (recipe.description || ''));
+                return fallback || 'uncategorized';
+              };
+
+              let cards = '';
+              for (const recipe of items) {
+                let timeStr = recipe.total_time || '';
+                if (timeStr) {
+                  timeStr = timeStr
+                    .replace(/(\d+)\s*hours?/, '$1h')
+                    .replace(/(\d+)\s*minutes?/, '$1m')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                }
+                const servings = recipe.recipe_yield || '';
+                const servingsNum = servings ? servings.replace(/[^\d]/g, '') : '';
+                const safeName = esc(recipe.name || 'Untitled Recipe');
+                const safeDesc = esc(recipe.description || '');
+                const searchName = (recipe.name || '').toLowerCase();
+                const searchDesc = (recipe.description || '').toLowerCase();
+                const cardId = 'recipe-' + recipe.slug;
+                const category = classify(recipe);
+                const totalMinutes = parseMinutes(recipe.total_time || '');
+                const quickTag = totalMinutes > 0 && totalMinutes <= 30 ? 'quick' : '';
+                const categoryLabelMap = {
+                  chicken: 'family',
+                  beef: 'mexican',
+                  seafood: 'fresh',
+                  pork: 'roasted',
+                  vegetarian: 'healthy',
+                  uncategorized: 'comfort'
+                };
+                const primaryTag = categoryLabelMap[category] || 'comfort';
+                cards += '<div class="home-hub-recipe-card" id="' + cardId + '" data-category="' + category + '" data-name="' + esc(searchName) + '" data-desc="' + esc(searchDesc) + '" role="button" tabindex="0" style="background:white;border-radius:14px;padding:14px 14px 12px 14px;cursor:pointer;border:1px solid #E5E7EB;transition:all 0.15s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">'
+                  + '<div style="height:98px;border-radius:8px;background:#FAFAF9;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">'
+                  + '<div style="width:40px;height:40px;background:rgba(74,124,89,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+                  + '<ha-icon icon="mdi:food-drumstick-outline" style="color:#5f9b7a;--mdc-icon-size:20px;"></ha-icon>'
+                  + '</div>'
+                  + '</div>'
+                  + '<div style="font-size:14px;font-weight:600;color:#1F2937;line-height:1.3;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px;">' + safeName + '</div>'
+                  + '<div style="font-size:12px;color:#8B97A8;display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
+                  + (timeStr ? '<span style="display:flex;align-items:center;gap:3px;"><ha-icon icon="mdi:clock-outline" style="--mdc-icon-size:13px;"></ha-icon>' + timeStr + '</span>' : '')
+                  + (servingsNum ? '<span style="display:flex;align-items:center;gap:3px;"><ha-icon icon="mdi:account-group-outline" style="--mdc-icon-size:13px;"></ha-icon>' + servingsNum + '</span>' : '')
+                  + '</div>'
+                  + '<div style="display:flex;gap:6px;flex-wrap:wrap;">'
+                  + '<span style="font-size:11px;color:#74A38A;background:#EDF5F0;padding:2px 8px;border-radius:999px;text-transform:lowercase;">' + primaryTag + '</span>'
+                  + (quickTag ? '<span style="font-size:11px;color:#74A38A;background:#EDF5F0;padding:2px 8px;border-radius:999px;text-transform:lowercase;">' + quickTag + '</span>' : '')
+                  + '</div>'
+                  + '</div>';
+              }
+
+              const controls = '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">'
+                + '<div style="flex:1;min-width:260px;position:relative;">'
+                + '<ha-icon icon="mdi:magnify" style="position:absolute;left:10px;top:10px;--mdc-icon-size:16px;color:#9CA3AF;"></ha-icon>'
+                + '<input id="home-hub-meal-search" type="text" placeholder="Search recipes..." style="width:100%;height:36px;border:1px solid #E5E7EB;border-radius:10px;padding:0 12px 0 34px;font-size:13px;color:#1F2937;background:white;box-sizing:border-box;" />'
+                + '</div>'
+                + '<div id="home-hub-filter-chips" style="display:flex;gap:8px;flex-wrap:wrap;">'
+                + '<button type="button" class="home-hub-filter-chip is-active" data-cat="all" style="height:32px;padding:0 12px;border-radius:9px;border:1px solid #4A7C59;background:#4A7C59;color:white;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">All</button>'
+                + '<button type="button" class="home-hub-filter-chip" data-cat="chicken" style="height:32px;padding:0 12px;border-radius:9px;border:1px solid #E5E7EB;background:white;color:#374151;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">Chicken</button>'
+                + '<button type="button" class="home-hub-filter-chip" data-cat="beef" style="height:32px;padding:0 12px;border-radius:9px;border:1px solid #E5E7EB;background:white;color:#374151;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">Beef</button>'
+                + '<button type="button" class="home-hub-filter-chip" data-cat="seafood" style="height:32px;padding:0 12px;border-radius:9px;border:1px solid #E5E7EB;background:white;color:#374151;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">Seafood</button>'
+                + '<button type="button" class="home-hub-filter-chip" data-cat="pork" style="height:32px;padding:0 12px;border-radius:9px;border:1px solid #E5E7EB;background:white;color:#374151;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">Pork</button>'
+                + '<button type="button" class="home-hub-filter-chip" data-cat="vegetarian" style="height:32px;padding:0 12px;border-radius:9px;border:1px solid #E5E7EB;background:white;color:#374151;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">Vegetarian</button>'
+                + '</div>'
+                + '</div>';
+
+              const output = controls
+                + '<div id="home-hub-recipe-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;">'
+                + cards
+                + '</div>'
+                + '<div id="home-hub-empty-state" style="display:none;color:#6B7280;padding:20px 10px;text-align:center;">No recipes match this filter.</div>';
+
+              window.setTimeout(() => {
+                const scope = this.shadowRoot || document;
+                const searchInput = scope.getElementById('home-hub-meal-search');
+                const chipsWrap = scope.getElementById('home-hub-filter-chips');
+                const emptyState = scope.getElementById('home-hub-empty-state');
+                if (!searchInput || !chipsWrap || !emptyState) return;
+                let selected = 'all';
+
+                const setChipStyle = (chip, isActive) => {
+                  chip.classList.toggle('is-active', isActive);
+                  chip.style.background = isActive ? '#4A7C59' : 'white';
+                  chip.style.borderColor = isActive ? '#4A7C59' : '#E5E7EB';
+                  chip.style.color = isActive ? 'white' : '#374151';
+                };
+
+                const applyFilters = () => {
+                  const query = (searchInput.value || '').toLowerCase().trim();
+                  const recipeCards = scope.querySelectorAll('.home-hub-recipe-card');
+                  let visibleCount = 0;
+                  recipeCards.forEach((card) => {
+                    const name = card.getAttribute('data-name') || '';
+                    const desc = card.getAttribute('data-desc') || '';
+                    const cat = card.getAttribute('data-category') || 'uncategorized';
+                    const queryMatch = !query || name.includes(query) || desc.includes(query);
+                    const catMatch = selected === 'all' || cat === selected;
+                    const show = queryMatch && catMatch;
+                    card.style.display = show ? '' : 'none';
+                    if (show) visibleCount += 1;
+                  });
+                  emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+                };
+
+                window.setTimeout(() => {
+                  const openRecipePopup = (recipe, target) => {
+                    let md = '';
+                    if (recipe.recipe_id && recipe.image && recipe.image !== 'None') {
+                      md += '![recipe](http://100.68.225.20:9925/api/media/recipes/' + recipe.recipe_id + '/images/min-original.webp)\n\n';
+                    }
+                    const desc = (recipe.description || '').trim();
+                    if (desc) md += desc + '\n\n';
+                    const parts = [];
+                    if (recipe.prep_time) parts.push('**Prep:** ' + recipe.prep_time);
+                    if (recipe.perform_time) parts.push('**Cook:** ' + recipe.perform_time);
+                    if (recipe.total_time) parts.push('**Total:** ' + recipe.total_time);
+                    if (recipe.recipe_yield) parts.push('**Yield:** ' + recipe.recipe_yield);
+                    if (parts.length) md += parts.join(' · ') + '\n\n';
+                    if (recipe.original_url) md += '[View Original Recipe](' + recipe.original_url + ')\n\n';
+                    md += '[Open in Mealie](http://100.68.225.20:9925/g/home/r/' + recipe.slug + ')';
+                    const evt = new Event('ll-custom', { bubbles: true, composed: true });
+                    evt.detail = {
+                      browser_mod: {
+                        service: 'browser_mod.popup',
+                        data: {
+                          title: recipe.name || 'Recipe',
+                          size: 'normal',
+                          content: { type: 'markdown', content: md }
+                        }
+                      }
+                    };
+                    target.dispatchEvent(evt);
+                  };
+
+                  const recipeCards = scope.querySelectorAll('.home-hub-recipe-card');
+                  recipeCards.forEach((card) => {
+                    if (card._popupBound) return;
+                    card._popupBound = true;
+                    const slug = (card.id || '').replace('recipe-', '');
+                    const recipe = items.find((r) => r.slug === slug);
+                    if (!recipe) return;
+
+                    let lastTouchOpenAt = 0;
+                    let pointerStart = null;
+                    let touchStart = null;
+
+                    card.addEventListener('pointerdown', (ev) => {
+                      pointerStart = {
+                        x: ev.clientX,
+                        y: ev.clientY,
+                        pointerType: ev.pointerType || 'mouse'
+                      };
+                    }, { passive: true });
+
+                    card.addEventListener('pointerup', (ev) => {
+                      if (!pointerStart) return;
+                      const deltaX = Math.abs(ev.clientX - pointerStart.x);
+                      const deltaY = Math.abs(ev.clientY - pointerStart.y);
+                      const pointerType = pointerStart.pointerType;
+                      pointerStart = null;
+                      if (pointerType === 'mouse' || deltaX > 10 || deltaY > 10) return;
+                      lastTouchOpenAt = Date.now();
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                      openRecipePopup(recipe, card);
+                    });
+
+                    card.addEventListener('touchstart', (ev) => {
+                      if (window.PointerEvent) return;
+                      const touch = ev.changedTouches && ev.changedTouches[0];
+                      if (!touch) return;
+                      touchStart = { x: touch.clientX, y: touch.clientY };
+                    }, { passive: true });
+
+                    card.addEventListener('touchend', (ev) => {
+                      if (window.PointerEvent || !touchStart) return;
+                      const touch = ev.changedTouches && ev.changedTouches[0];
+                      if (!touch) return;
+                      const deltaX = Math.abs(touch.clientX - touchStart.x);
+                      const deltaY = Math.abs(touch.clientY - touchStart.y);
+                      touchStart = null;
+                      if (deltaX > 10 || deltaY > 10) return;
+                      lastTouchOpenAt = Date.now();
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                      openRecipePopup(recipe, card);
+                    });
+
+                    card.addEventListener('click', (ev) => {
+                      if (Date.now() - lastTouchOpenAt < 700) return;
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                      openRecipePopup(recipe, card);
+                    });
+
+                    card.addEventListener('keydown', (ev) => {
+                      if (ev.key !== 'Enter' && ev.key !== ' ') return;
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                      openRecipePopup(recipe, card);
+                    });
+                  });
+                }, 0);
+
+                if (!searchInput._filterBound) {
+                  searchInput._filterBound = true;
+                  searchInput.addEventListener('input', applyFilters);
+                }
+
+                const chips = chipsWrap.querySelectorAll('.home-hub-filter-chip');
+                const activateChip = (chip, ev) => {
+                  if (!chip) return;
+                  if (ev) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                  }
+                  selected = chip.getAttribute('data-cat') || 'all';
+                  chips.forEach((other) => setChipStyle(other, other === chip));
+                  applyFilters();
+                };
+
+                chips.forEach((chip) => {
+                  if (chip._filterBound) return;
+                  chip._filterBound = true;
+
+                  let lastChipTouchAt = 0;
+                  let pointerStart = null;
+                  let touchStart = null;
+
+                  chip.addEventListener('pointerdown', (ev) => {
+                    pointerStart = {
+                      x: ev.clientX,
+                      y: ev.clientY,
+                      pointerType: ev.pointerType || 'mouse'
+                    };
+                  }, { passive: true });
+
+                  chip.addEventListener('pointerup', (ev) => {
+                    if (!pointerStart) return;
+                    const deltaX = Math.abs(ev.clientX - pointerStart.x);
+                    const deltaY = Math.abs(ev.clientY - pointerStart.y);
+                    const pointerType = pointerStart.pointerType;
+                    pointerStart = null;
+                    if (pointerType === 'mouse' || deltaX > 10 || deltaY > 10) return;
+                    lastChipTouchAt = Date.now();
+                    activateChip(chip, ev);
+                  });
+
+                  chip.addEventListener('touchstart', (ev) => {
+                    if (window.PointerEvent) return;
+                    const touch = ev.changedTouches && ev.changedTouches[0];
+                    if (!touch) return;
+                    touchStart = { x: touch.clientX, y: touch.clientY };
+                  }, { passive: true });
+
+                  chip.addEventListener('touchend', (ev) => {
+                    if (window.PointerEvent || !touchStart) return;
+                    const touch = ev.changedTouches && ev.changedTouches[0];
+                    if (!touch) return;
+                    const deltaX = Math.abs(touch.clientX - touchStart.x);
+                    const deltaY = Math.abs(touch.clientY - touchStart.y);
+                    touchStart = null;
+                    if (deltaX > 10 || deltaY > 10) return;
+                    lastChipTouchAt = Date.now();
+                    activateChip(chip, ev);
+                  });
+
+                  chip.addEventListener('click', (ev) => {
+                    if (Date.now() - lastChipTouchAt < 700) return;
+                    activateChip(chip, ev);
+                  });
+                });
+
+                applyFilters();
+              }, 0);
+
+              return output;
+            ]]]
+
+# Room Grid Template (for consistent layout)
+home_hub_room_grid:
+  card:
+    type: grid
+    columns: 3
+    square: false
+    cards:
+      - type: custom:button-card
+        template: home_hub_room_card
+        name: "[[name]]"
+        icon: "[[icon]]"
+        variables:
+          room_color: "[[color]]"
+          temp_entity: "[[temp_entity]]"
+          light_entity: "[[light_entity]]"
+
+# Scene Buttons Row Template
+home_hub_scene_row:
+  card:
+    type: horizontal-stack
+    cards:
+      # Relax
+      - type: custom:button-card
+        template: home_hub_scene_button
+        icon: mdi:sofa
+        name: Relax
+        variables:
+          scene_color: '#4A7C59'
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.front_house_relax
+
+      # All Off
+      - type: custom:button-card
+        template: home_hub_scene_button
+        icon: mdi:lightbulb-off-outline
+        name: All Off
+        variables:
+          scene_color: '#6B7280'
+        tap_action:
+          action: call-service
+          service: light.turn_off
+          target:
+            entity_id:
+              - light.living_room_color
+              - light.extended_color_light_1
+              - light.bedroom
+              - light.kitchen_table
+              - light.kitchen
+              - light.outdoor_lights_dimmable
+              - light.front_house
+              - light.bedrooms
+              - light.master_bedroom
+              - light.toby_s_room
+              - light.dining_kitchen_zone
+
+      # Bright
+      - type: custom:button-card
+        template: home_hub_scene_button
+        icon: mdi:brightness-7
+        name: Bright
+        variables:
+          scene_color: '#F59E0B'
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.front_house_concentrate
+
+      # Morning
+      - type: custom:button-card
+        template: home_hub_scene_button
+        icon: mdi:weather-sunny
+        name: Morning
+        variables:
+          scene_color: '#F97316'
+        tap_action:
+          action: call-service
+          service: script.turn_on
+          service_data:
+            entity_id: script.good_morning_sequence
+
+      # Good Night
+      - type: custom:button-card
+        template: home_hub_scene_button
+        icon: mdi:weather-night
+        name: Good Night
+        variables:
+          scene_color: '#6366F1'
+        tap_action:
+          action: call-service
+          service: script.turn_on
+          service_data:
+            entity_id: script.good_night_sequence

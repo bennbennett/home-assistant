@@ -2,6 +2,8 @@
 #                            Lovelace Configuration                         #
 ##############################################################################
 title: Tablet Dashboard # Your dashboard title
+kiosk_mode:
+  kiosk: true
 
 ##############################################################################
 #                           1) Lovelace Resources                           #

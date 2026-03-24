@@ -473,7 +473,7 @@
   mode: single
 - id: 3d_printer_print_complete_notification
   alias: 3D Printer - Notify When Print Complete
-  description: Send notification to Pixel 7 when a 3D print finishes
+  description: Send notification to Pixel 10 when a 3D print finishes
   triggers:
   - platform: state
     entity_id: sensor.centauri_carbon_print_status
@@ -510,6 +510,10 @@
   - platform: state
     entity_id: sensor.centauri_carbon_print_status
     to: leveling
+  - platform: state
+    entity_id: sensor.centauri_carbon_print_status
+    from: unavailable
+    to: printing
   conditions: []
   actions:
   - action: light.turn_on
@@ -585,20 +589,20 @@
   - condition: not
     conditions:
     - condition: state
-      entity_id: todo.mealie_shopping_list
+      entity_id: todo.mealie_weekly_groceries
       state: unavailable
   actions:
   - action: todo.get_items
     target:
       entity_id:
-      - todo.mealie_shopping_list
+      - todo.mealie_weekly_groceries
       - todo.google_keep_shopping_list
     data:
       status:
       - needs_action
     response_variable: all_items
   - variables:
-      mealie_items: "{{ all_items['todo.mealie_shopping_list']['items'] | map(attribute='summary') | list }}"
+      mealie_items: "{{ all_items['todo.mealie_weekly_groceries']['items'] | map(attribute='summary') | list }}"
       keep_items: "{{ all_items['todo.google_keep_shopping_list']['items'] | map(attribute='summary') | list }}"
       items_to_add: "{{ mealie_items | reject('in', keep_items) | list }}"
   - repeat:
@@ -615,3 +619,83 @@
     data:
       title: "Shopping List Updated"
       message: "Added {{ items_to_add | length }} items from Mealie"
+
+- id: mealie_fetch_recipes
+  alias: "Mealie: Fetch Recipe List"
+  description: "Periodically fetches recipes from Mealie and fires event for template sensor"
+  triggers:
+    - platform: homeassistant
+      event: start
+    - platform: time_pattern
+      hours: "/1"
+  conditions: []
+  actions:
+    - action: mealie.get_recipes
+      data:
+        config_entry_id: "01KF57HBNBY4RWWRGH5PJKBF1C"
+        result_limit: 100
+      response_variable: mealie_response
+    - event: mealie_recipes_updated
+      event_data:
+        recipes: "{{ mealie_response['recipes']['items'] }}"
+  mode: single
+
+- id: mealie_fetch_mealplan
+  alias: "Mealie: Fetch Weekly Meal Plan"
+  description: "Fetches the weekly meal plan from Mealie"
+  triggers:
+    - platform: homeassistant
+      event: start
+    - platform: time_pattern
+      minutes: "/30"
+    - platform: event
+      event_type: mealie_mealplan_refresh
+  conditions: []
+  actions:
+    - variables:
+        start_date: "{{ (now() - timedelta(days=now().weekday())).strftime('%Y-%m-%d') }}"
+        end_date: "{{ (now() - timedelta(days=now().weekday()) + timedelta(days=6)).strftime('%Y-%m-%d') }}"
+    - action: mealie.get_mealplan
+      data:
+        config_entry_id: "01KF57HBNBY4RWWRGH5PJKBF1C"
+        start_date: "{{ start_date }}"
+        end_date: "{{ end_date }}"
+      response_variable: mealplan_response
+    - event: mealie_mealplan_updated
+      event_data:
+        meals: >
+          {% set ns = namespace(items=[]) %}
+          {% for m in mealplan_response['mealplan'] | default([]) %}
+            {% set raw_title = (m.title | default('', true) | string | trim) %}
+            {% set ns.items = ns.items + [{
+              'date': m.mealplan_date | string,
+              'title': '' if raw_title == '__HA_CLEARED__' else raw_title,
+              'recipe_name': m.recipe.name if m.recipe else '',
+              'recipe_slug': m.recipe.slug if m.recipe else ''
+            }] %}
+          {% endfor %}
+          {{ ns.items }}
+  mode: single
+
+- id: mealie_sync_recipe_selector
+  alias: "Mealie: Sync Recipe Selector Options"
+  description: "Updates input_select.recipe_selector options from Mealie recipe list"
+  triggers:
+    - platform: event
+      event_type: mealie_recipes_updated
+    - platform: homeassistant
+      event: start
+  conditions: []
+  actions:
+    - delay: "00:00:05"
+    - variables:
+        recipes: "{{ state_attr('sensor.mealie_recipe_browser', 'items') | default([]) }}"
+        recipe_names: "{{ recipes | map(attribute='name') | sort | list }}"
+    - condition: template
+      value_template: "{{ recipe_names | length > 0 }}"
+    - action: input_select.set_options
+      target:
+        entity_id: input_select.recipe_selector
+      data:
+        options: "{{ recipe_names }}"
+  mode: single

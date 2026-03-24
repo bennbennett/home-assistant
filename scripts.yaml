@@ -410,28 +410,105 @@ open_calendar_event_popup:
 
 assign_meal_to_day:
   alias: "Assign Meal to Day"
-  description: "Assigns a recipe to the selected day via Mealie"
-  fields:
-    recipe_id:
-      description: "Mealie recipe ID"
-      example: "abc123"
-    recipe_name:
-      description: "Recipe name for notification"
-      example: "Spaghetti Carbonara"
+  description: "Assigns the selected recipe to the selected day via Mealie"
   sequence:
+    - variables:
+        selected_day: "{{ states('input_select.meal_day_selector') }}"
+        selected_recipe: "{{ states('input_select.recipe_selector') }}"
+        recipes: "{{ state_attr('sensor.mealie_recipe_browser', 'items') | default([]) }}"
+        # Look up recipe ID dynamically from sensor data
+        recipe_id: "{{ (recipes | selectattr('name', 'eq', selected_recipe) | map(attribute='recipe_id') | list | first) | default('') }}"
+        # Calculate date from day name (Python weekday: Mon=0 ... Sun=6)
+        days_map:
+          "Monday": 0
+          "Tuesday": 1
+          "Wednesday": 2
+          "Thursday": 3
+          "Friday": 4
+          "Saturday": 5
+          "Sunday": 6
+        target_dow: "{{ days_map[selected_day] }}"
+        current_monday: "{{ (now() - timedelta(days=now().weekday())).strftime('%Y-%m-%d') }}"
+        target_date: "{{ (as_datetime(current_monday) + timedelta(days=target_dow | int)).strftime('%Y-%m-%d') }}"
+    - condition: template
+      value_template: "{{ recipe_id | trim | length > 0 }}"
     - action: mealie.set_mealplan
       data:
-        date: >-
-          {% set days = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6} %}
-          {% set selected = states('input_select.meal_day_selector') %}
-          {% set today_dow = now().weekday() %}
-          {% set target_dow = days[selected] %}
-          {% set diff = (target_dow - today_dow) % 7 %}
-          {{ (now() + timedelta(days=diff)).strftime('%Y-%m-%d') }}
+        config_entry_id: "01KF57HBNBY4RWWRGH5PJKBF1C"
+        recipe_id: "{{ recipe_id | trim }}"
         entry_type: dinner
-        recipe_id: "{{ recipe_id }}"
-    - action: browser_mod.close_popup
-    - action: notify.mobile_app_pixel_10
+        date: "{{ target_date }}"
+    - event: mealie_mealplan_refresh
+  mode: single
+
+clear_meal_for_day:
+  alias: "Clear Meal for Day"
+  description: "Clears the selected day dinner entry in Mealie"
+  sequence:
+    - variables:
+        selected_day: "{{ states('input_select.meal_day_selector') }}"
+        days_map:
+          "Monday": 0
+          "Tuesday": 1
+          "Wednesday": 2
+          "Thursday": 3
+          "Friday": 4
+          "Saturday": 5
+          "Sunday": 6
+        target_dow: "{{ days_map[selected_day] }}"
+        current_monday: "{{ (now() - timedelta(days=now().weekday())).strftime('%Y-%m-%d') }}"
+        target_date: "{{ (as_datetime(current_monday) + timedelta(days=target_dow | int)).strftime('%Y-%m-%d') }}"
+    - action: mealie.set_mealplan
       data:
-        title: "Meal Planned"
-        message: "{{ recipe_name }} set for {{ states('input_select.meal_day_selector') }}"
+        config_entry_id: "01KF57HBNBY4RWWRGH5PJKBF1C"
+        note_title: "__HA_CLEARED__"
+        note_text: "auto-clear"
+        entry_type: dinner
+        date: "{{ target_date }}"
+    - event: mealie_mealplan_refresh
+  mode: single
+
+import_recipe_from_url:
+  alias: "Import Recipe from URL"
+  description: "Imports a recipe into Mealie from a URL"
+  sequence:
+    - variables:
+        url: "{{ states('input_text.recipe_import_url') | trim }}"
+    - condition: template
+      value_template: "{{ url | length > 0 }}"
+    - action: mealie.import_recipe
+      data:
+        config_entry_id: "01KF57HBNBY4RWWRGH5PJKBF1C"
+        url: "{{ url }}"
+        include_tags: true
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.recipe_import_url
+      data:
+        value: ""
+    - event: mealie_recipes_refresh
+  mode: single
+
+clear_weekly_groceries:
+  alias: "Clear Weekly Groceries"
+  description: "Removes all items from the Weekly Groceries list"
+  sequence:
+    - action: todo.get_items
+      target:
+        entity_id: todo.mealie_weekly_groceries
+      data:
+        status:
+          - needs_action
+          - completed
+      response_variable: weekly_grocery_items
+    - variables:
+        items_to_remove: "{{ weekly_grocery_items['todo.mealie_weekly_groceries']['items'] | map(attribute='summary') | reject('equalto', none) | list }}"
+    - repeat:
+        for_each: "{{ items_to_remove }}"
+        sequence:
+          - action: todo.remove_item
+            target:
+              entity_id: todo.mealie_weekly_groceries
+            data:
+              item: "{{ repeat.item }}"
+  mode: single

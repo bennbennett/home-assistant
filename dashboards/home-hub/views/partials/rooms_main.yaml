@@ -1,0 +1,329 @@
+##############################################################################
+#                            Rooms Main Content                               #
+#  Extracted main content for reuse across conditional layout variants        #
+##############################################################################
+
+- type: vertical-stack
+  view_layout:
+    grid-column: 2
+  card_mod:
+    style: |
+      :host {
+        padding: 24px 32px !important;
+        background: #F9FAFB;
+        min-height: calc(100vh - 48px);
+      }
+  cards:
+    # Page Header
+    - type: custom:button-card
+      template: home_hub_header
+      icon: mdi:home-outline
+      name: Rooms
+
+    # Scene Buttons Row
+    - type: horizontal-stack
+      cards:
+        # Relax
+        - type: custom:button-card
+          template: home_hub_scene_button
+          icon: mdi:sofa
+          name: Relax
+          variables:
+            scene_color: '#4A7C59'
+          tap_action:
+            action: call-service
+            service: scene.turn_on
+            service_data:
+              entity_id: scene.front_house_relax
+
+        # All Off
+        - type: custom:button-card
+          template: home_hub_scene_button
+          icon: mdi:lightbulb-off-outline
+          name: All Off
+          variables:
+            scene_color: '#6B7280'
+          tap_action:
+            action: call-service
+            service: light.turn_off
+            target:
+              entity_id:
+                - light.living_room_color
+                - light.extended_color_light_1
+                - light.bedroom
+                - light.kitchen_table
+                - light.kitchen
+                - light.outdoor_lights_dimmable
+                - light.front_house
+                - light.bedrooms
+                - light.master_bedroom
+                - light.toby_s_room
+                - light.dining_kitchen_zone
+
+        # Bright
+        - type: custom:button-card
+          template: home_hub_scene_button
+          icon: mdi:brightness-7
+          name: Bright
+          variables:
+            scene_color: '#F59E0B'
+          tap_action:
+            action: call-service
+            service: scene.turn_on
+            service_data:
+              entity_id: scene.front_house_concentrate
+
+        # Morning
+        - type: custom:button-card
+          template: home_hub_scene_button
+          icon: mdi:weather-sunny
+          name: Morning
+          variables:
+            scene_color: '#F97316'
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            service_data:
+              entity_id: script.good_morning_sequence
+
+        # Good Night
+        - type: custom:button-card
+          template: home_hub_scene_button
+          icon: mdi:weather-night
+          name: Good Night
+          variables:
+            scene_color: '#6366F1'
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            service_data:
+              entity_id: script.good_night_sequence
+
+    # Room Cards Grid (unchanged from original file)
+    - type: grid
+      columns: 3
+      square: false
+      card_mod:
+        style: |
+          ha-card {
+            background: none;
+            box-shadow: none;
+            margin-top: 24px;
+          }
+      cards:
+        # Front House
+        - type: custom:button-card
+          template: home_hub_room_card
+          name: Front House
+          icon: mdi:home
+          entity: sensor.living_room_temp_temperature
+          triggers_update:
+            - sensor.living_room_temp_temperature
+            - light.front_house
+          variables:
+            room_color: '#6366F1'
+            temp_entity: sensor.living_room_temp_temperature
+            light_entity: light.front_house
+          tap_action:
+            action: fire-dom-event
+            browser_mod:
+              service: browser_mod.popup
+              data:
+                title: ""
+                popup_styles:
+                  - style: all
+                    styles: |
+                      ha-dialog {
+                        --ha-dialog-border-radius: 24px;
+                      }
+                      ha-dialog-header h2 {
+                        display: none;
+                      }
+                content: !include /config/dashboards/popups/front_house_popup.yaml
+
+        # Living Room
+        - type: custom:button-card
+          template: home_hub_room_card
+          name: Living Room
+          icon: mdi:sofa
+          entity: sensor.living_room_temp_temperature
+          triggers_update:
+            - sensor.living_room_temp_temperature
+            - light.living_room_color
+          variables:
+            room_color: '#EC4899'
+            temp_entity: sensor.living_room_temp_temperature
+            light_entity: light.living_room_color
+          tap_action:
+            action: fire-dom-event
+            browser_mod:
+              service: browser_mod.popup
+              data:
+                title: Living Room Controls
+                content:
+                  type: vertical-stack
+                  cards:
+                    - type: custom:mushroom-title-card
+                      title: Living Room
+                      subtitle: "Current Temperature: {{ states('sensor.living_room_temp_temperature') }}°F"
+                      card_mod:
+                        style: |
+                          ha-card {
+                            border-left: 4px solid #ec4899;
+                            padding-left: 16px;
+                            background: rgba(236, 72, 153, 0.08);
+                            border-radius: 12px;
+                            margin-bottom: 12px;
+                          }
+                    - type: custom:mushroom-light-card
+                      entity: light.living_room_color
+                      name: Main Light
+                      icon: mdi:ceiling-light
+                      show_brightness_control: true
+                      show_color_temp_control: true
+                      use_light_color: true
+                      card_mod:
+                        style: |
+                          ha-card { border-radius: 12px; margin-bottom: 8px; }
+                    - type: custom:mushroom-light-card
+                      entity: light.extended_color_light_1
+                      name: LED Strip
+                      icon: mdi:led-strip-variant
+                      show_brightness_control: true
+                      show_color_control: true
+                      use_light_color: true
+                      card_mod:
+                        style: |
+                          ha-card { border-radius: 12px; }
+
+        # Kitchen
+        - type: custom:button-card
+          template: home_hub_room_card
+          name: Kitchen
+          icon: mdi:countertop
+          triggers_update:
+            - light.dining_kitchen_zone
+          variables:
+            room_color: '#14B8A6'
+            light_entity: light.dining_kitchen_zone
+          tap_action:
+            action: fire-dom-event
+            browser_mod:
+              service: browser_mod.popup
+              data:
+                title: Kitchen & Dining Controls
+                content:
+                  type: vertical-stack
+                  cards:
+                    - type: custom:mushroom-title-card
+                      title: Kitchen & Dining
+                      card_mod:
+                        style: |
+                          ha-card {
+                            border-left: 4px solid #14b8a6;
+                            padding-left: 16px;
+                            background: rgba(20, 184, 166, 0.08);
+                            border-radius: 12px;
+                            margin-bottom: 12px;
+                          }
+                    - type: custom:mushroom-light-card
+                      entity: light.dining_kitchen_zone
+                      name: Lights
+                      icon: mdi:ceiling-light
+                      show_brightness_control: true
+                      show_color_temp_control: true
+
+        # Toby's Room
+        - type: custom:button-card
+          template: home_hub_room_card
+          name: Toby's Room
+          icon: mdi:briefcase
+          triggers_update:
+            - light.toby_s_room
+          variables:
+            room_color: '#F59E0B'
+            light_entity: light.toby_s_room
+          tap_action:
+            action: fire-dom-event
+            browser_mod:
+              service: browser_mod.popup
+              data:
+                title: Toby's Room
+                content:
+                  type: vertical-stack
+                  cards:
+                    - type: custom:mushroom-title-card
+                      title: Toby's Room
+                      card_mod:
+                        style: |
+                          ha-card {
+                            border-left: 4px solid #f59e0b;
+                            padding-left: 16px;
+                            background: rgba(245, 158, 11, 0.08);
+                            border-radius: 12px;
+                            margin-bottom: 12px;
+                          }
+                    - type: custom:mushroom-light-card
+                      entity: light.toby_s_room
+                      name: Room Lights
+                      show_brightness_control: true
+
+        # Bedroom
+        - type: custom:button-card
+          template: home_hub_room_card
+          name: Bedroom
+          icon: mdi:bed
+          triggers_update:
+            - light.bedrooms
+          variables:
+            room_color: '#8B5CF6'
+            light_entity: light.bedrooms
+          tap_action:
+            action: fire-dom-event
+            browser_mod:
+              service: browser_mod.popup
+              data:
+                title: Bedroom
+                content:
+                  type: vertical-stack
+                  cards:
+                    - type: custom:mushroom-title-card
+                      title: Master Bedroom
+                      subtitle: "{{ states('sensor.bedroom_temp_humidity_temperature') }}°F"
+                    - type: custom:mushroom-light-card
+                      entity: light.master_bedroom
+                      name: Bedroom Lights
+                      show_brightness_control: true
+                      show_color_temp_control: true
+                    - type: custom:mushroom-light-card
+                      entity: light.hue_color_lamp_1_3
+                      name: Petra's Lamp
+                      show_brightness_control: true
+                      show_color_temp_control: true
+
+        # Outside
+        - type: custom:button-card
+          template: home_hub_room_card
+          name: Outside
+          icon: mdi:tree
+          triggers_update:
+            - binary_sensor.outside_door
+          variables:
+            room_color: '#84CC16'
+            light_entity: light.outdoor_lights_dimmable
+          tap_action:
+            action: fire-dom-event
+            browser_mod:
+              service: browser_mod.popup
+              data:
+                title: Outside
+                content:
+                  type: vertical-stack
+                  cards:
+                    - type: custom:mushroom-title-card
+                      title: Outside
+                    - type: custom:mushroom-light-card
+                      entity: light.outdoor_lights_dimmable
+                      name: Outdoor Lights
+                      icon: mdi:string-lights
+                      show_brightness_control: true

@@ -193,11 +193,11 @@ cards:
             square: true
             cards:
               ############################################
-              # Whole House card
+              # Front House card
               ############################################
               - type: custom:button-card
                 template: room_card
-                name: Whole House
+                name: Front House
                 icon: mdi:home
                 entity: sensor.living_room_temp_temperature
                 triggers_update:
