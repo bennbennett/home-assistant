@@ -802,6 +802,7 @@ home_hub_calendar_main:
                 --legend-dot-size: 12px;
               }
               .container .day {
+                box-sizing: border-box;
                 border-radius: 12px;
                 padding: 8px;
                 transition: background-color 0.2s;
