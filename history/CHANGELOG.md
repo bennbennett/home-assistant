@@ -2,6 +2,20 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [March 25, 2026]
+
+### Changed
+- **Calendar view redesigned** — Home Hub calendar now has a clean header with Week/Month toggle pills and "+ Add Event" button on a separate row below the title (matching the Rooms view layout pattern)
+- **Calendar state model simplified** — Replaced two separate booleans (`calendar_week_view` + `calendar_month_view`) with a single `input_select.calendar_view_mode` dropdown. No more invalid "both off" state, no more fallback card
+- **Month view shows 4 weeks** — Changed from full calendar month to 28 days starting from the current Monday. Better for weekly planning
+- **Today styling cleaned up** — Removed over-designed green circle and left-border accent. Now uses a subtle warm tint with green "Today" text, matching the original mockup
+- **Add Event popup split** — Home Hub gets a green-palette popup (`calendar_event_popup_home_hub.yaml`), legacy iPad calendar keeps the original blue version. Each matches its dashboard's color scheme
+
+### Fixed
+- **Week view showing 6 days instead of 7** — The week-planner-card's responsive column breakpoints reduced to 5-6 columns when the sidebar narrowed the content area. Fixed by forcing 7 columns at all breakpoints via the card's `columns` config, plus `box-sizing: border-box` on day tiles to prevent padding from pushing the 7th day to the next row
+- **Add Event button not opening popup** — Was using `call-service` to a script that calls `browser_mod.popup`, which can't target the current browser. Changed to `fire-dom-event` with inline `browser_mod.popup` (the proven pattern used elsewhere in the dashboard)
+- **Toggle scripts simplified** — `toggle_week_view` and `toggle_month_view` now set `input_select.select_option` instead of toggling two booleans in sequence
+
 ## [March 2, 2026]
 
 ### Fixed

@@ -283,6 +283,7 @@ Mount Samba share: `open "smb://192.168.68.114/config"`
 | `/Volumes/config/dashboards/popups/meal_selection_popup.yaml` | Recipe picker popup |
 | `/Volumes/config/dashboards/popups/recipe_import_popup.yaml` | URL import popup |
 | `/Volumes/config/dashboards/popups/grocery_list_popup.yaml` | Grocery list popup (todo-list + actions) |
+| `/Volumes/config/dashboards/popups/calendar_event_popup_home_hub.yaml` | Add Event popup (green palette, Home Hub only) |
 | `/Volumes/config/dashboards/button_card_templates.yaml` | Card templates |
 | `/Volumes/config/dashboards/home-hub.yaml` | Home Hub dashboard (includes kiosk_mode config) |
 | `/Volumes/config/dashboards/home-hub/` | Home Hub templates and views |
@@ -372,17 +373,23 @@ Variables supported:
 ### Calendar View (`/Volumes/config/dashboards/views/calendar.yaml`)
 Uses `custom:week-planner-card` (HACS) with toggle between Week and Month views.
 
-**Week View:**
-- 7 days starting Monday
+**Week View (default):**
+- 7 days starting Monday, `columns` forced to 7 at all breakpoints
 - Weather icons via `weather.pirateweather`
 - Navigation arrows to browse weeks
+- Today: subtle warm tint (`#f9f7f4`) + green "Today" text (no borders, no circles)
 
 **Month View:**
-- Native `days: month` option (v1.13.0+)
-- Starts on Monday
-- Navigation arrows to browse months
+- 4 weeks (28 days) starting from current Monday — not a calendar month
+- 7 columns forced at all breakpoints via `columns` config
+- Navigation arrows to browse forward/back
+- Same today styling as week view
 
-Both views use `input_boolean.calendar_week_view` and `input_boolean.calendar_month_view` with toggle scripts.
+**State model:** Both views use `input_select.calendar_view_mode` (options: `week`, `month`) with toggle scripts `script.toggle_week_view` / `script.toggle_month_view`. No fallback card needed — the input_select always has a valid state.
+
+**Week-planner-card columns fix:** The sidebar layout narrows the content area below the card's responsive "large" breakpoint (1280px), causing it to fall to 5 columns. Fix: set `columns: { extraLarge: 7, large: 7, medium: 7, small: 7, extraSmall: 7 }` on both views. Additionally, `.container .day` needs `box-sizing: border-box` if custom `padding` is applied — otherwise padding adds to the width calculation and the 7th day wraps to the next line.
+
+**Add Event popup:** Home Hub uses `calendar_event_popup_home_hub.yaml` (green palette) via `fire-dom-event` inline. Legacy iPad calendar uses `calendar_event_popup.yaml` (blue palette). The `open_calendar_event_popup` script resets form fields before opening — only used by the legacy calendar path.
 
 ## Home Hub Dashboard (New Sidebar Pattern)
 
@@ -500,6 +507,15 @@ What we changed (Mar 20, 2026 - cont'd):
 - **Fixed lightbulb icon alignment**: Room card status icons (lightbulb, door sensors) used `align-items: center` in the flex wrapper, which could shift icons away from the right edge depending on column width. Changed to `align-items: flex-end` to ensure consistent right-edge alignment matching `justify-self: end` on the grid cell.
 - **Fixed weather widget justification**: Weather widget content was right-justified due to button-card's internal shadow DOM grid allocating slots for icon/state even with `show_icon: false`. Added `grid-template-areas: '"weather_content"'` to `styles.grid` to force a single-area layout, applying the same pattern documented in the "Button-card custom_fields width fix" memory. This resolves the long-standing known issue from Jan 20, 2026.
 
+What we changed (Mar 25, 2026 — Calendar View Redesign):
+- **State model fix**: Replaced 2 booleans (`input_boolean.calendar_week_view` + `calendar_month_view`) with single `input_select.calendar_view_mode` (options: week, month). Eliminated invalid "both off" state and removed fallback third planner card.
+- **Header redesign**: Replaced 3 scene-button pills with layout-card grid row below header — Week/Month toggle pills + "+ Add Event" button. Matches Rooms view chip placement pattern (separate line below header, left-aligned).
+- **Today styling**: Subtle warm tint (`#f9f7f4`) + green "Today" text only. Removed AI slop patterns (inset box-shadow left border, green circle on date number).
+- **Add Event fix**: Changed from `call-service` to `script.open_calendar_event_popup` (which can't target the current browser for browser_mod.popup) to `fire-dom-event` with inline `browser_mod.popup` (proven pattern).
+- **Green popup**: Created `calendar_event_popup_home_hub.yaml` with sage green palette matching Home Hub design. Legacy iPad calendar keeps original blue popup unchanged.
+- **Month view**: Changed from `days: month` to `days: 28` (4 weeks from current Monday). More useful for planning than a calendar month that may start mid-week.
+- **7-day grid fix**: Week-planner-card responsive breakpoints reduced columns to 5 when sidebar narrowed the content area. Fixed with explicit `columns` config forcing 7 at all breakpoints. Also fixed `box-sizing: border-box` on `.container .day` — padding added to width calculation caused the 7th day to wrap.
+
 **Kiosk Mode:**
 - **Install method:** Manual (downloaded JS from GitHub, not via HACS)
 - **File:** `/Volumes/config/www/kiosk-mode/kiosk-mode.js`
@@ -551,7 +567,7 @@ Notes:
 - For calendar popups, use absolute includes (e.g., `/config/dashboards/popups/calendar_event_popup.yaml`).
 
 Troubleshooting:
-- If a view appears blank, ensure at least one of `input_boolean.calendar_week_view` or `input_boolean.calendar_month_view` is ON (Calendar view), or rely on the month fallback added to the Home Hub Calendar template.
+- Calendar view uses `input_select.calendar_view_mode` (week/month). Since it's an input_select (not two booleans), there's no invalid "both off" state — no fallback card needed.
 - If Rooms view shows "Invalid configuration" error, check that `home_hub_rooms_main` template has a `cards:` array (YAML structure issue).
 - **ButtonCardJSTemplateError: Identifier 'html' has already been declared** - Don't use `html` as a variable name in button-card JavaScript templates. It conflicts with button-card's built-in `html` template helper. Use `output`, `result`, or another name instead.
 - **Recipe Browser area not clickable / default entity popup opens on click** - If using a `custom:button-card` as a JS-rendered container, avoid root card entity tap behavior intercepting child controls. Remove root `entity` binding for the container card (or ensure root actions do not capture click events), and read data from `states['sensor.*']` inside JS.
