@@ -639,26 +639,22 @@ home_hub_calendar_main:
       style: |
         :host { padding: 24px 32px; background: #fbfaf9; min-height: calc(100vh - 48px); }
     cards:
-      # Header row: Calendar title + Week/Month pills + Add Event button
+      # Header
+      - type: custom:button-card
+        template: home_hub_header
+        name: Calendar
+
+      # Control pills row (matches Rooms view pattern: separate line below header)
       - type: custom:layout-card
         layout_type: custom:grid-layout
         layout:
-          grid-template-columns: 1fr auto auto auto
+          grid-template-columns: repeat(3, auto) 1fr
           grid-gap: 8px
-          align-items: center
-          margin: 0
-          padding: 0
+          justify-content: start
         card_mod:
           style: |
             ha-card { background: none; box-shadow: none; border: none; }
         cards:
-          # Title
-          - type: custom:button-card
-            template: home_hub_header
-            name: Calendar
-            tap_action:
-              action: none
-
           # Week pill
           - type: custom:button-card
             entity: input_select.calendar_view_mode
@@ -673,12 +669,13 @@ home_hub_calendar_main:
               service: script.toggle_week_view
             styles:
               card:
-                - border-radius: 20px
-                - padding: 6px 16px
+                - border-radius: 22px
+                - height: 40px
+                - padding: 0 16px
                 - box-shadow: none
                 - background-color: >
                     [[[ return states['input_select.calendar_view_mode'].state === 'week'
-                        ? '#4A7C59' : 'white' ]]]
+                        ? '#4A7C59' : '#FFFFFF' ]]]
                 - border: >
                     [[[ return states['input_select.calendar_view_mode'].state === 'week'
                         ? '1px solid #4A7C59' : '1px solid #E5E7EB' ]]]
@@ -703,12 +700,13 @@ home_hub_calendar_main:
               service: script.toggle_month_view
             styles:
               card:
-                - border-radius: 20px
-                - padding: 6px 16px
+                - border-radius: 22px
+                - height: 40px
+                - padding: 0 16px
                 - box-shadow: none
                 - background-color: >
                     [[[ return states['input_select.calendar_view_mode'].state === 'month'
-                        ? '#4A7C59' : 'white' ]]]
+                        ? '#4A7C59' : '#FFFFFF' ]]]
                 - border: >
                     [[[ return states['input_select.calendar_view_mode'].state === 'month'
                         ? '1px solid #4A7C59' : '1px solid #E5E7EB' ]]]
@@ -719,7 +717,7 @@ home_hub_calendar_main:
                     [[[ return states['input_select.calendar_view_mode'].state === 'month'
                         ? 'white' : '#6B7280' ]]]
 
-          # + Add Event pill
+          # + Add Event pill (fire-dom-event targets current browser reliably)
           - type: custom:button-card
             show_icon: true
             show_name: true
@@ -727,12 +725,18 @@ home_hub_calendar_main:
             icon: mdi:plus
             name: Add Event
             tap_action:
-              action: call-service
-              service: script.open_calendar_event_popup
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: Add Calendar Event
+                  size: normal
+                  content: !include /config/dashboards/popups/calendar_event_popup_home_hub.yaml
             styles:
               card:
-                - border-radius: 20px
-                - padding: 6px 16px
+                - border-radius: 22px
+                - height: 40px
+                - padding: 0 16px
                 - box-shadow: none
                 - background-color: '#4A7C59'
                 - border: 1px solid #4A7C59
@@ -815,18 +819,23 @@ home_hub_calendar_main:
               .legend ul li { font-size: 13px; }
               /* Today highlight */
               .today {
-                background-color: #E8F5EB;
-                box-shadow: inset 3px 0 0 #4A7C59;
+                background-color: #EBF5EE !important;
+                box-shadow: inset 4px 0 0 #4A7C59;
                 border-radius: 12px;
               }
               .container .day.today .date .number {
-                background-color: #4A7C59;
-                color: white;
+                background-color: #4A7C59 !important;
+                color: white !important;
                 border-radius: 50%;
                 font-weight: 600;
+                width: 32px;
+                height: 32px;
+                line-height: 32px;
+                text-align: center;
+                display: inline-block;
               }
               .container .day.today .date .text {
-                color: #4A7C59;
+                color: #4A7C59 !important;
                 font-weight: 600;
               }
 

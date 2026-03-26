@@ -406,7 +406,7 @@ open_calendar_event_popup:
               width: 50vw;
               max-width: 50vw;
             }
-        content: !include dashboards/popups/calendar_event_popup_home_hub.yaml
+        content: !include dashboards/popups/calendar_event_popup.yaml
 
 assign_meal_to_day:
   alias: "Assign Meal to Day"
