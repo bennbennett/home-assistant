@@ -783,6 +783,12 @@ home_hub_calendar_main:
           showDescription: false
           updateInterval: 60
           locale: en
+          columns:
+            extraLarge: 7
+            large: 7
+            medium: 7
+            small: 7
+            extraSmall: 7
           card_mod:
             style: |
               ha-card {
@@ -817,22 +823,10 @@ home_hub_calendar_main:
               .navigation .previous:hover,
               .navigation .next:hover { background-color: #E8F0EA; }
               .legend ul li { font-size: 13px; }
-              /* Today highlight */
+              /* Today: subtle warm tint matching mockup — no borders, no circles */
               .today {
-                background-color: #EBF5EE !important;
-                box-shadow: inset 4px 0 0 #4A7C59;
+                background-color: #f9f7f4 !important;
                 border-radius: 12px;
-              }
-              .container .day.today .date .number {
-                background-color: #4A7C59 !important;
-                color: white !important;
-                border-radius: 50%;
-                font-weight: 600;
-                width: 32px;
-                height: 32px;
-                line-height: 32px;
-                text-align: center;
-                display: inline-block;
               }
               .container .day.today .date .text {
                 color: #4A7C59 !important;
@@ -856,6 +850,12 @@ home_hub_calendar_main:
           showNavigation: true
           showLocation: false
           showDescription: false
+          columns:
+            extraLarge: 7
+            large: 7
+            medium: 7
+            small: 7
+            extraSmall: 7
           calendars:
             - entity: calendar.home_calendar
               color: "#4A7C59"
@@ -893,20 +893,13 @@ home_hub_calendar_main:
               .navigation .previous:hover,
               .navigation .next:hover { background-color: #E8F0EA; }
               .legend ul li { font-size: 13px; }
-              /* Today highlight */
+              /* Today: subtle warm tint matching mockup — no borders, no circles */
               .today {
-                background-color: #E8F5EB;
-                box-shadow: inset 3px 0 0 #4A7C59;
+                background-color: #f9f7f4 !important;
                 border-radius: 8px;
               }
-              .container .day.today .date .number {
-                background-color: #4A7C59;
-                color: white;
-                border-radius: 50%;
-                font-weight: 600;
-              }
               .container .day.today .date .text {
-                color: #4A7C59;
+                color: #4A7C59 !important;
                 font-weight: 600;
               }
 
