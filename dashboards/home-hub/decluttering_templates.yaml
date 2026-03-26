@@ -840,8 +840,9 @@ home_hub_calendar_main:
             state: "month"
         card:
           type: custom:week-planner-card
-          days: month
+          days: 28
           startingDay: monday
+          startingDayOffset: 0
           maxDayEvents: 5
           updateInterval: 600
           noCardBackground: false
