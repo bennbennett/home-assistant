@@ -35,7 +35,7 @@ cards:
               - type: custom:button-card
                 icon: mdi:view-week
                 name: Week
-                entity: input_boolean.calendar_week_view
+                entity: input_select.calendar_view_mode
                 tap_action:
                   action: call-service
                   service: script.toggle_week_view
@@ -46,7 +46,7 @@ cards:
                     - margin: 4px
                     - width: 140px
                     - background-color: >
-                        [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                        [[[ return states['input_select.calendar_view_mode'].state === 'week'
                             ? 'rgb(219, 234, 254)'
                             : 'rgba(219, 234, 254, 0.5)' ]]]
                   grid:
@@ -56,12 +56,12 @@ cards:
                     - width: 24px
                     - height: 24px
                     - color: >
-                        [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                        [[[ return states['input_select.calendar_view_mode'].state === 'week'
                             ? 'rgb(59, 130, 246)'
                             : 'rgba(59, 130, 246, 0.6)' ]]]
                   name:
                     - color: >
-                        [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                        [[[ return states['input_select.calendar_view_mode'].state === 'week'
                             ? 'rgb(59, 130, 246)'
                             : 'rgba(59, 130, 246, 0.6)' ]]]
                     - font-size: 14px
@@ -71,11 +71,10 @@ cards:
               - type: custom:button-card
                 icon: mdi:calendar-month
                 name: Month
-                entity: input_boolean.calendar_month_view
+                entity: input_select.calendar_view_mode
                 tap_action:
                   action: call-service
                   service: script.toggle_month_view
-                  service_data: {}
                 styles:
                   card:
                     - border-radius: 12px
@@ -83,7 +82,7 @@ cards:
                     - margin: 4px
                     - width: 140px
                     - background-color: >
-                        [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                        [[[ return states['input_select.calendar_view_mode'].state === 'month'
                             ? 'rgb(219, 234, 254)'
                             : 'rgba(219, 234, 254, 0.5)' ]]]
                   grid:
@@ -93,12 +92,12 @@ cards:
                     - width: 24px
                     - height: 24px
                     - color: >
-                        [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                        [[[ return states['input_select.calendar_view_mode'].state === 'month'
                             ? 'rgb(59, 130, 246)'
                             : 'rgba(59, 130, 246, 0.6)' ]]]
                   name:
                     - color: >
-                        [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                        [[[ return states['input_select.calendar_view_mode'].state === 'month'
                             ? 'rgb(59, 130, 246)'
                             : 'rgba(59, 130, 246, 0.6)' ]]]
                     - font-size: 14px
@@ -144,8 +143,8 @@ cards:
           # WEEK VIEW - Shows 7 days horizontally starting today
           - type: conditional
             conditions:
-              - entity: input_boolean.calendar_week_view
-                state: "on"
+              - entity: input_select.calendar_view_mode
+                state: "week"
             card:
               type: custom:week-planner-card
               calendars:
@@ -231,8 +230,8 @@ cards:
           # MONTH VIEW - Shows full calendar month starting Monday
           - type: conditional
             conditions:
-              - entity: input_boolean.calendar_month_view
-                state: "on"
+              - entity: input_select.calendar_view_mode
+                state: "month"
             card:
               type: custom:week-planner-card
               days: month

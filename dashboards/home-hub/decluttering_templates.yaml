@@ -637,68 +637,123 @@ home_hub_calendar_main:
       grid-column: 2
     card_mod:
       style: |
-        :host { padding: 24px 32px; background: #F9FAFB; min-height: calc(100vh - 48px); }
+        :host { padding: 24px 32px; background: #fbfaf9; min-height: calc(100vh - 48px); }
     cards:
-      - type: custom:button-card
-        template: home_hub_header
-        icon: mdi:calendar-month
-        name: Calendar
-
-      - type: horizontal-stack
+      # Header row: Calendar title + Week/Month pills + Add Event button
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 1fr auto auto auto
+          grid-gap: 8px
+          align-items: center
+          margin: 0
+          padding: 0
+        card_mod:
+          style: |
+            ha-card { background: none; box-shadow: none; border: none; }
         cards:
+          # Title
           - type: custom:button-card
-            template: home_hub_scene_button
-            icon: mdi:view-week
+            template: home_hub_header
+            name: Calendar
+            tap_action:
+              action: none
+
+          # Week pill
+          - type: custom:button-card
+            entity: input_select.calendar_view_mode
+            triggers_update:
+              - input_select.calendar_view_mode
+            show_icon: false
+            show_name: true
+            show_state: false
             name: Week
-            entity: input_boolean.calendar_week_view
-            variables:
-              scene_color: '#3B82F6'
             tap_action:
               action: call-service
               service: script.toggle_week_view
             styles:
               card:
+                - border-radius: 20px
+                - padding: 6px 16px
+                - box-shadow: none
                 - background-color: >
-                    [[[ return states['input_boolean.calendar_week_view'].state === 'on'
-                        ? 'rgba(59, 130, 246, 0.2)'
-                        : 'rgba(59, 130, 246, 0.1)' ]]]
+                    [[[ return states['input_select.calendar_view_mode'].state === 'week'
+                        ? '#4A7C59' : 'white' ]]]
+                - border: >
+                    [[[ return states['input_select.calendar_view_mode'].state === 'week'
+                        ? '1px solid #4A7C59' : '1px solid #E5E7EB' ]]]
+              name:
+                - font-size: 13px
+                - font-weight: 500
+                - color: >
+                    [[[ return states['input_select.calendar_view_mode'].state === 'week'
+                        ? 'white' : '#6B7280' ]]]
 
+          # Month pill
           - type: custom:button-card
-            template: home_hub_scene_button
-            icon: mdi:calendar-month
+            entity: input_select.calendar_view_mode
+            triggers_update:
+              - input_select.calendar_view_mode
+            show_icon: false
+            show_name: true
+            show_state: false
             name: Month
-            entity: input_boolean.calendar_month_view
-            variables:
-              scene_color: '#3B82F6'
             tap_action:
               action: call-service
               service: script.toggle_month_view
             styles:
               card:
+                - border-radius: 20px
+                - padding: 6px 16px
+                - box-shadow: none
                 - background-color: >
-                    [[[ return states['input_boolean.calendar_month_view'].state === 'on'
-                        ? 'rgba(59, 130, 246, 0.2)'
-                        : 'rgba(59, 130, 246, 0.1)' ]]]
+                    [[[ return states['input_select.calendar_view_mode'].state === 'month'
+                        ? '#4A7C59' : 'white' ]]]
+                - border: >
+                    [[[ return states['input_select.calendar_view_mode'].state === 'month'
+                        ? '1px solid #4A7C59' : '1px solid #E5E7EB' ]]]
+              name:
+                - font-size: 13px
+                - font-weight: 500
+                - color: >
+                    [[[ return states['input_select.calendar_view_mode'].state === 'month'
+                        ? 'white' : '#6B7280' ]]]
 
+          # + Add Event pill
           - type: custom:button-card
-            template: home_hub_scene_button
-            icon: mdi:calendar-plus
+            show_icon: true
+            show_name: true
+            show_state: false
+            icon: mdi:plus
             name: Add Event
-            variables:
-              scene_color: '#4A7C59'
             tap_action:
-              action: fire-dom-event
-              browser_mod:
-                service: browser_mod.popup
-                data:
-                  title: Add Calendar Event
-                  size: normal
-                  content: !include /config/dashboards/popups/calendar_event_popup.yaml
+              action: call-service
+              service: script.open_calendar_event_popup
+            styles:
+              card:
+                - border-radius: 20px
+                - padding: 6px 16px
+                - box-shadow: none
+                - background-color: '#4A7C59'
+                - border: 1px solid #4A7C59
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+              icon:
+                - width: 16px
+                - height: 16px
+                - color: white
+              name:
+                - font-size: 13px
+                - font-weight: 500
+                - color: white
+                - padding-left: 4px
 
+      # Week view (calendar card_mod — keep in sync with month view below)
       - type: conditional
         conditions:
-          - entity: input_boolean.calendar_week_view
-            state: "on"
+          - entity: input_select.calendar_view_mode
+            state: "week"
         card:
           type: custom:week-planner-card
           calendars:
@@ -729,13 +784,23 @@ home_hub_calendar_main:
               ha-card {
                 font-size: 14px !important;
                 padding: 16px !important;
-                margin-top: 24px !important;
+                margin-top: 16px !important;
                 background: white;
                 border-radius: 16px;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                box-shadow: 0 1px 3px rgba(0,0,0,0.08);
                 --legend-spacing: 15px;
                 --legend-dot-size: 12px;
               }
+              .container .day {
+                border-radius: 12px;
+                padding: 8px;
+                transition: background-color 0.2s;
+              }
+              .container .day .events .event {
+                border-radius: 8px;
+                margin-bottom: 4px;
+                font-size: 13px;
+              }
               .navigation { margin-bottom: 12px; }
               .navigation .previous,
               .navigation .next {
@@ -747,12 +812,29 @@ home_hub_calendar_main:
               }
               .navigation .previous:hover,
               .navigation .next:hover { background-color: #E8F0EA; }
-              .today { background-color: #E8F0EA; border-radius: 12px; }
+              .legend ul li { font-size: 13px; }
+              /* Today highlight */
+              .today {
+                background-color: #E8F5EB;
+                box-shadow: inset 3px 0 0 #4A7C59;
+                border-radius: 12px;
+              }
+              .container .day.today .date .number {
+                background-color: #4A7C59;
+                color: white;
+                border-radius: 50%;
+                font-weight: 600;
+              }
+              .container .day.today .date .text {
+                color: #4A7C59;
+                font-weight: 600;
+              }
 
+      # Month view (calendar card_mod — keep in sync with week view above)
       - type: conditional
         conditions:
-          - entity: input_boolean.calendar_month_view
-            state: "on"
+          - entity: input_select.calendar_view_mode
+            state: "month"
         card:
           type: custom:week-planner-card
           days: month
@@ -776,11 +858,19 @@ home_hub_calendar_main:
             style: |
               ha-card {
                 padding: 16px;
-                margin-top: 24px;
+                margin-top: 16px;
                 background: white;
                 border-radius: 16px;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                box-shadow: 0 1px 3px rgba(0,0,0,0.08);
                 font-size: 12px !important;
+              }
+              .container .day {
+                border-radius: 8px;
+                transition: background-color 0.2s;
+              }
+              .container .day .events .event {
+                border-radius: 6px;
+                margin-bottom: 2px;
               }
               .navigation { margin-bottom: 12px; }
               .navigation .previous,
@@ -793,56 +883,23 @@ home_hub_calendar_main:
               }
               .navigation .previous:hover,
               .navigation .next:hover { background-color: #E8F0EA; }
-              .today { background-color: #E8F0EA; border-radius: 12px; }
-
-      # Fallback: show Month when both toggles are OFF (prevents blank view)
-      - type: conditional
-        conditions:
-          - entity: input_boolean.calendar_week_view
-            state: "off"
-          - entity: input_boolean.calendar_month_view
-            state: "off"
-        card:
-          type: custom:week-planner-card
-          days: month
-          startingDay: monday
-          maxDayEvents: 5
-          updateInterval: 600
-          noCardBackground: false
-          showLegend: true
-          legendToggle: true
-          showNavigation: true
-          showLocation: false
-          showDescription: false
-          calendars:
-            - entity: calendar.home_calendar
-              color: "#4A7C59"
-              name: Home
-            - entity: calendar.birthdays_anniversaries
-              color: "#9333EA"
-              name: Birthdays & Anniversaries
-          card_mod:
-            style: |
-              ha-card {
-                padding: 16px;
-                margin-top: 24px;
-                background: white;
-                border-radius: 16px;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                font-size: 12px !important;
-              }
-              .navigation { margin-bottom: 12px; }
-              .navigation .previous,
-              .navigation .next {
-                color: #4A7C59;
-                cursor: pointer;
-                padding: 4px 8px;
+              .legend ul li { font-size: 13px; }
+              /* Today highlight */
+              .today {
+                background-color: #E8F5EB;
+                box-shadow: inset 3px 0 0 #4A7C59;
                 border-radius: 8px;
-                transition: background-color 0.2s;
               }
-              .navigation .previous:hover,
-              .navigation .next:hover { background-color: #E8F0EA; }
-              .today { background-color: #E8F0EA; border-radius: 12px; }
+              .container .day.today .date .number {
+                background-color: #4A7C59;
+                color: white;
+                border-radius: 50%;
+                font-weight: 600;
+              }
+              .container .day.today .date .text {
+                color: #4A7C59;
+                font-weight: 600;
+              }
 
 home_hub_tasks_main:
   card:
@@ -1456,11 +1513,18 @@ home_hub_meals_main:
           z-index: 0;
         }
     cards:
-      # Header with title/subtitle and "This Week" badge
+      # Header: "Plan This Week" + progress counter
       - type: custom:button-card
+        entity: sensor.mealie_weekly_meal_plan
         show_icon: false
         show_name: false
         show_state: false
+        tap_action:
+          action: none
+        hold_action:
+          action: none
+        triggers_update:
+          - sensor.mealie_weekly_meal_plan
         styles:
           card:
             - background: none
@@ -1476,18 +1540,71 @@ home_hub_meals_main:
         custom_fields:
           header: |
             [[[
-              return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">'
-                + '<div>'
-                + '<div style="font-size:24px;font-weight:600;line-height:1.2;color:#1F2937;">Meal Planner</div>'
-                + '<div style="font-size:14px;color:#6B7280;margin-top:4px;">Plan your weekly dinners and browse recipes</div>'
-                + '</div>'
-                + '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:white;border-radius:10px;border:1px solid #E5E7EB;">'
-                + '<ha-icon icon="mdi:chevron-left" style="--mdc-icon-size:18px;color:#6B7280;"></ha-icon>'
-                + '<span style="font-size:14px;font-weight:600;color:#1F2937;">This Week</span>'
-                + '<ha-icon icon="mdi:chevron-right" style="--mdc-icon-size:18px;color:#6B7280;"></ha-icon>'
-                + '</div>'
+              const mealplan = states['sensor.mealie_weekly_meal_plan'];
+              const meals = (mealplan && mealplan.attributes && Array.isArray(mealplan.attributes.meals)) ? mealplan.attributes.meals : [];
+              const byDate = {};
+              meals.forEach(function(m) { byDate[m.date] = m.recipe_name || ''; });
+              const filled = Object.values(byDate).filter(function(n) { return n.trim().length > 0; }).length;
+              const progressColor = filled === 7 ? '#4A7C59' : '#7c8493';
+              return '<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;">'
+                + '<div style="font-size:24px;font-weight:600;line-height:1.2;color:#1F2937;">Plan This Week</div>'
+                + '<div style="font-size:15px;font-weight:500;color:' + progressColor + ';">' + filled + ' of 7 meals picked</div>'
                 + '</div>';
             ]]]
+
+      # Action banner with context text + Done Planning button
+      - type: custom:button-card
+        entity: sensor.mealie_weekly_meal_plan
+        show_icon: false
+        show_name: false
+        show_state: false
+        triggers_update:
+          - sensor.mealie_weekly_meal_plan
+        styles:
+          card:
+            - background: '#F5F5F0'
+            - box-shadow: none
+            - border: none
+            - border-radius: 12px
+            - padding: 12px 16px
+            - margin-top: 8px
+          grid:
+            - grid-template-areas: '"banner"'
+            - grid-template-columns: 1fr
+          custom_fields:
+            banner:
+              - width: 100%
+        custom_fields:
+          banner: |
+            [[[
+              const mealplan = states['sensor.mealie_weekly_meal_plan'];
+              const meals = (mealplan && mealplan.attributes && Array.isArray(mealplan.attributes.meals)) ? mealplan.attributes.meals : [];
+              const byDate = {};
+              meals.forEach(function(m) { byDate[m.date] = m.recipe_name || ''; });
+              const filled = Object.values(byDate).filter(function(n) { return n.trim().length > 0; }).length;
+              let bannerText = 'Pick dinners for the week from the recipes below';
+              if (filled > 0 && filled < 7) bannerText = 'Keep going! Pick recipes below to fill the week';
+              if (filled === 7) bannerText = 'All set! Review your grocery list when ready';
+              return '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">'
+                + '<span style="font-size:14px;color:#5c6470;">' + bannerText + '</span>'
+                + '<span id="home-hub-done-planning" style="display:inline-block;padding:8px 16px;background:#4A7C59;color:white;font-size:13px;font-weight:600;border-radius:8px;cursor:pointer;white-space:nowrap;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">' + (filled > 0 ? 'Done Planning' : 'No meals yet') + '</span>'
+                + '</div>';
+            ]]]
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.generate_groceries_for_mealplan
+                - service: browser_mod.delay
+                  data:
+                    time: 5000
+                - service: browser_mod.popup
+                  data:
+                    title: Weekly Groceries
+                    size: normal
+                    content: !include /config/dashboards/popups/grocery_list_popup.yaml
 
       # Weekly Dinners container
       - type: custom:mod-card
@@ -1536,9 +1653,17 @@ home_hub_meals_main:
                   section: |
                     [[[
                       const forkKnife = '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>';
+                      const now = new Date();
+                      const curDay = now.getDay();
+                      const monOff = curDay === 0 ? -6 : 1 - curDay;
+                      const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + monOff);
+                      const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+                      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                      const range = months[mon.getMonth()] + ' ' + mon.getDate() + ' - ' + months[sun.getMonth()] + ' ' + sun.getDate();
                       return '<div style="display:flex;align-items:center;gap:8px;">'
                         + '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + forkKnife + '</svg>'
                         + '<span style="font-size:16px;font-weight:600;color:#1F2937;">Weekly Dinners</span>'
+                        + '<span style="font-size:13px;font-weight:400;color:#7c8493;margin-left:4px;">' + range + '</span>'
                         + '</div>';
                     ]]]
 
@@ -1609,7 +1734,7 @@ home_hub_meals_main:
                         - service: browser_mod.popup
                           data:
                             title: Select Dinner for Monday
-                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+                            content: !include /config/dashboards/popups/day_slot_popup.yaml
 
               - type: custom:button-card
                 template: home_hub_meal_day_pill
@@ -1630,7 +1755,7 @@ home_hub_meals_main:
                         - service: browser_mod.popup
                           data:
                             title: Select Dinner for Tuesday
-                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+                            content: !include /config/dashboards/popups/day_slot_popup.yaml
 
               - type: custom:button-card
                 template: home_hub_meal_day_pill
@@ -1651,7 +1776,7 @@ home_hub_meals_main:
                         - service: browser_mod.popup
                           data:
                             title: Select Dinner for Wednesday
-                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+                            content: !include /config/dashboards/popups/day_slot_popup.yaml
 
               - type: custom:button-card
                 template: home_hub_meal_day_pill
@@ -1672,7 +1797,7 @@ home_hub_meals_main:
                         - service: browser_mod.popup
                           data:
                             title: Select Dinner for Thursday
-                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+                            content: !include /config/dashboards/popups/day_slot_popup.yaml
 
               - type: custom:button-card
                 template: home_hub_meal_day_pill
@@ -1693,7 +1818,7 @@ home_hub_meals_main:
                         - service: browser_mod.popup
                           data:
                             title: Select Dinner for Friday
-                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+                            content: !include /config/dashboards/popups/day_slot_popup.yaml
 
               - type: custom:button-card
                 template: home_hub_meal_day_pill
@@ -1714,7 +1839,7 @@ home_hub_meals_main:
                         - service: browser_mod.popup
                           data:
                             title: Select Dinner for Saturday
-                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+                            content: !include /config/dashboards/popups/day_slot_popup.yaml
 
               - type: custom:button-card
                 template: home_hub_meal_day_pill
@@ -1735,7 +1860,7 @@ home_hub_meals_main:
                         - service: browser_mod.popup
                           data:
                             title: Select Dinner for Sunday
-                            content: !include /config/dashboards/popups/meal_selection_popup.yaml
+                            content: !include /config/dashboards/popups/day_slot_popup.yaml
 
       # "Recipe Browser" section header with Add Recipe button
       - type: custom:layout-card
@@ -1779,26 +1904,17 @@ home_hub_meals_main:
           # Add Recipe button
           - type: custom:button-card
             name: "+ Add Recipe"
-            show_icon: true
-            icon: mdi:plus
+            show_icon: false
             styles:
               card:
                 - background: '#4A7C59'
                 - border-radius: 10px
                 - padding: 10px 18px
                 - box-shadow: none
-              grid:
-                - grid-template-areas: '"i n"'
-                - grid-template-columns: min-content 1fr
-              icon:
-                - color: white
-                - width: 14px
-                - height: 14px
               name:
                 - color: white
                 - font-size: 14px
                 - font-weight: 600
-                - padding-left: 6px
             tap_action:
               action: fire-dom-event
               browser_mod:
@@ -1838,8 +1954,18 @@ home_hub_meals_main:
                 ? recipeSensor.attributes.items
                 : [];
               const esc = (s) => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-              if (items.length === 0) return '<div style="color:#6B7280;padding:20px;text-align:center;">No recipes found. Add some in Mealie!</div>';
 
+              // Zero-recipe empty state
+              if (items.length === 0) {
+                const bookOpenIcon = '<path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>';
+                return '<div style="text-align:center;padding:48px 20px;">'
+                  + '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#BDBDBD" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + bookOpenIcon + '</svg>'
+                  + '<div style="font-size:16px;font-weight:500;color:#374151;margin-top:16px;">Add some family favorites to get started</div>'
+                  + '<div style="font-size:13px;color:#9CA3AF;margin-top:4px;">Import recipes to start planning meals</div>'
+                  + '</div>';
+              }
+
+              // Utility functions (kept from existing)
               const parseMinutes = (text) => {
                 if (!text) return 0;
                 let mins = 0;
@@ -1880,76 +2006,71 @@ home_hub_meals_main:
 
               const classify = (recipe) => {
                 const directFields = [
-                  recipe.category_key,
-                  recipe.category,
-                  recipe.category_name,
-                  recipe.recipe_category,
-                  recipe.meal_type
+                  recipe.category_key, recipe.category, recipe.category_name,
+                  recipe.recipe_category, recipe.meal_type
                 ].filter(Boolean);
-
                 const tagFields = [
-                  ...flattenLabels(recipe.tags),
-                  ...flattenLabels(recipe.recipe_tags),
-                  ...flattenLabels(recipe.categories),
-                  ...flattenLabels(recipe.recipe_categories)
+                  ...flattenLabels(recipe.tags), ...flattenLabels(recipe.recipe_tags),
+                  ...flattenLabels(recipe.categories), ...flattenLabels(recipe.recipe_categories)
                 ];
-
                 for (const text of [...directFields, ...tagFields]) {
                   const mapped = mapTextToCategory(text);
                   if (mapped) return mapped;
                 }
-
-                const fallback = mapTextToCategory((recipe.name || '') + ' ' + (recipe.description || ''));
-                return fallback || 'uncategorized';
+                return mapTextToCategory((recipe.name || '') + ' ' + (recipe.description || '')) || 'uncategorized';
               };
 
+              // Color cycling for initial letter backgrounds
+              const initialColors = ['#E8F5E9', '#FFF3E0', '#EFEBE9', '#ECEFF1', '#F3E5F5'];
+              const hashName = (name) => {
+                let h = 0;
+                for (let i = 0; i < name.length; i++) h = ((h << 5) - h + name.charCodeAt(i)) | 0;
+                return Math.abs(h);
+              };
+
+              // Info icon SVG (circle-i)
+              const infoIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+
+              // Build recipe cards
               let cards = '';
               for (const recipe of items) {
                 let timeStr = recipe.total_time || '';
                 if (timeStr) {
-                  timeStr = timeStr
-                    .replace(/(\d+)\s*hours?/, '$1h')
-                    .replace(/(\d+)\s*minutes?/, '$1m')
-                    .replace(/\s+/g, ' ')
-                    .trim();
+                  timeStr = timeStr.replace(/(\d+)\s*hours?/, '$1h').replace(/(\d+)\s*minutes?/, '$1m').replace(/\s+/g, ' ').trim();
                 }
-                const servings = recipe.recipe_yield || '';
-                const servingsNum = servings ? servings.replace(/[^\d]/g, '') : '';
                 const safeName = esc(recipe.name || 'Untitled Recipe');
-                const safeDesc = esc(recipe.description || '');
                 const searchName = (recipe.name || '').toLowerCase();
                 const searchDesc = (recipe.description || '').toLowerCase();
                 const cardId = 'recipe-' + recipe.slug;
                 const category = classify(recipe);
-                const totalMinutes = parseMinutes(recipe.total_time || '');
-                const quickTag = totalMinutes > 0 && totalMinutes <= 30 ? 'quick' : '';
-                const categoryLabelMap = {
-                  chicken: 'family',
-                  beef: 'mexican',
-                  seafood: 'fresh',
-                  pork: 'roasted',
-                  vegetarian: 'healthy',
-                  uncategorized: 'comfort'
-                };
-                const primaryTag = categoryLabelMap[category] || 'comfort';
-                cards += '<div class="home-hub-recipe-card" id="' + cardId + '" data-category="' + category + '" data-name="' + esc(searchName) + '" data-desc="' + esc(searchDesc) + '" role="button" tabindex="0" style="background:white;border-radius:14px;padding:14px 14px 12px 14px;cursor:pointer;border:1px solid #E5E7EB;transition:all 0.15s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">'
-                  + '<div style="height:98px;border-radius:8px;background:#FAFAF9;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">'
-                  + '<div style="width:40px;height:40px;background:rgba(74,124,89,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
-                  + '<ha-icon icon="mdi:food-drumstick-outline" style="color:#5f9b7a;--mdc-icon-size:20px;"></ha-icon>'
-                  + '</div>'
-                  + '</div>'
-                  + '<div style="font-size:14px;font-weight:600;color:#1F2937;line-height:1.3;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px;">' + safeName + '</div>'
-                  + '<div style="font-size:12px;color:#8B97A8;display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
-                  + (timeStr ? '<span style="display:flex;align-items:center;gap:3px;"><ha-icon icon="mdi:clock-outline" style="--mdc-icon-size:13px;"></ha-icon>' + timeStr + '</span>' : '')
-                  + (servingsNum ? '<span style="display:flex;align-items:center;gap:3px;"><ha-icon icon="mdi:account-group-outline" style="--mdc-icon-size:13px;"></ha-icon>' + servingsNum + '</span>' : '')
-                  + '</div>'
-                  + '<div style="display:flex;gap:6px;flex-wrap:wrap;">'
-                  + '<span style="font-size:11px;color:#74A38A;background:#EDF5F0;padding:2px 8px;border-radius:999px;text-transform:lowercase;">' + primaryTag + '</span>'
-                  + (quickTag ? '<span style="font-size:11px;color:#74A38A;background:#EDF5F0;padding:2px 8px;border-radius:999px;text-transform:lowercase;">' + quickTag + '</span>' : '')
+
+                // Image area: real image or colored initial letter
+                const hasImage = recipe.recipe_id && recipe.image && recipe.image !== 'None';
+                const imgUrl = hasImage ? 'http://100.68.225.20:9925/api/media/recipes/' + recipe.recipe_id + '/images/min-original.webp' : '';
+                const initial = (recipe.name || 'R').charAt(0).toUpperCase();
+                const bgColor = initialColors[hashName(recipe.name || '') % initialColors.length];
+
+                const imageArea = hasImage
+                  ? '<div style="position:relative;height:120px;border-radius:12px 12px 0 0;overflow:hidden;background:#FAFAF9;">'
+                    + '<img src="' + imgUrl + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" />'
+                    + '<div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;background:' + bgColor + ';"><span style="font-size:32px;font-weight:300;color:#5c6470;">' + initial + '</span></div>'
+                    + '<div class="recipe-info-btn" style="position:absolute;top:6px;right:6px;width:28px;height:28px;background:rgba(255,255,255,0.9);border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;z-index:2;">' + infoIcon + '</div>'
+                    + '</div>'
+                  : '<div style="position:relative;height:120px;border-radius:12px 12px 0 0;background:' + bgColor + ';display:flex;align-items:center;justify-content:center;">'
+                    + '<span style="font-size:32px;font-weight:300;color:#5c6470;">' + initial + '</span>'
+                    + '<div class="recipe-info-btn" style="position:absolute;top:6px;right:6px;width:28px;height:28px;background:rgba(255,255,255,0.9);border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;z-index:2;">' + infoIcon + '</div>'
+                    + '</div>';
+
+                cards += '<div class="home-hub-recipe-card" id="' + cardId + '" data-category="' + category + '" data-name="' + esc(searchName) + '" data-desc="' + esc(searchDesc) + '" role="button" tabindex="0" style="background:white;border-radius:14px;cursor:pointer;border:1px solid #E5E7EB;transition:all 0.15s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overflow:hidden;">'
+                  + imageArea
+                  + '<div style="padding:10px 12px 12px 12px;">'
+                  + '<div style="font-size:14px;font-weight:500;color:#1F2937;line-height:1.3;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px;">' + safeName + '</div>'
+                  + (timeStr ? '<div style="font-size:12px;color:#7c8493;display:flex;align-items:center;gap:4px;"><ha-icon icon="mdi:clock-outline" style="--mdc-icon-size:13px;color:#7c8493;"></ha-icon>' + timeStr + '</div>' : '')
                   + '</div>'
                   + '</div>';
               }
 
+              // Search + filter chips (kept from existing)
               const controls = '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">'
                 + '<div style="flex:1;min-width:260px;position:relative;">'
                 + '<ha-icon icon="mdi:magnify" style="position:absolute;left:10px;top:10px;--mdc-icon-size:16px;color:#9CA3AF;"></ha-icon>'
@@ -2004,11 +2125,9 @@ home_hub_meals_main:
                 };
 
                 window.setTimeout(() => {
+                  // Recipe detail popup (for info icon)
                   const openRecipePopup = (recipe, target) => {
                     let md = '';
-                    if (recipe.recipe_id && recipe.image && recipe.image !== 'None') {
-                      md += '![recipe](http://100.68.225.20:9925/api/media/recipes/' + recipe.recipe_id + '/images/min-original.webp)\n\n';
-                    }
                     const desc = (recipe.description || '').trim();
                     if (desc) md += desc + '\n\n';
                     const parts = [];
@@ -2033,6 +2152,122 @@ home_hub_meals_main:
                     target.dispatchEvent(evt);
                   };
 
+                  // Day picker popup (for card body tap)
+                  const openDayPicker = (recipe, target) => {
+                    const dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+                    const dayAbbrevs = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                    const now = new Date();
+                    const curDay = now.getDay();
+                    const monOff = curDay === 0 ? -6 : 1 - curDay;
+                    const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + monOff);
+                    const todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+
+                    // Check which days are filled
+                    const mp = states['sensor.mealie_weekly_meal_plan'];
+                    const mealsArr = (mp && mp.attributes && Array.isArray(mp.attributes.meals)) ? mp.attributes.meals : [];
+                    const filledDays = {};
+                    mealsArr.forEach(function(m) {
+                      filledDays[m.date] = m.recipe_name || '';
+                    });
+                    Object.keys(filledDays).forEach(function(d) { if (!filledDays[d].trim()) delete filledDays[d]; });
+
+                    // Build 7 day button cards
+                    const dayCards = [];
+                    for (let i = 0; i < 7; i++) {
+                      const td = new Date(mon);
+                      td.setDate(mon.getDate() + i);
+                      const ds = td.getFullYear() + '-' + String(td.getMonth()+1).padStart(2,'0') + '-' + String(td.getDate()).padStart(2,'0');
+                      const isToday = ds === todayStr;
+                      const isFilled = !!filledDays[ds];
+                      const mealText = isFilled ? filledDays[ds] : '';
+                      const truncMeal = mealText.length > 22 ? mealText.substring(0, 20) + '..' : mealText;
+
+                      dayCards.push({
+                        type: 'custom:button-card',
+                        show_icon: false,
+                        show_name: false,
+                        show_state: false,
+                        styles: {
+                          card: [
+                            { background: isFilled ? '#F5F5F5' : (isToday ? '#E8F5E9' : 'white') },
+                            { border: isFilled ? '1px solid #E0E0E0' : (isToday ? '1px solid #4A7C59' : '1px solid #E5E7EB') },
+                            { 'border-radius': '10px' },
+                            { padding: '10px 14px' },
+                            { cursor: 'pointer' },
+                            { 'box-shadow': 'none' },
+                            { 'min-height': '44px' }
+                          ],
+                          grid: [
+                            { 'grid-template-areas': '"lbl"' },
+                            { 'grid-template-columns': '1fr' }
+                          ],
+                          custom_fields: { lbl: [{ width: '100%' }] }
+                        },
+                        custom_fields: {
+                          lbl: '<div style="display:flex;justify-content:space-between;align-items:center;">'
+                            + '<div>'
+                            + '<div style="font-size:14px;font-weight:600;color:' + (isFilled ? '#BDBDBD' : '#374151') + ';">' + dayAbbrevs[i] + ' ' + td.getDate() + '</div>'
+                            + (isFilled ? '<div style="font-size:12px;color:#9CA3AF;margin-top:2px;">' + truncMeal + '</div>' : '<div style="font-size:12px;color:#4A7C59;margin-top:2px;">Available</div>')
+                            + '</div>'
+                            + (isToday ? '<span style="font-size:10px;font-weight:600;color:#4A7C59;background:#E8F5E9;padding:2px 6px;border-radius:4px;">TODAY</span>' : '')
+                            + '</div>'
+                        },
+                        tap_action: {
+                          action: 'call-service',
+                          service: 'script.pick_day_and_assign',
+                          service_data: {
+                            day_name: dayNames[i]
+                          }
+                        }
+                      });
+                    }
+
+                    // Cancel button
+                    dayCards.push({
+                      type: 'custom:button-card',
+                      name: 'Cancel',
+                      icon: 'mdi:close',
+                      styles: {
+                        card: [
+                          { 'border-radius': '12px' },
+                          { padding: '8px 12px' },
+                          { 'margin-top': '8px' },
+                          { background: 'rgb(243,244,246)' },
+                          { 'box-shadow': 'none' }
+                        ],
+                        grid: [
+                          { 'grid-template-areas': '"i n"' },
+                          { 'grid-template-columns': 'min-content 1fr' }
+                        ],
+                        icon: [{ width: '20px' }, { height: '20px' }, { color: 'rgb(107,114,128)' }],
+                        name: [{ color: 'rgb(107,114,128)' }, { 'font-size': '14px' }, { 'margin-left': '8px' }]
+                      },
+                      tap_action: {
+                        action: 'fire-dom-event',
+                        browser_mod: { service: 'browser_mod.close_popup' }
+                      }
+                    });
+
+                    const evt = new Event('ll-custom', { bubbles: true, composed: true });
+                    evt.detail = {
+                      browser_mod: {
+                        service: 'browser_mod.sequence',
+                        data: {
+                          sequence: [
+                            { service: 'input_select.select_option', data: { entity_id: 'input_select.recipe_selector', option: recipe.name } },
+                            { service: 'browser_mod.popup', data: {
+                              title: 'Pick a day for ' + (recipe.name || 'Recipe'),
+                              size: 'normal',
+                              content: { type: 'vertical-stack', cards: dayCards }
+                            }}
+                          ]
+                        }
+                      }
+                    };
+                    target.dispatchEvent(evt);
+                  };
+
+                  // Bind event handlers to recipe cards
                   const recipeCards = scope.querySelectorAll('.home-hub-recipe-card');
                   recipeCards.forEach((card) => {
                     if (card._popupBound) return;
@@ -2041,33 +2276,49 @@ home_hub_meals_main:
                     const recipe = items.find((r) => r.slug === slug);
                     if (!recipe) return;
 
+                    // Info icon handler (opens recipe detail)
+                    const infoBtn = card.querySelector('.recipe-info-btn');
+                    if (infoBtn) {
+                      let infoTouchAt = 0;
+                      infoBtn.addEventListener('pointerdown', (ev) => { ev.stopPropagation(); }, { passive: true });
+                      infoBtn.addEventListener('pointerup', (ev) => {
+                        ev.stopPropagation(); ev.preventDefault();
+                        infoTouchAt = Date.now();
+                        openRecipePopup(recipe, card);
+                      });
+                      infoBtn.addEventListener('click', (ev) => {
+                        ev.stopPropagation(); ev.preventDefault();
+                        if (Date.now() - infoTouchAt < 700) return;
+                        openRecipePopup(recipe, card);
+                      });
+                    }
+
+                    // Card body handler (opens day picker)
                     let lastTouchOpenAt = 0;
                     let pointerStart = null;
                     let touchStart = null;
 
                     card.addEventListener('pointerdown', (ev) => {
-                      pointerStart = {
-                        x: ev.clientX,
-                        y: ev.clientY,
-                        pointerType: ev.pointerType || 'mouse'
-                      };
+                      if (ev.target && ev.target.closest && ev.target.closest('.recipe-info-btn')) return;
+                      pointerStart = { x: ev.clientX, y: ev.clientY, pointerType: ev.pointerType || 'mouse' };
                     }, { passive: true });
 
                     card.addEventListener('pointerup', (ev) => {
                       if (!pointerStart) return;
+                      if (ev.target && ev.target.closest && ev.target.closest('.recipe-info-btn')) { pointerStart = null; return; }
                       const deltaX = Math.abs(ev.clientX - pointerStart.x);
                       const deltaY = Math.abs(ev.clientY - pointerStart.y);
-                      const pointerType = pointerStart.pointerType;
+                      const pType = pointerStart.pointerType;
                       pointerStart = null;
-                      if (pointerType === 'mouse' || deltaX > 10 || deltaY > 10) return;
+                      if (pType === 'mouse' || deltaX > 10 || deltaY > 10) return;
                       lastTouchOpenAt = Date.now();
-                      ev.preventDefault();
-                      ev.stopPropagation();
-                      openRecipePopup(recipe, card);
+                      ev.preventDefault(); ev.stopPropagation();
+                      openDayPicker(recipe, card);
                     });
 
                     card.addEventListener('touchstart', (ev) => {
                       if (window.PointerEvent) return;
+                      if (ev.target && ev.target.closest && ev.target.closest('.recipe-info-btn')) return;
                       const touch = ev.changedTouches && ev.changedTouches[0];
                       if (!touch) return;
                       touchStart = { x: touch.clientX, y: touch.clientY };
@@ -2075,6 +2326,7 @@ home_hub_meals_main:
 
                     card.addEventListener('touchend', (ev) => {
                       if (window.PointerEvent || !touchStart) return;
+                      if (ev.target && ev.target.closest && ev.target.closest('.recipe-info-btn')) { touchStart = null; return; }
                       const touch = ev.changedTouches && ev.changedTouches[0];
                       if (!touch) return;
                       const deltaX = Math.abs(touch.clientX - touchStart.x);
@@ -2082,23 +2334,21 @@ home_hub_meals_main:
                       touchStart = null;
                       if (deltaX > 10 || deltaY > 10) return;
                       lastTouchOpenAt = Date.now();
-                      ev.preventDefault();
-                      ev.stopPropagation();
-                      openRecipePopup(recipe, card);
+                      ev.preventDefault(); ev.stopPropagation();
+                      openDayPicker(recipe, card);
                     });
 
                     card.addEventListener('click', (ev) => {
+                      if (ev.target && ev.target.closest && ev.target.closest('.recipe-info-btn')) return;
                       if (Date.now() - lastTouchOpenAt < 700) return;
-                      ev.preventDefault();
-                      ev.stopPropagation();
-                      openRecipePopup(recipe, card);
+                      ev.preventDefault(); ev.stopPropagation();
+                      openDayPicker(recipe, card);
                     });
 
                     card.addEventListener('keydown', (ev) => {
                       if (ev.key !== 'Enter' && ev.key !== ' ') return;
-                      ev.preventDefault();
-                      ev.stopPropagation();
-                      openRecipePopup(recipe, card);
+                      ev.preventDefault(); ev.stopPropagation();
+                      openDayPicker(recipe, card);
                     });
                   });
                 }, 0);
@@ -2108,13 +2358,11 @@ home_hub_meals_main:
                   searchInput.addEventListener('input', applyFilters);
                 }
 
+                // Filter chip handlers (kept from existing)
                 const chips = chipsWrap.querySelectorAll('.home-hub-filter-chip');
                 const activateChip = (chip, ev) => {
                   if (!chip) return;
-                  if (ev) {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                  }
+                  if (ev) { ev.preventDefault(); ev.stopPropagation(); }
                   selected = chip.getAttribute('data-cat') || 'all';
                   chips.forEach((other) => setChipStyle(other, other === chip));
                   applyFilters();
@@ -2129,20 +2377,16 @@ home_hub_meals_main:
                   let touchStart = null;
 
                   chip.addEventListener('pointerdown', (ev) => {
-                    pointerStart = {
-                      x: ev.clientX,
-                      y: ev.clientY,
-                      pointerType: ev.pointerType || 'mouse'
-                    };
+                    pointerStart = { x: ev.clientX, y: ev.clientY, pointerType: ev.pointerType || 'mouse' };
                   }, { passive: true });
 
                   chip.addEventListener('pointerup', (ev) => {
                     if (!pointerStart) return;
                     const deltaX = Math.abs(ev.clientX - pointerStart.x);
                     const deltaY = Math.abs(ev.clientY - pointerStart.y);
-                    const pointerType = pointerStart.pointerType;
+                    const pType = pointerStart.pointerType;
                     pointerStart = null;
-                    if (pointerType === 'mouse' || deltaX > 10 || deltaY > 10) return;
+                    if (pType === 'mouse' || deltaX > 10 || deltaY > 10) return;
                     lastChipTouchAt = Date.now();
                     activateChip(chip, ev);
                   });

@@ -162,6 +162,16 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 group: !include groups.yaml
 
+############################################################
+# REST commands (Mealie API)
+rest_command:
+  mealie_add_recipe_ingredients:
+    url: "http://100.68.225.20:9925/api/households/shopping/lists/fc3de051-fb82-44f8-8b07-6f410d8d1166/recipe/{{ recipe_id }}"
+    method: POST
+    headers:
+      Authorization: !secret mealie_token_header
+    content_type: "application/json"
+
 # KP405 Dimmer Fix - DEPRECATED: Migrated to template: section above (Dec 2025)
 # light: !include lights.yaml
 
@@ -607,6 +617,14 @@ input_button:
 #                   INPUT SELECT                            #
 ############################################################
 input_select:
+  calendar_view_mode:
+    name: Calendar View Mode
+    options:
+      - week
+      - month
+    initial: week
+    icon: mdi:calendar
+
   calendar_selector:
     name: Calendar Selector
     options:

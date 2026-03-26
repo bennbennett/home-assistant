@@ -20,22 +20,22 @@ toby_random_activity:
           {{ activities | random }}
 
 toggle_week_view:
+  alias: "Switch to Week View"
   sequence:
-    - action: input_boolean.turn_on
+    - action: input_select.select_option
       target:
-        entity_id: input_boolean.calendar_week_view
-    - action: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.calendar_month_view
+        entity_id: input_select.calendar_view_mode
+      data:
+        option: week
 
 toggle_month_view:
+  alias: "Switch to Month View"
   sequence:
-    - action: input_boolean.turn_on
+    - action: input_select.select_option
       target:
-        entity_id: input_boolean.calendar_month_view
-    - action: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.calendar_week_view
+        entity_id: input_select.calendar_view_mode
+      data:
+        option: month
 
 toggle_device_filter_all:
   sequence:
@@ -406,7 +406,7 @@ open_calendar_event_popup:
               width: 50vw;
               max-width: 50vw;
             }
-        content: !include dashboards/popups/calendar_event_popup.yaml
+        content: !include dashboards/popups/calendar_event_popup_home_hub.yaml
 
 assign_meal_to_day:
   alias: "Assign Meal to Day"
@@ -511,4 +511,67 @@ clear_weekly_groceries:
               entity_id: todo.mealie_weekly_groceries
             data:
               item: "{{ repeat.item }}"
+  mode: single
+
+########################################################################
+# Generate grocery list from assigned meals
+# Clears existing list, then adds each assigned recipe's ingredients
+# via Mealie's native recipe-to-shopping-list endpoint.
+########################################################################
+generate_groceries_for_mealplan:
+  alias: "Generate Groceries for Meal Plan"
+  sequence:
+    # Clear existing grocery list first
+    - service: script.clear_weekly_groceries
+
+    # Wait for clear to complete
+    - delay: "00:00:02"
+
+    # For each unique assigned recipe, add its ingredients
+    - repeat:
+        for_each: >
+          {% set meals = state_attr('sensor.mealie_weekly_meal_plan', 'meals') | default([]) %}
+          {% set ns = namespace(by_date={}, slugs=[]) %}
+          {% for m in meals %}
+            {% set ns.by_date = dict(ns.by_date, **{m.date: m}) %}
+          {% endfor %}
+          {% for m in ns.by_date.values() %}
+            {% if m.recipe_name and m.recipe_name | trim != '' and m.recipe_slug not in ns.slugs %}
+              {% set ns.slugs = ns.slugs + [m.recipe_slug] %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.slugs }}
+        sequence:
+          - variables:
+              slug: "{{ repeat.item }}"
+              rid: >
+                {{ (state_attr('sensor.mealie_recipe_browser', 'items') | default([])
+                    | selectattr('slug', 'eq', slug)
+                    | map(attribute='recipe_id')
+                    | list | first) | default('') }}
+          - condition: template
+            value_template: "{{ rid != '' }}"
+          - service: rest_command.mealie_add_recipe_ingredients
+            data:
+              recipe_id: "{{ rid }}"
+  mode: single
+
+########################################################################
+# Pick day and assign — wrapper for day picker popup buttons
+# Accepts day_name as input, sets the selector, runs assignment.
+# Used by inline JS-defined cards where fire-dom-event doesn't work.
+########################################################################
+pick_day_and_assign:
+  alias: "Pick Day and Assign Meal"
+  fields:
+    day_name:
+      description: "Day of the week (e.g., Monday)"
+      example: "Monday"
+  sequence:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.meal_day_selector
+      data:
+        option: "{{ day_name }}"
+    - service: script.assign_meal_to_day
   mode: single
