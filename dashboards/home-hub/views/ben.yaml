@@ -1,9 +1,9 @@
 ##############################################################################
-#                            Toby View                                       #
-#  Toby's activities, checklists, and room controls                         #
+#                            Ben View                                        #
+#  Ben's personal dashboard                                                 #
 ##############################################################################
-title: Toby
-path: toby
+title: Ben
+path: ben
 type: panel
 cards:
   - type: vertical-stack
@@ -25,7 +25,7 @@ cards:
             - type: custom:decluttering-card
               template: home_hub_sidebar_expanded
             - type: custom:decluttering-card
-              template: home_hub_toby_main
+              template: home_hub_ben_main
 
       - type: conditional
         conditions:
@@ -44,4 +44,4 @@ cards:
             - type: custom:decluttering-card
               template: home_hub_sidebar_collapsed
             - type: custom:decluttering-card
-              template: home_hub_toby_main
+              template: home_hub_ben_main

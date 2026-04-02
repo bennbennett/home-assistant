@@ -561,6 +561,56 @@ generate_groceries_for_mealplan:
 # Accepts day_name as input, sets the selector, runs assignment.
 # Used by inline JS-defined cards where fire-dom-event doesn't work.
 ########################################################################
+ring_iphone:
+  alias: "Ring iPhone"
+  sequence:
+    - action: notify.mobile_app_iphone_4
+      data:
+        message: "Find My iPhone"
+        data:
+          push:
+            sound:
+              name: default
+              critical: 1
+              volume: 1.0
+
+ring_pixel_10:
+  alias: "Ring Pixel 10"
+  sequence:
+    - action: notify.mobile_app_pixel_10
+      data:
+        message: "Find My Phone"
+        data:
+          ttl: 0
+          priority: high
+          channel: alarm_stream
+
+ring_small_ipad:
+  alias: "Ring Small iPad"
+  sequence:
+    - action: notify.mobile_app_benjamins_ipad
+      data:
+        message: "Find My iPad"
+        data:
+          push:
+            sound:
+              name: default
+              critical: 1
+              volume: 1.0
+
+ring_big_ipad:
+  alias: "Ring Big iPad"
+  sequence:
+    - action: notify.mobile_app_ipad
+      data:
+        message: "Find My iPad"
+        data:
+          push:
+            sound:
+              name: default
+              critical: 1
+              volume: 1.0
+
 pick_day_and_assign:
   alias: "Pick Day and Assign Meal"
   fields:

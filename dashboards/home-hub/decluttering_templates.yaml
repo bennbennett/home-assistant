@@ -912,12 +912,11 @@ home_hub_tasks_main:
       grid-column: 2
     card_mod:
       style: |
-        :host { padding: 24px 32px; background: #F9FAFB; min-height: calc(100vh - 48px); }
+        :host { padding: 24px 32px; background: #fbfaf9; min-height: calc(100vh - 48px); }
     cards:
       - type: custom:button-card
         template: home_hub_header
-        icon: mdi:checkbox-marked-outline
-        name: Tasks
+        name: Tasks & Lists
 
       - type: grid
         columns: 2
@@ -926,28 +925,57 @@ home_hub_tasks_main:
           style: |
             ha-card { background: none; box-shadow: none; margin-top: 24px; }
         cards:
+          # ── Shopping List ──
           - type: vertical-stack
+            card_mod:
+              style: |
+                ha-card { display: contents; }
             cards:
               - type: custom:mushroom-template-card
                 primary: Shopping List
                 secondary: >
-                  {{ state_attr('todo.google_keep_shopping_list', 'items') | count }} items
-                icon: mdi:cart
-                icon_color: orange
+                  {{ (state_attr('todo.google_keep_shopping_list', 'items') | default([]) | selectattr('status', 'eq', 'needs_action') | list | count) }} active
+                icon: mdi:cart-outline
+                icon_color: green
                 card_mod:
                   style: |
-                    ha-card { margin-bottom: 8px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-                    .icon { background: rgba(249, 115, 22, 0.1) !important; }
+                    ha-card { background: white; border-radius: 16px 16px 0 0; box-shadow: none; border-bottom: 1px solid #F3F4F6; margin-bottom: 0; padding: 8px 16px; }
+                    mushroom-shape-icon { --shape-color: rgba(74, 124, 89, 0.12) !important; }
+                    .icon { --icon-color: #4A7C59 !important; }
 
               - type: todo-list
                 entity: todo.google_keep_shopping_list
-                hide_completed: true
+                hide_completed: false
                 card_mod:
                   style: |
-                    ha-card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #F97316; }
-                    .add-item { padding: 16px; border-bottom: 1px solid #F3F4F6; }
-                    .add-item ha-icon { color: #F97316; }
-                    .items { padding: 8px 16px; }
+                    ha-card { background: white; border-radius: 0 0 16px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-top: 0; }
+                    .add-item { padding: 12px 16px; border-bottom: 1px solid #F3F4F6; }
+
+          # ── Family Todo ──
+          - type: vertical-stack
+            card_mod:
+              style: |
+                ha-card { display: contents; }
+            cards:
+              - type: custom:mushroom-template-card
+                primary: Family Todo
+                secondary: >
+                  {{ (state_attr('todo.google_keep_family_todo', 'items') | default([]) | selectattr('status', 'eq', 'needs_action') | list | count) }} active
+                icon: mdi:checkbox-marked-circle-outline
+                icon_color: green
+                card_mod:
+                  style: |
+                    ha-card { background: white; border-radius: 16px 16px 0 0; box-shadow: none; border-bottom: 1px solid #F3F4F6; margin-bottom: 0; padding: 8px 16px; }
+                    mushroom-shape-icon { --shape-color: rgba(74, 124, 89, 0.12) !important; }
+                    .icon { --icon-color: #4A7C59 !important; }
+
+              - type: todo-list
+                entity: todo.google_keep_family_todo
+                hide_completed: false
+                card_mod:
+                  style: |
+                    ha-card { background: white; border-radius: 0 0 16px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-top: 0; }
+                    .add-item { padding: 12px 16px; border-bottom: 1px solid #F3F4F6; }
 
 home_hub_devices_main:
   card:
@@ -956,7 +984,7 @@ home_hub_devices_main:
       grid-column: 2
     card_mod:
       style: |
-        :host { padding: 24px 32px; background: #F9FAFB; min-height: calc(100vh - 48px); }
+        :host { padding: 24px 32px; background: #fbfaf9; min-height: calc(100vh - 48px); }
     cards:
       - type: custom:button-card
         template: home_hub_header
@@ -1104,17 +1132,6 @@ home_hub_devices_main:
                             style: |
                               ha-card { background: #f8f8f6; border-radius: 16px; margin-top: 24px; border: none; box-shadow: none; }
 
-                        # Location Section
-                        - type: custom:mushroom-template-card
-                          primary: Location
-                          secondary: "{{ 'Home' if is_state('device_tracker.iphone', 'home') else 'Away' }}"
-                          icon: mdi:map-marker
-                          icon_color: green
-                          layout: horizontal
-                          card_mod:
-                            style: |
-                              ha-card { background: #f8f8f6; border-radius: 16px; margin-top: 12px; border: none; box-shadow: none; }
-
                         # Quick Actions Header
                         - type: custom:mushroom-title-card
                           title: Quick Actions
@@ -1122,38 +1139,16 @@ home_hub_devices_main:
                             style: |
                               ha-card { margin-top: 12px; }
 
-                        # Quick Actions Grid
-                        - type: grid
-                          columns: 2
-                          square: false
-                          cards:
-                            - type: custom:mushroom-template-card
-                              primary: Ring Device
-                              icon: mdi:bell-outline
-                              tap_action:
-                                action: call-service
-                                service: script.find_iphone
-                              card_mod:
-                                style: |
-                                  ha-card { background: white; border: 1px solid #f2f1ed; border-radius: 12px; box-shadow: none; }
-                            - type: custom:mushroom-template-card
-                              primary: Play Sound
-                              icon: mdi:volume-high
-                              card_mod:
-                                style: |
-                                  ha-card { background: white; border: 1px solid #f2f1ed; border-radius: 12px; box-shadow: none; }
-                            - type: custom:mushroom-template-card
-                              primary: Lock Device
-                              icon: mdi:lock-outline
-                              card_mod:
-                                style: |
-                                  ha-card { background: white; border: 1px solid #f2f1ed; border-radius: 12px; box-shadow: none; }
-                            - type: custom:mushroom-template-card
-                              primary: Sync Now
-                              icon: mdi:refresh
-                              card_mod:
-                                style: |
-                                  ha-card { background: white; border: 1px solid #f2f1ed; border-radius: 12px; box-shadow: none; }
+                        # Quick Actions
+                        - type: custom:mushroom-template-card
+                          primary: Ring Device
+                          icon: mdi:bell-outline
+                          tap_action:
+                            action: call-service
+                            service: script.ring_iphone
+                          card_mod:
+                            style: |
+                              ha-card { background: white; border: 1px solid #f2f1ed; border-radius: 12px; box-shadow: none; }
 
                         # Footer
                         - type: custom:button-card
@@ -1193,7 +1188,106 @@ home_hub_devices_main:
                 device_color: '#a386d7'
                 battery_entity: sensor.pixel_10_battery_level
               tap_action:
-                action: more-info
+                action: fire-dom-event
+                browser_mod:
+                  service: browser_mod.popup
+                  data:
+                    title: Pixel 10
+                    content:
+                      type: vertical-stack
+                      cards:
+                        - type: custom:button-card
+                          show_icon: false
+                          show_name: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: 0]
+                            grid:
+                              - grid-template-areas: '"icon title"'
+                              - grid-template-columns: 80px 1fr
+                            custom_fields:
+                              icon: [justify-self: start]
+                              title: [justify-self: start, align-self: center]
+                          custom_fields:
+                            icon: |
+                              [[[
+                                return `<div style=\"width: 64px; height: 64px; background: #f8f8f6; border-radius: 16px; display: flex; align-items: center; justify-content: center;\">
+                                  <ha-icon icon=\"mdi:cellphone\" style=\"--mdc-icon-size: 32px; color: #a386d7;\"></ha-icon>
+                                </div>`;
+                              ]]]
+                            title: |
+                              [[[
+                                const tracker = states['device_tracker.pixel_10'];
+                                const status = (tracker && tracker.state !== 'unavailable' && tracker.state !== 'unknown') ? 'Online' : 'Offline';
+                                return `<div style=\"display: flex; flex-direction: column;\">
+                                  <div style=\"font-size: 24px; font-weight: 600; color: #1F2937;\">Pixel 10</div>
+                                  <div style=\"font-size: 16px; color: #9CA3AF;\">${status}</div>
+                                </div>`;
+                              ]]]
+                        - type: custom:button-card
+                          entity: sensor.pixel_10_battery_level
+                          show_name: false
+                          show_icon: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: "24px 0 0 0"]
+                            custom_fields:
+                              bar: [width: 100%]
+                          custom_fields:
+                            bar: |
+                              [[[
+                                const val = entity.state;
+                                return `<div style=\"display: flex; flex-direction: column; gap: 8px;\">
+                                  <div style=\"display: flex; justify-content: space-between; align-items: center;\">
+                                    <div style=\"display: flex; align-items: center; gap: 8px; font-size: 16px; color: #1F2937;\">
+                                      <ha-icon icon=\"mdi:battery\" style=\"--mdc-icon-size: 20px; color: #5aa287;\"></ha-icon>
+                                      <span>Battery</span>
+                                    </div>
+                                    <div style=\"font-size: 16px; color: #5aa287; font-weight: 500;\">${val}%</div>
+                                  </div>
+                                  <div style=\"width: 100%; height: 8px; background: #f2f1ed; border-radius: 4px; overflow: hidden;\">
+                                    <div style=\"width: ${val}%; height: 100%; background: #5aa287;\"></div>
+                                  </div>
+                                </div>`;
+                              ]]]
+                        - type: custom:mushroom-template-card
+                          primary: Network
+                          secondary: "{{ states('sensor.pixel_10_network_type') }}"
+                          icon: mdi:wifi
+                          icon_color: green
+                          layout: horizontal
+                          card_mod:
+                            style: |
+                              ha-card { background: #f8f8f6; border-radius: 16px; margin-top: 24px; border: none; box-shadow: none; }
+                        - type: custom:mushroom-title-card
+                          title: Quick Actions
+                          card_mod:
+                            style: |
+                              ha-card { margin-top: 12px; }
+                        - type: custom:mushroom-template-card
+                          primary: Ring Device
+                          icon: mdi:bell-outline
+                          tap_action:
+                            action: call-service
+                            service: script.ring_pixel_10
+                          card_mod:
+                            style: |
+                              ha-card { background: white; border: 1px solid #f2f1ed; border-radius: 12px; box-shadow: none; }
+                        - type: custom:button-card
+                          show_icon: false
+                          show_name: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: "16px 0 0 0"]
+                          custom_fields:
+                            footer: |
+                              [[[
+                                const lastSeen = states['device_tracker.pixel_10'].last_changed;
+                                const date = new Date(lastSeen);
+                                const now = new Date();
+                                const diff = Math.floor((now - date) / 60000);
+                                const timeStr = diff < 1 ? 'Just now' : (diff < 60 ? `${diff}m ago` : `${Math.floor(diff/60)}h ago`);
+                                return `<div style=\"border-top: 1px solid #f2f1ed; padding-top: 12px; font-size: 14px; color: #9CA3AF;\">
+                                  Last seen: ${timeStr} • Model: Pixel 10
+                                </div>`;
+                              ]]]
 
           # Small iPad
           - type: conditional
@@ -1214,7 +1308,106 @@ home_hub_devices_main:
                 device_color: '#3B82F6'
                 battery_entity: sensor.benjamins_ipad_battery_level
               tap_action:
-                action: more-info
+                action: fire-dom-event
+                browser_mod:
+                  service: browser_mod.popup
+                  data:
+                    title: Small iPad
+                    content:
+                      type: vertical-stack
+                      cards:
+                        - type: custom:button-card
+                          show_icon: false
+                          show_name: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: 0]
+                            grid:
+                              - grid-template-areas: '"icon title"'
+                              - grid-template-columns: 80px 1fr
+                            custom_fields:
+                              icon: [justify-self: start]
+                              title: [justify-self: start, align-self: center]
+                          custom_fields:
+                            icon: |
+                              [[[
+                                return `<div style=\"width: 64px; height: 64px; background: #f8f8f6; border-radius: 16px; display: flex; align-items: center; justify-content: center;\">
+                                  <ha-icon icon=\"mdi:tablet-ipad\" style=\"--mdc-icon-size: 32px; color: #3B82F6;\"></ha-icon>
+                                </div>`;
+                              ]]]
+                            title: |
+                              [[[
+                                const tracker = states['device_tracker.benjamins_ipad'];
+                                const status = (tracker && tracker.state !== 'unavailable' && tracker.state !== 'unknown') ? 'Online' : 'Offline';
+                                return `<div style=\"display: flex; flex-direction: column;\">
+                                  <div style=\"font-size: 24px; font-weight: 600; color: #1F2937;\">Small iPad</div>
+                                  <div style=\"font-size: 16px; color: #9CA3AF;\">${status}</div>
+                                </div>`;
+                              ]]]
+                        - type: custom:button-card
+                          entity: sensor.benjamins_ipad_battery_level
+                          show_name: false
+                          show_icon: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: "24px 0 0 0"]
+                            custom_fields:
+                              bar: [width: 100%]
+                          custom_fields:
+                            bar: |
+                              [[[
+                                const val = entity.state;
+                                return `<div style=\"display: flex; flex-direction: column; gap: 8px;\">
+                                  <div style=\"display: flex; justify-content: space-between; align-items: center;\">
+                                    <div style=\"display: flex; align-items: center; gap: 8px; font-size: 16px; color: #1F2937;\">
+                                      <ha-icon icon=\"mdi:battery\" style=\"--mdc-icon-size: 20px; color: #5aa287;\"></ha-icon>
+                                      <span>Battery</span>
+                                    </div>
+                                    <div style=\"font-size: 16px; color: #5aa287; font-weight: 500;\">${val}%</div>
+                                  </div>
+                                  <div style=\"width: 100%; height: 8px; background: #f2f1ed; border-radius: 4px; overflow: hidden;\">
+                                    <div style=\"width: ${val}%; height: 100%; background: #5aa287;\"></div>
+                                  </div>
+                                </div>`;
+                              ]]]
+                        - type: custom:mushroom-template-card
+                          primary: Network
+                          secondary: "{{ states('sensor.benjamins_ipad_connection_type') }}"
+                          icon: mdi:wifi
+                          icon_color: green
+                          layout: horizontal
+                          card_mod:
+                            style: |
+                              ha-card { background: #f8f8f6; border-radius: 16px; margin-top: 24px; border: none; box-shadow: none; }
+                        - type: custom:mushroom-title-card
+                          title: Quick Actions
+                          card_mod:
+                            style: |
+                              ha-card { margin-top: 12px; }
+                        - type: custom:mushroom-template-card
+                          primary: Ring Device
+                          icon: mdi:bell-outline
+                          tap_action:
+                            action: call-service
+                            service: script.ring_small_ipad
+                          card_mod:
+                            style: |
+                              ha-card { background: white; border: 1px solid #f2f1ed; border-radius: 12px; box-shadow: none; }
+                        - type: custom:button-card
+                          show_icon: false
+                          show_name: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: "16px 0 0 0"]
+                          custom_fields:
+                            footer: |
+                              [[[
+                                const lastSeen = states['device_tracker.benjamins_ipad'].last_changed;
+                                const date = new Date(lastSeen);
+                                const now = new Date();
+                                const diff = Math.floor((now - date) / 60000);
+                                const timeStr = diff < 1 ? 'Just now' : (diff < 60 ? `${diff}m ago` : `${Math.floor(diff/60)}h ago`);
+                                return `<div style=\"border-top: 1px solid #f2f1ed; padding-top: 12px; font-size: 14px; color: #9CA3AF;\">
+                                  Last seen: ${timeStr} • Model: iPad mini
+                                </div>`;
+                              ]]]
 
           # Big iPad
           - type: conditional
@@ -1235,7 +1428,106 @@ home_hub_devices_main:
                 device_color: '#3B82F6'
                 battery_entity: sensor.ipad_battery_level
               tap_action:
-                action: more-info
+                action: fire-dom-event
+                browser_mod:
+                  service: browser_mod.popup
+                  data:
+                    title: Big iPad
+                    content:
+                      type: vertical-stack
+                      cards:
+                        - type: custom:button-card
+                          show_icon: false
+                          show_name: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: 0]
+                            grid:
+                              - grid-template-areas: '"icon title"'
+                              - grid-template-columns: 80px 1fr
+                            custom_fields:
+                              icon: [justify-self: start]
+                              title: [justify-self: start, align-self: center]
+                          custom_fields:
+                            icon: |
+                              [[[
+                                return `<div style=\"width: 64px; height: 64px; background: #f8f8f6; border-radius: 16px; display: flex; align-items: center; justify-content: center;\">
+                                  <ha-icon icon=\"mdi:tablet-ipad\" style=\"--mdc-icon-size: 32px; color: #3B82F6;\"></ha-icon>
+                                </div>`;
+                              ]]]
+                            title: |
+                              [[[
+                                const tracker = states['device_tracker.ipad'];
+                                const status = (tracker && tracker.state !== 'unavailable' && tracker.state !== 'unknown') ? 'Online' : 'Offline';
+                                return `<div style=\"display: flex; flex-direction: column;\">
+                                  <div style=\"font-size: 24px; font-weight: 600; color: #1F2937;\">Big iPad</div>
+                                  <div style=\"font-size: 16px; color: #9CA3AF;\">${status}</div>
+                                </div>`;
+                              ]]]
+                        - type: custom:button-card
+                          entity: sensor.ipad_battery_level
+                          show_name: false
+                          show_icon: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: "24px 0 0 0"]
+                            custom_fields:
+                              bar: [width: 100%]
+                          custom_fields:
+                            bar: |
+                              [[[
+                                const val = entity.state;
+                                return `<div style=\"display: flex; flex-direction: column; gap: 8px;\">
+                                  <div style=\"display: flex; justify-content: space-between; align-items: center;\">
+                                    <div style=\"display: flex; align-items: center; gap: 8px; font-size: 16px; color: #1F2937;\">
+                                      <ha-icon icon=\"mdi:battery\" style=\"--mdc-icon-size: 20px; color: #5aa287;\"></ha-icon>
+                                      <span>Battery</span>
+                                    </div>
+                                    <div style=\"font-size: 16px; color: #5aa287; font-weight: 500;\">${val}%</div>
+                                  </div>
+                                  <div style=\"width: 100%; height: 8px; background: #f2f1ed; border-radius: 4px; overflow: hidden;\">
+                                    <div style=\"width: ${val}%; height: 100%; background: #5aa287;\"></div>
+                                  </div>
+                                </div>`;
+                              ]]]
+                        - type: custom:mushroom-template-card
+                          primary: Network
+                          secondary: "{{ states('sensor.ipad_connection_type') }}"
+                          icon: mdi:wifi
+                          icon_color: green
+                          layout: horizontal
+                          card_mod:
+                            style: |
+                              ha-card { background: #f8f8f6; border-radius: 16px; margin-top: 24px; border: none; box-shadow: none; }
+                        - type: custom:mushroom-title-card
+                          title: Quick Actions
+                          card_mod:
+                            style: |
+                              ha-card { margin-top: 12px; }
+                        - type: custom:mushroom-template-card
+                          primary: Ring Device
+                          icon: mdi:bell-outline
+                          tap_action:
+                            action: call-service
+                            service: script.ring_big_ipad
+                          card_mod:
+                            style: |
+                              ha-card { background: white; border: 1px solid #f2f1ed; border-radius: 12px; box-shadow: none; }
+                        - type: custom:button-card
+                          show_icon: false
+                          show_name: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: "16px 0 0 0"]
+                          custom_fields:
+                            footer: |
+                              [[[
+                                const lastSeen = states['device_tracker.ipad'].last_changed;
+                                const date = new Date(lastSeen);
+                                const now = new Date();
+                                const diff = Math.floor((now - date) / 60000);
+                                const timeStr = diff < 1 ? 'Just now' : (diff < 60 ? `${diff}m ago` : `${Math.floor(diff/60)}h ago`);
+                                return `<div style=\"border-top: 1px solid #f2f1ed; padding-top: 12px; font-size: 14px; color: #9CA3AF;\">
+                                  Last seen: ${timeStr} • Model: iPad
+                                </div>`;
+                              ]]]
 
           # Printer
           - type: conditional
@@ -1255,7 +1547,85 @@ home_hub_devices_main:
                 device_color: '#5aa287'
                 status_text: 'Black Ink: 88%'
               tap_action:
-                action: more-info
+                action: fire-dom-event
+                browser_mod:
+                  service: browser_mod.popup
+                  data:
+                    title: Printer
+                    content:
+                      type: vertical-stack
+                      cards:
+                        - type: custom:button-card
+                          show_icon: false
+                          show_name: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: 0]
+                            grid:
+                              - grid-template-areas: '"icon title"'
+                              - grid-template-columns: 80px 1fr
+                            custom_fields:
+                              icon: [justify-self: start]
+                              title: [justify-self: start, align-self: center]
+                          custom_fields:
+                            icon: |
+                              [[[
+                                return `<div style=\"width: 64px; height: 64px; background: #f8f8f6; border-radius: 16px; display: flex; align-items: center; justify-content: center;\">
+                                  <ha-icon icon=\"mdi:printer\" style=\"--mdc-icon-size: 32px; color: #5aa287;\"></ha-icon>
+                                </div>`;
+                              ]]]
+                            title: |
+                              [[[
+                                return `<div style=\"display: flex; flex-direction: column;\">
+                                  <div style=\"font-size: 24px; font-weight: 600; color: #1F2937;\">Printer</div>
+                                  <div style=\"font-size: 16px; color: #9CA3AF;\">Brother MFC-J4335DW</div>
+                                </div>`;
+                              ]]]
+                        - type: custom:button-card
+                          show_icon: false
+                          show_name: false
+                          show_state: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: "24px 0 0 0"]
+                            grid:
+                              - grid-template-areas: '"toner"'
+                              - grid-template-columns: 1fr
+                            custom_fields:
+                              toner: [width: 100%]
+                          custom_fields:
+                            toner: |
+                              [[[
+                                const toners = [
+                                  { name: 'Black', entity: 'sensor.mfc_j4335dw_black_toner_remaining', color: '#1F2937' },
+                                  { name: 'Cyan', entity: 'sensor.mfc_j4335dw_cyan_toner_remaining', color: '#06B6D4' },
+                                  { name: 'Magenta', entity: 'sensor.mfc_j4335dw_magenta_toner_remaining', color: '#EC4899' },
+                                  { name: 'Yellow', entity: 'sensor.mfc_j4335dw_yellow_toner_remaining', color: '#EAB308' }
+                                ];
+                                let rows = toners.map(t => {
+                                  const val = states[t.entity] ? states[t.entity].state : '0';
+                                  return `<div style=\"display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;\">
+                                    <div style=\"display: flex; justify-content: space-between; align-items: center;\">
+                                      <div style=\"font-size: 14px; color: #1F2937;\">${t.name}</div>
+                                      <div style=\"font-size: 14px; color: ${t.color}; font-weight: 500;\">${val}%</div>
+                                    </div>
+                                    <div style=\"width: 100%; height: 8px; background: #f2f1ed; border-radius: 4px; overflow: hidden;\">
+                                      <div style=\"width: ${val}%; height: 100%; background: ${t.color}; border-radius: 4px;\"></div>
+                                    </div>
+                                  </div>`;
+                                }).join('');
+                                return `<div>${rows}</div>`;
+                              ]]]
+                        - type: custom:button-card
+                          show_icon: false
+                          show_name: false
+                          styles:
+                            card: [background: none, box-shadow: none, border: none, padding: "0"]
+                          custom_fields:
+                            footer: |
+                              [[[
+                                return `<div style=\"border-top: 1px solid #f2f1ed; padding-top: 12px; font-size: 14px; color: #9CA3AF;\">
+                                  Model: Brother MFC-J4335DW
+                                </div>`;
+                              ]]]
 
           # 3D Printer
           - type: conditional
@@ -1355,12 +1725,17 @@ home_hub_family_main:
       grid-column: 2
     card_mod:
       style: |
-        :host { padding: 24px 32px; background: #F9FAFB; min-height: calc(100vh - 48px); }
+        :host { padding: 24px 32px; background: #fbfaf9; min-height: calc(100vh - 48px); }
     cards:
       - type: custom:button-card
         template: home_hub_header
-        icon: mdi:account-group-outline
-        name: Family
+        name: Family Members
+
+      - type: custom:mushroom-title-card
+        subtitle: Select a family member to view their details
+        card_mod:
+          style: |
+            ha-card { margin-top: -8px; background: none; box-shadow: none; }
 
       - type: grid
         columns: 3
@@ -1393,35 +1768,11 @@ home_hub_family_main:
               person_color: '#4A7C59'
               person_initial: 'B'
             tap_action:
-              action: fire-dom-event
-              browser_mod:
-                service: browser_mod.popup
-                data:
-                  title: Ben
-                  content:
-                    type: vertical-stack
-                    cards:
-                      - type: custom:mushroom-title-card
-                        title: Ben
-                        subtitle: "Location: {{ states('person.ben') }}"
-                        card_mod:
-                          style: |
-                            ha-card { border-left: 4px solid #4A7C59; padding-left: 16px; background: rgba(74, 124, 89, 0.08); border-radius: 12px; margin-bottom: 12px; }
-                      - type: map
-                        entities:
-                          - entity: person.ben
-                        hours_to_show: 24
-                        card_mod:
-                          style: |
-                            ha-card { border-radius: 12px; height: 300px; }
-                      - type: custom:mushroom-template-card
-                        primary: Phone
-                        secondary: "{{ states('device_tracker.pixel_10') }}"
-                        icon: mdi:cellphone
-                        icon_color: green
-                        card_mod:
-                          style: |
-                            ha-card { border-radius: 12px; margin-top: 8px; }
+              action: navigate
+              navigation_path: /home-hub/ben
+            styles:
+              card:
+                - cursor: pointer
 
           - type: custom:button-card
             template: home_hub_person_card
@@ -1432,72 +1783,545 @@ home_hub_family_main:
               person_color: '#EC4899'
               person_initial: 'P'
             tap_action:
-              action: fire-dom-event
-              browser_mod:
-                service: browser_mod.popup
-                data:
-                  title: Petra
-                  content:
-                    type: vertical-stack
-                    cards:
-                      - type: custom:mushroom-title-card
-                        title: Petra
-                        subtitle: "Location: {{ states('person.petra') }}"
-                        card_mod:
-                          style: |
-                            ha-card { border-left: 4px solid #EC4899; padding-left: 16px; background: rgba(236, 72, 153, 0.08); border-radius: 12px; margin-bottom: 12px; }
-                      - type: map
-                        entities:
-                          - entity: person.petra
-                        hours_to_show: 24
-                        card_mod:
-                          style: |
-                            ha-card { border-radius: 12px; height: 300px; }
-                      - type: custom:mushroom-template-card
-                        primary: Phone
-                        secondary: "{{ states('device_tracker.sm_s918u') }}"
-                        icon: mdi:cellphone
-                        icon_color: pink
-                        card_mod:
-                          style: |
-                            ha-card { border-radius: 12px; margin-top: 8px; }
+              action: navigate
+              navigation_path: /home-hub/petra
+            styles:
+              card:
+                - cursor: pointer
 
-      - type: vertical-stack
+##############################################################################
+#                    Toby Main Content                                       #
+##############################################################################
+home_hub_toby_main:
+  card:
+    type: vertical-stack
+    view_layout:
+      grid-column: 2
+    card_mod:
+      style: |
+        :host { padding: 24px 32px; background: #fbfaf9; min-height: calc(100vh - 48px); }
+    cards:
+      - type: custom:button-card
+        template: home_hub_header
+        name: Toby's Corner
+
+      - type: grid
+        columns: 4
+        square: false
         card_mod:
           style: |
             ha-card { background: none; box-shadow: none; margin-top: 24px; }
         cards:
+          # School Checklist
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            styles:
+              card:
+                - background: white
+                - border-radius: 16px
+                - padding: 24px
+                - box-shadow: '0 1px 3px rgba(0,0,0,0.05)'
+                - height: 140px
+                - cursor: pointer
+                - border: '1px solid #F3F4F6'
+              grid:
+                - grid-template-areas: '"n" "i"'
+                - grid-template-rows: auto 1fr
+              custom_fields:
+                n: [justify-self: start, font-size: 16px, font-weight: 600, color: '#1F2937']
+                i: [justify-self: start, align-self: end]
+            custom_fields:
+              n: School
+              i: |
+                [[[
+                  return `<div style="width: 56px; height: 56px; background: rgba(59,130,246,0.12); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <ha-icon icon="mdi:school" style="--mdc-icon-size: 24px; color: #3B82F6;"></ha-icon>
+                  </div>`;
+                ]]]
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: School Checklist
+                  content:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-title-card
+                        title: School Checklist
+                        subtitle: Check off items as you pack
+                        card_mod:
+                          style: |
+                            ha-card { border-left: 4px solid #3B82F6; padding-left: 16px; background: rgba(59, 130, 246, 0.08); border-radius: 12px; margin-bottom: 12px; }
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.school_snack
+                        name: Snack
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.school_lunch
+                        name: Lunch
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.school_water
+                        name: Water bottle
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.school_jacket
+                        name: Jacket
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.school_binder
+                        name: Binder
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.school_chromebook
+                        name: Chromebook
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.school_homework
+                        name: Homework
+                        tap_action:
+                          action: toggle
+
+          # Swimming Checklist
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            styles:
+              card:
+                - background: white
+                - border-radius: 16px
+                - padding: 24px
+                - box-shadow: '0 1px 3px rgba(0,0,0,0.05)'
+                - height: 140px
+                - cursor: pointer
+                - border: '1px solid #F3F4F6'
+              grid:
+                - grid-template-areas: '"n" "i"'
+                - grid-template-rows: auto 1fr
+              custom_fields:
+                n: [justify-self: start, font-size: 16px, font-weight: 600, color: '#1F2937']
+                i: [justify-self: start, align-self: end]
+            custom_fields:
+              n: Swimming
+              i: |
+                [[[
+                  return `<div style="width: 56px; height: 56px; background: rgba(6,182,212,0.12); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <ha-icon icon="mdi:pool" style="--mdc-icon-size: 24px; color: #06B6D4;"></ha-icon>
+                  </div>`;
+                ]]]
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: Swimming Checklist
+                  content:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-title-card
+                        title: Swimming Checklist
+                        subtitle: Check off items as you pack
+                        card_mod:
+                          style: |
+                            ha-card { border-left: 4px solid #06B6D4; padding-left: 16px; background: rgba(6, 182, 212, 0.08); border-radius: 12px; margin-bottom: 12px; }
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.swimming_bag
+                        name: Swim bag
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.swimming_shirt
+                        name: Swim shirt
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.swimming_trunks
+                        name: Swim trunks
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.swimming_goggles
+                        name: Goggles
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.swimming_towel
+                        name: Towel
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.swimming_sunscreen
+                        name: Sunscreen
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.swimming_water
+                        name: Water bottle
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.swimming_snack
+                        name: Snack
+                        tap_action:
+                          action: toggle
+
+          # Hockey Checklist
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            styles:
+              card:
+                - background: white
+                - border-radius: 16px
+                - padding: 24px
+                - box-shadow: '0 1px 3px rgba(0,0,0,0.05)'
+                - height: 140px
+                - cursor: pointer
+                - border: '1px solid #F3F4F6'
+              grid:
+                - grid-template-areas: '"n" "i"'
+                - grid-template-rows: auto 1fr
+              custom_fields:
+                n: [justify-self: start, font-size: 16px, font-weight: 600, color: '#1F2937']
+                i: [justify-self: start, align-self: end]
+            custom_fields:
+              n: Hockey
+              i: |
+                [[[
+                  return `<div style="width: 56px; height: 56px; background: rgba(239,68,68,0.12); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <ha-icon icon="mdi:hockey-sticks" style="--mdc-icon-size: 24px; color: #EF4444;"></ha-icon>
+                  </div>`;
+                ]]]
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: Hockey Checklist
+                  content:
+                    type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-title-card
+                        title: Hockey Checklist
+                        subtitle: Check off items as you pack
+                        card_mod:
+                          style: |
+                            ha-card { border-left: 4px solid #EF4444; padding-left: 16px; background: rgba(239, 68, 68, 0.08); border-radius: 12px; margin-bottom: 12px; }
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.hockey_1
+                        name: Helmet
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.hockey_2
+                        name: Stick
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.hockey_3
+                        name: Shinguards
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.hockey_4
+                        name: Elbow Pads
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.hockey_5
+                        name: Skates
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.hockey_6
+                        name: Chestplate
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.hockey_jersey
+                        name: Jersey
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.hockey_7
+                        name: Water bottle
+                        tap_action:
+                          action: toggle
+                      - type: custom:mushroom-entity-card
+                        entity: input_boolean.hockey_8
+                        name: Snack
+                        tap_action:
+                          action: toggle
+
+          # I'm Bored
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            styles:
+              card:
+                - background: white
+                - border-radius: 16px
+                - padding: 24px
+                - box-shadow: '0 1px 3px rgba(0,0,0,0.05)'
+                - height: 140px
+                - cursor: pointer
+                - border: '1px solid #F3F4F6'
+              grid:
+                - grid-template-areas: '"n" "i"'
+                - grid-template-rows: auto 1fr
+              custom_fields:
+                n: [justify-self: start, font-size: 16px, font-weight: 600, color: '#1F2937']
+                i: [justify-self: start, align-self: end]
+            custom_fields:
+              n: I'm Bored
+              i: |
+                [[[
+                  return `<div style="width: 56px; height: 56px; background: rgba(245,158,11,0.12); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <ha-icon icon="mdi:dice-multiple" style="--mdc-icon-size: 24px; color: #F59E0B;"></ha-icon>
+                  </div>`;
+                ]]]
+            tap_action:
+              action: navigate
+              navigation_path: /tablet-dashboard/toby-bored
+
+      # Room Controls
+      - type: vertical-stack
+        card_mod:
+          style: |
+            ha-card { background: none; box-shadow: none; margin-top: 32px; }
+        cards:
           - type: custom:mushroom-title-card
-            title: Location Overview
-            subtitle: Where is everyone?
-          - type: map
-            entities:
-              - entity: person.ben
-              - entity: person.petra
-              - entity: person.toby
-            hours_to_show: 24
+            title: Room Controls
+            subtitle: Control lights in Toby's room
 
-          - type: vertical-stack
+          - type: horizontal-stack
             cards:
-              - type: custom:mushroom-template-card
-                primary: Family Todo
-                secondary: Family tasks and reminders
-                icon: mdi:checkbox-marked-outline
-                icon_color: blue
+              - type: custom:mushroom-light-card
+                entity: light.toby_s_room
+                name: Room Light
+                icon: mdi:ceiling-light
+                show_brightness_control: true
+                show_color_temp_control: true
                 card_mod:
                   style: |
-                    ha-card { margin-bottom: 8px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-                    .icon { background: rgba(59, 130, 246, 0.1) !important; }
+                    ha-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
-              - type: todo-list
-                entity: todo.google_keep_family_todo
-                hide_completed: true
+              - type: custom:mushroom-light-card
+                entity: light.dimmable_light_1
+                name: Toby's Lamp
+                icon: mdi:lamp
+                show_brightness_control: true
                 card_mod:
                   style: |
-                    ha-card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #3B82F6; }
-                    .add-item { padding: 16px; border-bottom: 1px solid #F3F4F6; }
-                    .add-item ha-icon { color: #3B82F6; }
-                    .items { padding: 8px 16px; }
+                    ha-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+              - type: custom:mushroom-template-card
+                primary: Temperature
+                secondary: "{{ states('sensor.toby_s_room_temp_temperature_2') }}°F"
+                icon: mdi:thermometer
+                icon_color: >
+                  {% set temp = states('sensor.toby_s_room_temp_temperature_2') | float %}
+                  {% if temp < 65 %}blue
+                  {% elif temp < 75 %}orange
+                  {% else %}red{% endif %}
+                card_mod:
+                  style: |
+                    ha-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+##############################################################################
+#                    Ben Main Content                                        #
+##############################################################################
+home_hub_ben_main:
+  card:
+    type: vertical-stack
+    view_layout:
+      grid-column: 2
+    card_mod:
+      style: |
+        :host { padding: 24px 32px; background: #fbfaf9; min-height: calc(100vh - 48px); }
+    cards:
+      - type: custom:button-card
+        template: home_hub_header
+        name: Ben
+
+      - type: grid
+        columns: 2
+        square: false
+        card_mod:
+          style: |
+            ha-card { background: none; box-shadow: none; margin-top: 24px; }
+        cards:
+          # Today's Agenda
+          - type: custom:mushroom-template-card
+            primary: Next Event
+            secondary: >
+              {{ state_attr('calendar.home_calendar', 'message') | default('No upcoming events') }}
+            icon: mdi:calendar-today
+            icon_color: green
+            card_mod:
+              style: |
+                ha-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #F3F4F6; }
+
+          # 3D Printer Status
+          - type: custom:mushroom-template-card
+            primary: 3D Printer
+            secondary: >
+              {% if states('sensor.centauri_carbon_print_status') == 'printing' %}
+                Printing: {{ states('sensor.centauri_carbon_percent_complete') }}%
+              {% else %}
+                {{ states('sensor.centauri_carbon_print_status') | title }}
+              {% endif %}
+            icon: mdi:printer-3d
+            icon_color: green
+            card_mod:
+              style: |
+                ha-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #F3F4F6; }
+
+      # Coming Soon section
+      - type: custom:mushroom-title-card
+        title: Coming Soon
+        subtitle: Future integrations
+        card_mod:
+          style: |
+            ha-card { margin-top: 32px; background: none; box-shadow: none; }
+
+      - type: grid
+        columns: 3
+        square: false
+        card_mod:
+          style: |
+            ha-card { background: none; box-shadow: none; margin-top: 8px; }
+        cards:
+          - type: custom:mushroom-template-card
+            primary: Daily Wisdom
+            icon: mdi:book-open-page-variant
+            card_mod:
+              style: |
+                ha-card { background: #f8f8f6; border: 1px dashed #D1D5DB; border-radius: 16px; opacity: 0.6; }
+          - type: custom:mushroom-template-card
+            primary: Todo List
+            icon: mdi:checkbox-marked-outline
+            card_mod:
+              style: |
+                ha-card { background: #f8f8f6; border: 1px dashed #D1D5DB; border-radius: 16px; opacity: 0.6; }
+          - type: custom:mushroom-template-card
+            primary: Commute
+            icon: mdi:car
+            card_mod:
+              style: |
+                ha-card { background: #f8f8f6; border: 1px dashed #D1D5DB; border-radius: 16px; opacity: 0.6; }
+          - type: custom:mushroom-template-card
+            primary: Health
+            icon: mdi:heart-pulse
+            card_mod:
+              style: |
+                ha-card { background: #f8f8f6; border: 1px dashed #D1D5DB; border-radius: 16px; opacity: 0.6; }
+          - type: custom:mushroom-template-card
+            primary: Server Stats
+            icon: mdi:server
+            card_mod:
+              style: |
+                ha-card { background: #f8f8f6; border: 1px dashed #D1D5DB; border-radius: 16px; opacity: 0.6; }
+
+##############################################################################
+#                    Petra Main Content                                      #
+##############################################################################
+home_hub_petra_main:
+  card:
+    type: vertical-stack
+    view_layout:
+      grid-column: 2
+    card_mod:
+      style: |
+        :host { padding: 24px 32px; background: #fbfaf9; min-height: calc(100vh - 48px); }
+    cards:
+      - type: custom:button-card
+        template: home_hub_header
+        name: Petra
+
+      - type: grid
+        columns: 2
+        square: false
+        card_mod:
+          style: |
+            ha-card { background: none; box-shadow: none; margin-top: 24px; }
+        cards:
+          # Today's Agenda
+          - type: custom:mushroom-template-card
+            primary: Next Event
+            secondary: >
+              {{ state_attr('calendar.home_calendar', 'message') | default('No upcoming events') }}
+            icon: mdi:calendar-today
+            icon_color: pink
+            card_mod:
+              style: |
+                ha-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #F3F4F6; }
+
+          # Weather
+          - type: custom:mushroom-template-card
+            primary: Weather
+            secondary: >
+              {{ states('weather.pirateweather') | title }} • {{ state_attr('weather.pirateweather', 'temperature') }}°F
+            icon: mdi:weather-partly-cloudy
+            icon_color: amber
+            card_mod:
+              style: |
+                ha-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #F3F4F6; }
+
+          # This Week's Meals
+          - type: custom:mushroom-template-card
+            primary: This Week's Meals
+            secondary: >
+              {% set meals = state_attr('sensor.mealie_weekly_meal_plan', 'meals') | default([]) %}
+              {% set assigned = meals | selectattr('recipe_name', 'ne', '') | list | count %}
+              {{ assigned }} dinners planned
+            icon: mdi:silverware-fork-knife
+            icon_color: green
+            card_mod:
+              style: |
+                ha-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #F3F4F6; }
+
+      # Coming Soon section
+      - type: custom:mushroom-title-card
+        title: Coming Soon
+        subtitle: Future integrations
+        card_mod:
+          style: |
+            ha-card { margin-top: 32px; background: none; box-shadow: none; }
+
+      - type: grid
+        columns: 3
+        square: false
+        card_mod:
+          style: |
+            ha-card { background: none; box-shadow: none; margin-top: 8px; }
+        cards:
+          - type: custom:mushroom-template-card
+            primary: Tide Times
+            icon: mdi:waves
+            card_mod:
+              style: |
+                ha-card { background: #f8f8f6; border: 1px dashed #D1D5DB; border-radius: 16px; opacity: 0.6; }
+          - type: custom:mushroom-template-card
+            primary: Photography
+            icon: mdi:camera
+            card_mod:
+              style: |
+                ha-card { background: #f8f8f6; border: 1px dashed #D1D5DB; border-radius: 16px; opacity: 0.6; }
+          - type: custom:mushroom-template-card
+            primary: Todo List
+            icon: mdi:checkbox-marked-outline
+            card_mod:
+              style: |
+                ha-card { background: #f8f8f6; border: 1px dashed #D1D5DB; border-radius: 16px; opacity: 0.6; }
 
 ##############################################################################
 #                    Meals Main Content                                      #

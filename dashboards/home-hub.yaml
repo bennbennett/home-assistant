@@ -39,3 +39,5 @@ views:
   - !include home-hub/views/devices.yaml
   - !include home-hub/views/family.yaml
   - !include home-hub/views/toby.yaml
+  - !include home-hub/views/ben.yaml
+  - !include home-hub/views/petra.yaml
