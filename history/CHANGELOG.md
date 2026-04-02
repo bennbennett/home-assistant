@@ -2,6 +2,25 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 1, 2026]
+
+### Added
+- **Tasks & Lists view** — Two-column layout with Shopping List and Family Todo side by side, each with sage green icon headers and active item counts. Shows both active and completed items matching the mockup
+- **Device popups for all devices** — Pixel 10, Small iPad, Big iPad, and Printer now open styled popups instead of default HA more-info. Phones/tablets show battery bar, network status, and Ring Device button. Printer shows 4 CMYK toner level bars (Black, Cyan, Magenta, Yellow)
+- **Ring Device scripts** — `script.ring_iphone`, `script.ring_pixel_10`, `script.ring_small_ipad`, `script.ring_big_ipad`. iOS uses critical notification (plays sound even in silent mode). Android uses alarm_stream channel
+- **Family member subpages** — Each family member gets a full subpage navigated from the Family gateway:
+  - **Toby** (`/home-hub/toby`): School, Swimming, Hockey checklists + "I'm Bored" activity randomizer + Room Controls (lights + temperature)
+  - **Ben** (`/home-hub/ben`): Next Event from calendar + 3D Printer status + "Coming Soon" placeholders for Daily Wisdom, Todo List, Commute, Health, Server Stats
+  - **Petra** (`/home-hub/petra`): Next Event + Weather + This Week's Meals + "Coming Soon" placeholders for Tide Times, Photography, Todo List
+- **Skill routing rules** added to CLAUDE.md for gstack skill auto-invocation
+
+### Changed
+- **Family gateway simplified** — Removed Location Overview map and Family Todo list (now on Tasks view). Changed Ben/Petra from popup to navigate action. Header updated to "Family Members" with subtitle
+- **Toby view converted** — Migrated from old `max-content` sidebar pattern to standard 198px/64px decluttering template pattern, matching all other Home Hub views
+- **iPhone popup cleaned up** — Removed broken `script.find_iphone` (replaced with `script.ring_iphone`), removed Location section, removed Play Sound/Lock Device/Sync Now quick actions (only Ring Device remains)
+- **Garmin watch group** — Updated `groups.yaml` to reference `script.ring_iphone` (was `script.find_iphone`)
+- **Background color fix** — Tasks, Devices, and Family views updated from `#F9FAFB` to `#fbfaf9` to match all other Home Hub views
+
 ## [March 25, 2026]
 
 ### Changed

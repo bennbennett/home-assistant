@@ -287,6 +287,8 @@ Mount Samba share: `open "smb://192.168.68.114/config"`
 | `/Volumes/config/dashboards/button_card_templates.yaml` | Card templates |
 | `/Volumes/config/dashboards/home-hub.yaml` | Home Hub dashboard (includes kiosk_mode config) |
 | `/Volumes/config/dashboards/home-hub/` | Home Hub templates and views |
+| `/Volumes/config/dashboards/home-hub/views/ben.yaml` | Ben's personal subpage |
+| `/Volumes/config/dashboards/home-hub/views/petra.yaml` | Petra's personal subpage |
 | `/Volumes/config/www/kiosk-mode/kiosk-mode.js` | Kiosk mode JS (hides HA chrome on Home Hub) |
 
 ## Common Tasks
@@ -542,14 +544,24 @@ What we changed (Mar 25, 2026 — Calendar View Redesign):
 
 **Mockups location:** `/examples/mockup/` (rooms.png, calendar.png, devices.png, etc.)
 
+What we changed (Apr 1, 2026):
+- **Tasks & Lists view redesigned**: Two-column layout with Shopping List (`todo.google_keep_shopping_list`) and Family Todo (`todo.google_keep_family_todo`) using mushroom headers with "X active" counts and sage green accents. `hide_completed: false` shows both active and completed items.
+- **Devices view popups**: Added styled popups for Pixel 10, Small iPad, Big iPad, and Printer (previously used default `more-info`). Each phone/tablet popup shows battery bar, network, Ring Device button, and footer. Printer popup shows 4 CMYK toner level bars. Fixed iPhone popup: replaced broken `script.find_iphone` with `script.ring_iphone`, removed Location section, removed Play Sound/Lock/Sync quick actions.
+- **Ring Device scripts**: Created `script.ring_iphone`, `script.ring_pixel_10`, `script.ring_small_ipad`, `script.ring_big_ipad` in `scripts.yaml`. iOS uses critical notification with sound. Android uses alarm_stream channel.
+- **groups.yaml**: Updated Garmin watch group to reference `script.ring_iphone` (was `script.find_iphone`).
+- **Family view redesigned**: Gateway page simplified to 3 person cards with navigate actions (removed Location Overview map and Family Todo, which now lives on Tasks view). Header changed to "Family Members" with subtitle.
+- **Family subpages**: All 3 family members get full subpages. Toby (`/home-hub/toby`) converted from old `max-content` sidebar to standard pattern, content moved to `home_hub_toby_main` decluttering template. Ben (`/home-hub/ben`) new page with Next Event + 3D Printer status + "Coming Soon" placeholders for Daily Wisdom, Todo, Commute, Health, Server Stats. Petra (`/home-hub/petra`) new page with Next Event + Weather + This Week's Meals + "Coming Soon" placeholders for Tide Times, Photography, Todo.
+- **Background fix**: Fixed `#F9FAFB` → `#fbfaf9` on Tasks, Devices, and Family views to match other Home Hub views.
+- **Skill routing**: Added `## Skill routing` section to CLAUDE.md for gstack skill auto-invocation.
+
 Key files:
 - Views: `/Volumes/config/dashboards/home-hub/views/*.yaml`
 - Button card templates: `/Volumes/config/dashboards/home-hub/button_card_templates.yaml`
 - Sidebars + decluttering templates: `/Volumes/config/dashboards/home-hub/decluttering_templates.yaml`
 - Sidebars toggled by: `input_boolean.sidebar_collapsed`
 
-Converted views (done): Rooms, Calendar, Tasks, Devices, Family, Meals
-Pending: Toby (still using old `max-content` pattern)
+Converted views (done): Rooms, Calendar, Tasks, Devices, Family, Meals, Toby, Ben, Petra
+All views now use the standard sidebar pattern. No pending conversions.
 
 Pattern per view (panel view):
 ```
@@ -606,6 +618,26 @@ User must authenticate the Samba dialog when it appears.
 1. Go to HA web UI > Profile > Long-Lived Access Tokens
 2. Create new token
 3. Update `.env` with new HASS_TOKEN value
+
+## Skill routing
+
+When the user's request matches an available skill, ALWAYS invoke it using the Skill
+tool as your FIRST action. Do NOT answer directly, do NOT use other tools first.
+The skill has specialized workflows that produce better results than ad-hoc answers.
+
+Key routing rules:
+- Product ideas, "is this worth building", brainstorming → invoke office-hours
+- Bugs, errors, "why is this broken", 500 errors → invoke investigate
+- Ship, deploy, push, create PR → invoke ship
+- QA, test the site, find bugs → invoke qa
+- Code review, check my diff → invoke review
+- Update docs after shipping → invoke document-release
+- Weekly retro → invoke retro
+- Design system, brand → invoke design-consultation
+- Visual audit, design polish → invoke design-review
+- Architecture review → invoke plan-eng-review
+- Save progress, checkpoint, resume → invoke checkpoint
+- Code quality, health check → invoke health
 
 ## For More Information
 
