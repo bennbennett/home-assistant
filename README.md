@@ -46,7 +46,7 @@ cd /Users/bbennett/Documents/25_PERSONAL-Environment/home-assistant && source .e
 - **Home Assistant URL:** http://100.116.131.121:8123 (Tailscale)
 - **Token Name:** Claude MCP
 - **Location:** Home (America/Los_Angeles)
-- **Version:** 2025.7.1
+- **Version:** 2026.3.0
 
 ## Helper Script Usage
 
@@ -181,4 +181,4 @@ If `./hass-setup.sh` commands fail:
 - [Home Assistant Service Calls](https://www.home-assistant.io/docs/scripts/service-calls/)
 
 ---
-*Configuration saved on 2025-11-13*
+*Configuration saved on 2025-11-13. Last updated April 2026.*

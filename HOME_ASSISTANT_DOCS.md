@@ -1,5 +1,5 @@
 # Home Assistant Documentation & Reference
-*Last Updated: February 23, 2026 at 09:10 AM*
+*Last Updated: April 4, 2026*
 
 ## Quick Start for Claude Code
 
@@ -20,8 +20,12 @@ open "smb://192.168.68.114/config"
 /Volumes/config/
 ```
 
-## Most Recent Work (Jan 29, 2Y)
-## Most Recent Work (Feb 23, 2026)
+## Most Recent Work (Apr 4, 2026)
+✅ Unified design language across all Home Hub views (standardized border-radius, shadows, borders, padding, pills)
+✅ Fixed Mealie shopping list auto-sync bug (removed 20-min timer, sync now manual only)
+✅ Created HTML mockup of unified design (`examples/mockup/home-hub-unified.html`)
+
+## Previous Work (Feb 23, 2026)
 ✅ Refined Home Hub Meals view to closely match mockup screenshots
   - Added/updated weekly dinners container, day pills, and recipe card visual hierarchy
   - Added functional recipe search and category filters

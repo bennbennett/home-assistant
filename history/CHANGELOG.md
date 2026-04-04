@@ -2,6 +2,18 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 4, 2026]
+
+### Changed
+- **Design language unified across all Home Hub views** — Every page now shares the same card styling: `16px` border-radius, `1px solid #F3F4F6` border, `0 1px 3px rgba(0,0,0,0.05)` shadow, `20px` padding. Previously, Room cards used `24px` radius with no border, Device cards used `12px` radius with `24px` padding, and Person cards used a stronger `0.1` shadow. Filter/chip pills on the Devices view now match the Calendar and Rooms pill style (`22px` radius, `40px` height, `500` weight, `8px` gap)
+- **Popup accent bars added** to Bedroom (green `#5aa287`) and Outside (teal `#549f82`) popups, matching the pattern already used by Living Room, Kitchen, and Toby's Room popups
+
+### Fixed
+- **Mealie shopping list auto-sync removed** — The `mealie_google_keep_shopping_list_sync` automation was running every 20 minutes and re-adding stale Mealie grocery items to Google Keep even after they were manually cleared. Removed the `time_pattern` trigger so sync only happens when you press "Send to Keep"
+
+### Added
+- **HTML mockup** (`examples/mockup/home-hub-unified.html`) — Interactive mockup of all 6 Home Hub views (Rooms, Calendar, Tasks, Devices, Family, Meals) showing the unified design language. Switchable via bottom tab bar or sidebar navigation
+
 ## [April 1, 2026]
 
 ### Added

@@ -563,6 +563,38 @@ Key files:
 Converted views (done): Rooms, Calendar, Tasks, Devices, Family, Meals, Toby, Ben, Petra
 All views now use the standard sidebar pattern. No pending conversions.
 
+What we changed (Apr 4, 2026 — Design Unification + Mealie Fix):
+- **Mealie shopping list auto-sync removed**: Removed 20-minute `time_pattern` trigger from `mealie_google_keep_shopping_list_sync` automation. Sync now only fires when user explicitly presses "Send to Keep" via `input_button.sync_shopping_list`. This fixes the bug where clearing Google Keep items would be undone within 20 minutes by stale Mealie list items being re-synced.
+- **Unified design language across all Home Hub views**: Standardized card styling tokens so every page shares the same visual treatment:
+  - **Card border-radius**: Room cards `24px` → `16px`, Device cards `12px` → `16px`. All content cards now `16px`.
+  - **Card elevation**: All cards now use `box-shadow: 0 1px 3px rgba(0,0,0,0.05)` + `border: 1px solid #F3F4F6`. Removed `0.08` and `0.1` shadow variants. Added missing borders to room cards, person cards, calendar planner, and Toby room controls.
+  - **Card padding**: Device cards `24px` → `20px`, Toby checklist cards `24px` → `20px`. All content cards now `20px`.
+  - **Filter/chip pills**: Device filter pills standardized to match Calendar/Rooms: `border-radius: 22px`, `height: 40px`, `padding: 0 16px`, `font-weight: 500`, grid gap `8px`.
+  - **Popup accent bars**: Added missing accent bars to Bedroom (green `#5aa287`) and Outside (teal `#549f82`) popups.
+  - **Design system comment**: Fixed background color reference from `#F9FAFB` to `#fbfaf9` in `button_card_templates.yaml`.
+- **HTML mockup**: Created `examples/mockup/home-hub-unified.html` — interactive mockup of all 6 views showing the unified design language. Switchable via bottom tab bar or sidebar nav.
+
+**Standardized Design Tokens (Home Hub):**
+| Token | Value |
+|-------|-------|
+| Page background | `#fbfaf9` |
+| Card background | `#FFFFFF` |
+| Card border-radius | `16px` |
+| Card border | `1px solid #F3F4F6` |
+| Card shadow | `0 1px 3px rgba(0,0,0,0.05)` |
+| Card padding | `20px` (content cards) |
+| Pill border-radius | `22px` |
+| Pill height | `40px` |
+| Pill font-weight | `500` |
+| Pill grid gap | `8px` |
+| Text primary | `#1F2937` |
+| Text secondary | `#6B7280` |
+| Text muted | `#9CA3AF` |
+| Sage green primary | `#4A7C59` |
+| Sage green light | `#E8F0EA` |
+| Subtle border | `#E5E7EB` (pills, dividers) |
+| Card border | `#F3F4F6` (card edges) |
+
 Pattern per view (panel view):
 ```
 type: panel
