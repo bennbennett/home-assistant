@@ -9,7 +9,40 @@
 - Baseline (2026-04-07): **18/40** ("Functional but unrefined")
 - After Phase 1-4 (2026-04-07): **24/40** ("Solid")
 - After Phase 5 (2026-04-07 cont'd): **~28-30/40** estimate (next /critique to confirm)
+- After Phase 6 (2026-04-08): **~30-32/40** estimate (substance + clarity pass)
 - Target after all phases: **~33/40**
+
+---
+
+## Phase 6 — Substance & Clarity (2026-04-08)
+
+**Goal**: Card density issue from `/critique` — too much white space — solved with substance, not compression. Plus the leftover failure-state copy and a sidebar simplification pass.
+
+### `/harden` ✅ DONE 2026-04-08
+- [x] **Recipe Browser distinguishes Mealie offline from "no recipes"**: when `sensor.mealie_recipe_browser` is `unavailable`/`unknown`, the empty state now reads "Mealie is offline" with a terracotta crossed-circle icon (Fraunces title), instead of misleadingly suggesting the user import family favorites. Fix in `decluttering_templates.yaml` Recipe Browser JS template.
+- Toby's Lamp Zigbee badge — still hardware (deferred). Toby room sensor offline copy already shipped Phase 1.
+
+### `/extract` ✅ DONE 2026-04-08
+**Substance over compression** — added real information to cards that were 70% empty.
+- [x] **Room cards** now show a brightness % line ("65% bright" with sun icon) when the light is on with a brightness attribute. Fills the previously empty middle area. Falls back gracefully when no temp sensor.
+- [x] **Person cards** now show **up to 2 events** stacked under UP NEXT (with dashed divider), not just 1. Card height bumped 260→300px and avatar padding tightened (`30px 20px 20px` from `36px 20px 24px`).
+- Device cards already have battery in the sub line — left as-is.
+
+### `/onboard` — Ben subpage buildout ✅ DONE 2026-04-08
+Ben's page transformed from two anemic mushroom cards into a real personal dashboard:
+- [x] **Today's Agenda** (wide left, 1.4fr): rich JS-rendered list of work + personal events for today/tomorrow + active multi-day, with calendar dots (taupe = Work, olive = Personal). Filters `sensor.home_hub_upcoming_events` by `work_calendar` and `ben_personal`. Fraunces "Today's agenda" title + terracotta "Work · Personal" eyebrow. Empty state: "A clear day. Enjoy it." Tap → `/home-hub/calendar`.
+- [x] **3D Printer card** (right, 1fr): Fraunces title + status pill (sage when complete, honey when printing, gray when idle). Switches between **printing state** (38px % readout, fill bar, time-left, layer counter, file name) and **idle/complete state** (file name, nozzle/bed temps in °F).
+- [x] **Glance stats strip** (bottom): Steps today (with `% of 8k goal`), iPhone battery, iPad battery — Fraunces 26px values with sage/honey/terracotta thresholds (<20% = terracotta, <50% = honey, ≥50% = sage). Charging state in sublabel.
+- Petra subpage **deferred** until intentional product convo with user. The earlier speculative ideas (commute, tides, photography, Walmart helper) explicitly NOT shipped.
+
+### `/distill` — Sidebar simplification ✅ DONE 2026-04-08
+- [x] **Dropped sidebar weather widget** from both expanded and collapsed sidebars. The Right Now landing already shows the rich weather card; other views can navigate Home if they want it. Removes the duplication called out in `/critique`.
+- [x] **Collapsed sidebar nav now has tiny labels** ("Home", "Cal", "Tasks", "Meals", "Rooms", "Devices", "Family") under each icon. Tile bumped from 44×44 to 52×56px. Recognition no longer depends on icon literacy alone — significant accessibility win for kitchen-glance use.
+
+### `/polish`
+- [x] Lovelace reloaded
+- [x] Action plan updated (this section)
+- [ ] User to verify on iPad (hard refresh) and re-run `/critique` for score
 
 ---
 
