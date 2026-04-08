@@ -2,6 +2,29 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 7, 2026 — Phase 5: Coherence pass]
+
+After the Editorial Kitchen redesign (Phases 1-4) landed at 24/40, `/critique` flagged two issues that broke the warm direction even though everything else was working: the calendar repeated multi-day events as identical pills across every cell, and the Rooms/Devices/Family icons were still in a leftover Material UI rainbow that didn't sit in the Editorial Kitchen palette. Phase 5 fixes both.
+
+### Changed
+- **Calendar week + month views: multi-day events render once instead of seven times.** "ben - spring break" used to fill seven identical "Entire day" pills across the row. Now it appears once on its start day with a clean date range. Same for "Toby spring break". Two actual events now look like two events instead of fourteen visual elements
+- **Calendar uses 12-hour AM/PM time** matching the Right Now clock and the hourly forecast. "17:25 - 17:55" → "5:25 PM - 5:55 PM". Time labels are also small uppercase gray now so the event title gets visual priority
+- **Calendar drops the redundant "Yesterday/Tomorrow/Thursday" labels** next to day numbers. Today gets a single "TODAY" terracotta eyebrow under the number — one source of "now" signaling instead of two
+- **Long calendar event titles truncate to 2 lines** with ellipsis instead of pushing cells to absurd heights
+- **Right Now agenda — present-tense labels.** "Until Mon" → "Through Mon" feels more current
+- **Right Now agenda — Outlook metadata stripped from event titles.** "Stay at Misty Mountain Chalet- Pets•EV•Trails•Views•2acres" now displays as "Stay at Misty Mountain Chalet". Long titles also ellipsis-truncate cleanly
+- **Unified warm icon palette across Rooms, Devices, and Family.** Six colors that all sit in the warm Editorial Kitchen spectrum: sage for Living Room/tablets/batteries, terracotta for Front House/phones/Petra, honey for Kitchen/printers, taupe for Bedroom/work calendar, clay for Toby's Room/Toby avatar/school tile, olive for Outside/ben_personal calendar. Walking from one view to another now feels like one designed system instead of a Material UI grab bag
+- **Room cards get tinted tile backgrounds** matching their icon color (14% alpha). Each room is identifiable at a glance AND the icon stays legible without fighting low-contrast strokes. Icon stroke bumped to 28px / weight 2.25 for stronger presence
+- **Hourly forecast night blocks no longer harsh black.** Replaced `#111` with warm dusk indigo `#3D3654`. Other forecast colors also slightly warmed (cloudy → warm tan, partlycloudy → softer day blue, sunny → honey yellow)
+- **Toby's avatar** changed from cold blue to clay (matches his room and his school tile)
+
+### Fixed
+- **week-planner-card v1.14.1 has a config bug** where the `multiDayTimeFormat` key is read as `_multiDayTimeFormat` (with underscore prefix) in the source. Set the YAML key WITH the underscore to actually apply the format. Documented inline so it doesn't get reverted
+- **`lovelace-hourly-weather` color variables can't be overridden via card-mod** because they're defined on `.main` inside `weather-bar`'s nested shadow root, which card-mod can't reach. Added a JS patcher to `home-hub-fonts.js` that walks the DOM, finds every `weather-bar` element, and injects a `<style>` tag directly into its shadow root. Runs on script load + every 1.5s to catch newly mounted elements
+
+### Required after pickup
+- **Hard refresh on the iPad once** (Safari → close tab → reopen) to pick up the new `home-hub-fonts.js` with the night-block patcher. Without that refresh, the iPad keeps showing black night blocks even though the patch is shipped to disk. Restarting HA also works (it re-busts `extra_module_url` cache)
+
 ## [April 4, 2026]
 
 ### Changed

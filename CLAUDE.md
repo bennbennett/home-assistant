@@ -15,9 +15,8 @@
 
 | Item | Value |
 |------|-------|
-| **HA URL (Local)** | `http://192.168.68.114:8123` |
-| **HA URL (Remote)** | `http://100.116.131.121:8123` (via Tailscale) |
-| **Tailscale IP** | `100.116.131.121` |
+| **HA URL** | `http://192.168.68.114:8123` (works home & remote — remote goes via bennett-server subnet route) |
+| **Tailscale access** | Via `bennett-server` (`100.68.225.20`) subnet route for `192.168.68.0/24`. HA's own Tailscale daemon (`100.116.131.121` / `homeassistant.tail7d68ca.ts.net`) is offline as of 2026-04-07. |
 | **3D Printer IP** | `192.168.68.103` (Elegoo Centauri Carbon) |
 | **Phone** | Pixel 10 (`notify.mobile_app_pixel_10`) |
 | **Credentials** | `.env` file (use `. .env` to load) |
@@ -29,30 +28,29 @@
 
 ## Remote Access (Away from Home)
 
-When not on the home network, you can still access HA config files via Tailscale:
+As of 2026-04-07, **the same URL works home and remote** — Tailscale delivers you transparently to the LAN via the bennett-server subnet route. No more separate "local IP" vs "Tailscale IP" switching.
 
-### 1. API Access (Always Works)
-The HA API works remotely via Tailscale. Use `$HASS_URL_REMOTE` from `.env`:
+### 1. API Access
 ```bash
 . .env
-curl -s -H "Authorization: Bearer $HASS_TOKEN" "$HASS_URL_REMOTE/api/"
+curl -s -H "Authorization: Bearer $HASS_TOKEN" "$HASS_URL/api/"
 ```
 
-### 2. Config File Access (Samba via Tailscale)
-Mount the Samba share using the Tailscale IP instead of the local IP:
-```bash
-# Remote mount (via Tailscale) - use when away from home
-open "smb://100.116.131.121/config"
+`$HASS_URL` in `.env` should be `http://192.168.68.114:8123` (same from home or remote). If `.env` still has a separate `$HASS_URL_REMOTE` pointing at `100.116.131.121`, that IP is dead — update or remove it.
 
-# Local mount - use when on home network
+### 2. Config File Access (Samba)
+```bash
 open "smb://192.168.68.114/config"
 ```
 
-Both mount to `/Volumes/config/`. User will need to authenticate the Samba dialog when it appears.
+Mounts to `/Volumes/config/`. Same URL whether home or away. User will need to authenticate the Samba dialog when it appears.
 
-**Requirements:**
-- Tailscale must be running and connected on the Mac
+**Requirements (remote only):**
+- Tailscale running on the Mac with `--accept-routes` enabled (`tailscale set --accept-routes=true`)
+- bennett-server's `192.168.68.0/24` subnet route approved in the Tailscale admin console (one-time)
 - Samba credentials (same as local access)
+
+**Why it works:** HA's own Tailscale daemon (`100.116.131.121`) has been offline since around 2026-04-07. Instead of relying on HA's direct Tailscale presence, bennett-server now acts as a subnet router advertising the whole `192.168.68.0/24` LAN into Tailscale. This is actually more robust — it survives HA crashes, DHCP lease changes, and Tailscale add-on failures on HA.
 
 ## Quick Start
 
@@ -62,14 +60,11 @@ If `/Volumes/config/` is not mounted, Claude should check network and mount:
 # Check if already mounted
 ls /Volumes/config/ 2>/dev/null && echo "Mounted" || echo "Not mounted"
 
-# If not mounted, check if on home network (local IP reachable)
-ping -c 1 -W 1 192.168.68.114 >/dev/null 2>&1 && echo "Home network" || echo "Remote"
+# Verify reachability (works home or via Tailscale subnet route when remote)
+ping -c 1 -W 1 192.168.68.114 >/dev/null 2>&1 && echo "Reachable" || echo "Unreachable — check Tailscale"
 
-# Mount using appropriate IP (user will authenticate the Samba dialog)
-# Home network:
+# Mount (same URL home and remote; user will authenticate the Samba dialog)
 open "smb://192.168.68.114/config"
-# Remote (Tailscale):
-open "smb://100.116.131.121/config"
 ```
 
 ### API and Commands
@@ -289,7 +284,9 @@ Mount Samba share: `open "smb://192.168.68.114/config"`
 | `/Volumes/config/dashboards/home-hub/` | Home Hub templates and views |
 | `/Volumes/config/dashboards/home-hub/views/ben.yaml` | Ben's personal subpage |
 | `/Volumes/config/dashboards/home-hub/views/petra.yaml` | Petra's personal subpage |
+| `/Volumes/config/dashboards/home-hub/views/right_now.yaml` | Right Now landing (default view, glance-first) |
 | `/Volumes/config/www/kiosk-mode/kiosk-mode.js` | Kiosk mode JS (hides HA chrome on Home Hub) |
+| `/Volumes/config/www/home-hub-fonts.js` | Loads Fraunces serif from Google Fonts + global animation keyframes (hh-pulse, hh-fade-in) |
 
 ## Common Tasks
 
@@ -563,6 +560,86 @@ Key files:
 Converted views (done): Rooms, Calendar, Tasks, Devices, Family, Meals, Toby, Ben, Petra
 All views now use the standard sidebar pattern. No pending conversions.
 
+What we changed (Apr 7, 2026 — Editorial Kitchen Redesign / `/critique` Phases 1-4):
+This was a multi-phase, score-driven redesign launched after `/critique` graded the dashboard 18/40 ("Functional but unrefined"). Direction: **Editorial Kitchen** — warm-neutral palette + Fraunces serif + glance-first landing. Source of truth: `CRITIQUE-ACTION-PLAN.md` in repo root.
+
+**Phase 1 — Cleanup (`/distill` + `/harden`):**
+- Re-enabled kiosk mode (uncommented `kiosk_mode: kiosk: true` in `home-hub.yaml` AND `/local/kiosk-mode/kiosk-mode.js` in `configuration.yaml` `extra_module_url` — both were stale-commented).
+- Deleted Coming Soon placeholders from Ben (5 cards) and Petra (3 cards) subpages.
+- Tasks count headers fixed: `state_attr('todo.x', 'items')` returned empty (attr doesn't exist on those entities); changed to `states('todo.x')` which returns active count directly. Set `hide_completed: true` on both todo-list cards to stop the 4000px-tall page.
+- Toby's `unavailable°F` literal text fixed via Jinja conditional showing "Sensor offline".
+- Devices view: `mdi:tablet-ipad` icon doesn't render in this MDI version → replaced with `mdi:tablet`.
+- Ben page Next Event fixed: switched from `calendar.home_calendar` to `calendar.ben_personal`.
+
+**Phase 2 — Glance + Warmth (`/onboard` + `/bolder` + `/arrange`):**
+- **Right Now landing page** (new default `/home-hub/right-now`, first view in `home-hub.yaml`): 132px Fraunces clock, Fraunces "Good evening, Bennetts" italic greeting, weather card, Tonight's Dinner card with terracotta icon, hourly forecast strip (HACS `lovelace-hourly-weather`), and a custom upcoming events list grouped by day with TODAY/TOMORROW/Weekday eyebrows.
+- **New entities**: `sensor.live_time`, `sensor.live_date_long`, `sensor.live_greeting` (30s `time_pattern` triggered template sensors in `configuration.yaml`); `sensor.home_hub_upcoming_events` (event-triggered template sensor populated by `home_hub_fetch_upcoming_events` automation that runs every 5 min calling `calendar.get_events` on home_calendar + ben_personal + work_calendar + birthdays_anniversaries).
+- **Family page redesign**: Replaced thin broken person cards (which referenced non-existent `person.toby`/`person.ben`/`person.petra`) with rich `home_hub_person_card` template — avatar circle, Fraunces serif name, UP NEXT block from filtered calendar. Per user feedback, the cards do NOT show home/away presence or phone battery (Bennetts know where each other are; battery isn't actionable). Each person filters by their primary calendar:
+  - Ben → `calendar.work_calendar` (his actual driver) + Outlook all-day normalization
+  - Petra → `calendar.home_calendar` (no personal HA calendar)
+  - Toby → `calendar.home_calendar` (no calendar — he's 10)
+- **Outlook all-day normalization**: Outlook (`work_calendar`) returns multi-day events as midnight-to-midnight TIMED events (not `all_day: True` like Google Calendar). The events automation now detects `'T00:00:00' in start_raw and end_raw` and normalizes them to `all_day: True` with YYYY-MM-DD start/end. Without this, "Out of office" displayed as "Thu · 12:00 AM" instead of "Through Apr 13".
+- **Multi-day event grouping**: Right Now agenda groups currently-active multi-day all-day events under TODAY (instead of their original start date) with "Until [day]" labels.
+- **Sidebar reorder**: Home (right-now landing) → Calendar → Tasks → Meals → Rooms (new — was "Home") → Devices → Family. "Home" now means the glance landing; Rooms is its own item.
+
+**Phase 3 — Visual Identity (`/typeset` + `/colorize` + `/clarify` + `/delight`):**
+- **Fraunces serif** (`/typeset`): Created `/Volumes/config/www/home-hub-fonts.js` that injects Google Fonts Fraunces (variable, opsz 9..144, weights 300-700) into the document head. Registered in `frontend.extra_module_url` as `/local/home-hub-fonts.js`. Applied to: all `home_hub_header` page titles (34px), Right Now hero greeting/AM-PM/date, Tonight's Dinner meal name, Coming Up agenda eyebrow, Room card titles, Person card display names, "Plan this week" Meals header, "Weekly dinners" + "Recipe browser" subheaders, Calendar header. Body and dense data stay system sans for legibility.
+- **Two-color discipline** (`/colorize`): Sage `#4A7C59` reserved for ACTION (buttons, nav, primary state); terracotta `#C87456` introduced for "current moment" (TODAY, TONIGHT, UP NEXT, today's day pill, calendar Today text). New tokens: `#FFF6F1` (terracotta tint), `#FCE9DE` (terracotta peach for active press / today badges).
+- **Friendlier copy** (`/clarify`): Removed "Family Members / Select a family member" robot subtitle. Person card empty states use friendly fallbacks ("No work events" / "A quiet day at home") instead of "Nothing scheduled". Date display shows "Apr 14 · 2:00 PM" instead of "Tue · 2:00 PM" for events more than 6 days out. Meals banner copy now reads "Pick this week's dinners from the recipes below ↓" (empty), "N more to go for the week" (partial), "Week's planned. Time to make the grocery list →" (full).
+- **Sidebar weather "Partlycloudy" bug fixed**: `home_hub_weather_expanded` template's condition formatter only handled dashed conditions; added explicit condMap so "partlycloudy" → "Partly cloudy".
+- **Animation moments** (`/delight`): Added `hh-pulse` and `hh-fade-in` keyframes globally via `home-hub-fonts.js` (with `prefers-reduced-motion` override). Person cards and room cards lift on hover (`translateY(-3px)` + softer shadow, `cubic-bezier(0.2, 0.9, 0.3, 1.2)` ease). Press feedback on `:active` (translateY(-1px) + scale(0.99)). Scene chips warm to terracotta on hover, snap-press on tap. Right Now's "TODAY" eyebrow has a 6px terracotta dot that pulses every 2.4s — drawing the eye without being demanding.
+
+**`button-card` reserved variables (memory)**: Don't use `html` OR `hass` as local variable names in JS templates — both conflict with built-ins and produce `Identifier 'X' has already been declared`. Use `output`, `result`, `haObj`, etc.
+
+**Live YAML reload trick (memory)**: For YAML-mode dashboards (`home-hub`), HA caches the parsed config. Force a hot-reload via the WebSocket trick `ha.hass.connection.sendMessagePromise({type: 'lovelace/config', url_path: 'home-hub', force: true})` instead of restarting HA. Useful for fast Playwright edit-verify loops. HA restart is the bulletproof fallback if the trick doesn't take.
+
+What we changed (Apr 7, 2026 cont'd — Phase 5: Coherence pass / `/clarify` + `/colorize`):
+After the Phase 1-4 redesign landed at 24/40, `/critique` flagged two P0 issues that broke the editorial direction even though everything else was working: (1) the calendar's repeating multi-day events, (2) the leftover Material-UI icon palette on Rooms/Devices/Family that didn't sit in the warm Editorial Kitchen system. Phase 5 fixed both.
+
+**Calendar refactor (`/clarify`):**
+- **Multi-day event repetition fixed.** Set `multiDayMode: single` on `custom:week-planner-card` (week + month views). "ben - spring break" was rendering as 7 identical "Entire day" pills across the row → now appears once on its start day. Same for "Toby spring break" (was 5+ cells → 1).
+- **week-planner-card v1.14.1 config bug**: the card source reads `e._multiDayTimeFormat` (with underscore prefix) instead of `e.multiDayTimeFormat` for the multi-day time format key. Set the YAML config key WITH the leading underscore — `_multiDayTimeFormat: "MMM d"` — to actually apply the format. Documented inline in `decluttering_templates.yaml` so it doesn't get reverted.
+- **12-hour AM/PM format everywhere.** Calendar week + month views now use `timeFormat: "h:mm a"` to match the Right Now clock and hourly forecast. "17:25 - 17:55" → "5:25 PM - 5:55 PM".
+- **"Entire day" prefix dropped** via `texts.fullDay: " "` override.
+- **Quieted time metadata.** Times in week + month views now render as small uppercase gray (`text-transform: uppercase, font-size: 10px, color: #9CA3AF`) so the title gets visual priority.
+- **Title clamping.** `-webkit-line-clamp: 2` truncates long titles cleanly instead of pushing cells to absurd heights.
+- **Day labels reformed.** Dropped the redundant relative labels ("Yesterday", "Tomorrow", "Thursday", "Friday") via `.container .day .date .text { display: none; }`. Today gets a single dedicated `TODAY` terracotta eyebrow under the number via `::after` pseudo-element. One source of "now" signaling instead of two.
+- **Right Now agenda — present-tense labels.** "Until Mon" → "Through Mon" in `home_hub_right_now_main`.
+- **Right Now agenda — raw bullet stripping.** Calendar event titles like `"Stay at Misty Mountain Chalet- Pets•EV•Trails•Views•2acres"` (Outlook metadata leak) now strip to `"Stay at Misty Mountain Chalet"`. Regex matches a dash-prefixed segment with bullet runs only — leaves normal titles like `"ben - spring break"` intact.
+- **Right Now agenda — title overflow.** Added `white-space: nowrap; overflow: hidden; text-overflow: ellipsis` to the title cell so long titles ellipsis-truncate cleanly.
+
+**Icon palette unification (`/colorize`):**
+Committed to a 6-color editorial palette where every color sits in the warm spectrum (no blues/purples/teals). The 6 colors all read as siblings from the same paint chip set, low-saturation warm-earth family.
+
+| Slot | Hex | Use |
+|---|---|---|
+| Sage | `#4A7C59` | Living Room, batteries, tablets, system primary action |
+| Terracotta | `#C87456` | Front House, phones, birthdays, Petra avatar, "current moment" |
+| Honey | `#B89254` | Kitchen, both printers (food/appliance warmth) |
+| Taupe | `#8E7065` | Bedroom, work_calendar dot |
+| Clay | `#9A6B47` | Toby's Room, Toby avatar, Toby school tile |
+| Olive | `#6E8E4D` | Outside, ben_personal calendar dot |
+| Dusk indigo | `#3D3654` | Hourly forecast night blocks (was harsh `#111`) |
+
+Touched:
+- **Room cards (6):** retinted Front House (was `#488cd0` blue → terracotta), Living Room (`#a386d7` purple → sage), Kitchen (`#5aa287` green → honey), Bedroom (`#5aa287` → taupe), Toby's Room (`#f4b143` → clay), Outside (`#549f82` → olive). All popup `mushroom-title-card` border-left accent colors updated to match.
+- **Tinted tile backgrounds.** The room icon tile derives its background from the room color at 14% alpha (`rgba(r, g, b, 0.14)`) instead of being a uniform `#f8f8f6`. Each room gets its own warm tile, and the icon stays legible without fighting low-contrast strokes. Icon bumped to 28px with stroke-width 2.25 for stronger presence.
+- **Device cards (6):** phones (iPhone, Pixel 10) → terracotta, tablets (Small iPad, Big iPad) → sage, both printers (Brother + Centauri Carbon) → honey, batteries → sage. Default `device_color` fallback in `home_hub_device_card` template also updated from `#a386d7` purple to `#4A7C59` sage.
+- **Family avatars:** Ben already sage, Petra already terracotta — Toby switched from blue `#3B82F6` to clay `#9A6B47` (matches his room and his school tile).
+- **Toby's Corner — School tile:** clay tile + clay icon (was blue). Other tiles (Swimming/Hockey/I'm Bored) intentionally kept their semantic colors — water=cyan, hockey=red, play=orange — kid-friendly is a feature.
+- **Right Now agenda calendar dots:** updated `calColors` map — `home_calendar` stays sage, `birthdays_anniversaries` already terracotta, `ben_personal` blue → olive, `work_calendar` purple → taupe.
+- **Calendar week + month views:** `birthdays_anniversaries` calendar color in week-planner-card config changed from purple `#9333EA` to terracotta `#C87456`. Legend dot reflects this.
+
+**Hourly forecast night-block fix (the gnarly one):**
+The `lovelace-hourly-weather` card defines its color variables on a `.main` selector inside `weather-bar`'s nested shadow root. card-mod can't reach into nested shadow roots from the parent — even setting the variable on the `weather-bar` host element with `!important` was overridden by the internal `.main` declaration. Solution: added a JS patcher to `home-hub-fonts.js` that walks the DOM, finds every `weather-bar` element, and injects a `<style>` tag directly into its shadow root with the warm overrides (clear-night → `#3D3654`, cloudy → `#B6B0A2`, partlycloudy → `#C6D8E8`, sunny → `#F5C57F`, plus matching foregrounds). Runs on script load + every 1.5s via `setInterval` to catch newly mounted weather-bar elements (e.g. when the hourly card re-renders).
+
+**Required for iPad pickup**: the new `home-hub-fonts.js` (with the night-block patcher) is browser-cached on the iPad. Either hard refresh once on the iPad (Safari → close tab → reopen), or restart HA so `extra_module_url` re-busts. Without that, the iPad keeps showing black night blocks even though the patch is shipped to disk.
+
+**New memory entries**:
+- **week-planner-card `_multiDayTimeFormat` underscore bug** (v1.14.1): config key requires underscore prefix to be read.
+- **Nested shadow root CSS variables**: `lovelace-hourly-weather`'s color vars live on `.main` inside `weather-bar`'s nested shadow root, not on `:host`. card-mod can't reach them — must inject `<style>` directly into that shadow root via JS.
+- **Tinted tile background pattern**: derive icon tile background from `rgba(r, g, b, 0.14)` of the icon color so each card gets its own warm tile and icons stay legible.
+
 What we changed (Apr 4, 2026 — Design Unification + Mealie Fix):
 - **Mealie shopping list auto-sync removed**: Removed 20-minute `time_pattern` trigger from `mealie_google_keep_shopping_list_sync` automation. Sync now only fires when user explicitly presses "Send to Keep" via `input_button.sync_shopping_list`. This fixes the bug where clearing Google Keep items would be undone within 20 minutes by stale Mealie list items being re-synced.
 - **Unified design language across all Home Hub views**: Standardized card styling tokens so every page shares the same visual treatment:
@@ -590,10 +667,22 @@ What we changed (Apr 4, 2026 — Design Unification + Mealie Fix):
 | Text primary | `#1F2937` |
 | Text secondary | `#6B7280` |
 | Text muted | `#9CA3AF` |
-| Sage green primary | `#4A7C59` |
-| Sage green light | `#E8F0EA` |
+| **Sage primary** | `#4A7C59` (action color: buttons, nav, primary state, Living Room, batteries, tablets) |
+| Sage light | `#E8F0EA` |
+| **Terracotta accent** | `#C87456` ("current moment" — TODAY/TONIGHT/UP NEXT — and Front House, phones, birthdays, Petra avatar) |
+| **Terracotta tint** | `#FFF6F1` (active scene chips, today day-pill bg) |
+| **Terracotta peach** | `#FCE9DE` (today badges, dinner card icon bg, active press) |
+| **Honey** | `#B89254` (Phase 5: Kitchen, Brother printer, Centauri Carbon — food/appliance warmth) |
+| **Taupe** | `#8E7065` (Phase 5: Bedroom, work_calendar dot — calm) |
+| **Clay** | `#9A6B47` (Phase 5: Toby's Room, Toby avatar, Toby school tile — kid-warm identity) |
+| **Olive** | `#6E8E4D` (Phase 5: Outside, ben_personal calendar — earth/garden) |
+| **Dusk indigo** | `#3D3654` (Phase 5: hourly forecast night blocks, replaces harsh `#111`) |
 | Subtle border | `#E5E7EB` (pills, dividers) |
 | Card border | `#F3F4F6` (card edges) |
+| **Display font** | `Fraunces` serif (variable, opsz 9..144, weights 300-700) — page headers, hero text, person names, room titles |
+| **Body font** | system-sans (legibility for dense data) |
+
+**Room icon palette** (one-line lookup): Front House → terracotta, Living Room → sage, Kitchen → honey, Bedroom → taupe, Toby's Room → clay, Outside → olive. Each room card derives its tile background from the icon color at 14% alpha.
 
 Pattern per view (panel view):
 ```
@@ -637,11 +726,12 @@ Small responses (single entity, `/api/` test endpoint) can be piped directly.
 # Check mount
 ls /Volumes/config/ 2>/dev/null || echo "Not mounted"
 
-# Mount it (local - on home network)
+# Mount (same URL home and remote — Tailscale subnet route via bennett-server when away)
 open "smb://192.168.68.114/config"
 
-# Mount it (remote - via Tailscale, when away from home)
-open "smb://100.116.131.121/config"
+# If remote and this fails: verify Tailscale is connected and accept-routes is on
+#   tailscale status | grep bennett-server
+#   tailscale debug prefs | grep -i routeall   # should be: true
 ```
 
 User must authenticate the Samba dialog when it appears.

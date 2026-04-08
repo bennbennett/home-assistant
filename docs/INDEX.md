@@ -34,7 +34,7 @@
 
 | Metric | Value |
 |--------|-------|
-| **Home Assistant URL** | http://192.168.68.114:8123 (local) / http://100.116.131.121:8123 (Tailscale) |
+| **Home Assistant URL** | http://192.168.68.114:8123 (same URL home & remote — remote via bennett-server Tailscale subnet route) |
 | **Version** | 2026.3.0 |
 | **Total Entities** | ~650 |
 | **Automations** | 25 total (21 enabled) |
@@ -73,7 +73,8 @@ home-assistant/
 │   ├── views/rooms.yaml
 │   └── button_card_templates.yaml
 ├── www/
-│   └── kiosk-mode/          # Kiosk mode JS (hides HA chrome)
+│   ├── kiosk-mode/          # Kiosk mode JS (hides HA chrome)
+│   └── home-hub-fonts.js    # Fraunces serif loader + animation keyframes + hourly-weather warm patcher
 └── .storage/                # Integration configs
 ```
 

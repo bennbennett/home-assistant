@@ -43,7 +43,7 @@ cd /Users/bbennett/Documents/25_PERSONAL-Environment/home-assistant && source .e
 
 ## Configuration Details
 
-- **Home Assistant URL:** http://100.116.131.121:8123 (Tailscale)
+- **Home Assistant URL:** http://192.168.68.114:8123 (works home & remote via bennett-server Tailscale subnet route)
 - **Token Name:** Claude MCP
 - **Location:** Home (America/Los_Angeles)
 - **Version:** 2026.3.0
