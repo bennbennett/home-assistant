@@ -46,6 +46,26 @@ Ben's page transformed from two anemic mushroom cards into a real personal dashb
 
 ---
 
+## Phase 7 — Family Feedback Round 1 (2026-04-08 evening)
+
+Family verdict after Phase 6 shipped:
+- **Petra**: doesn't like the weather card on Right Now. Doesn't like scrolling on Right Now (iPad horizontal). Likes the colors. Says nav is "too tiny" — wants bigger tile-style buttons. **#1 use case: Find iPhone (used CONSTANTLY).**
+- **Toby**: likes the hourly weather strip. Family page calendar items get cut off — would prefer scroll OR (Ben's call) just remove the events since they're already on Calendar + Right Now.
+- **Ben**: agrees that family page events are redundant.
+
+### Shipped 2026-04-08
+- [x] **Find iPhone marquee button on Right Now** — replaced the weather card in the top row with a big terracotta "Find iPhone" button calling `script.ring_iphone`. Petra's #1 action now lives at the top of the home screen, one tap away. White cellphone-sound icon, "TAP TO RING / Find iPhone / Petra's phone" copy, hover lift + active scale press feedback.
+- [x] **Big weather card removed** (Petra). **Hourly strip kept** (Toby).
+- [x] **Family page UP NEXT block removed** from person cards. The card JS still computes events but the rendering is gated behind `if (false)` so the cards become clean tap targets to each subpage. Card height shrunk 300→220px.
+- [x] **Sidebar nav tiles enlarged**: each nav item is now a 14px-radius white card with 1px border (sage when active), 28px icons, 16px bold labels, 16px padding, 6px vertical margin. Sidebar widened 198→232px to fit comfortably. This is the (a) interpretation of Petra's "big buttons" feedback — bigger touch-friendly nav items, sidebar layout preserved.
+- Petra confirmed she meant tiles not just bigger icons, but is known to change her mind. Ship (a) first, see if it satisfies; if not, do (b) launcher restructure.
+
+### Notes
+- Right Now should now fit without scrolling on iPad horizontal: hero clock (~200px) + Find iPhone/Tonight's Dinner row (132px) + hourly strip (~80px) + agenda (~250px) ≈ 660px. iPad 6 horizontal in kiosk mode is ~810px usable. ✓
+- Mealie offline state from Phase 6 still not visible on iPad — likely the sensor isn't actually `unavailable` (could be holding stale state or `unknown`). Deferred per user.
+
+---
+
 ## Phase 1 — Cleanup (restore trust)
 
 **Goal**: fix the broken stuff so the design has a chance. No styling work until data is clean.
