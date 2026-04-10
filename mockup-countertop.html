@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>The Countertop — Home Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --terracotta: #C87456;
+    --terracotta-tint: #FFF6F1;
+    --terracotta-peach: #FCE9DE;
+    --sage: #4A7C59;
+    --sage-light: #E8F0EA;
+    --sage-tint: #F0F7F2;
+    --neutral-900: #1F2937;
+    --neutral-700: #374151;
+    --neutral-600: #4B5563;
+    --neutral-500: #6B7280;
+    --neutral-400: #9CA3AF;
+    --neutral-300: #D1D5DB;
+    --neutral-200: #E5E7EB;
+    --neutral-100: #F3F4F6;
+    --neutral-50: #F9FAFB;
+    --bg: #fbfaf9;
+    --card-bg: #FFFFFF;
+    --card-radius: 16px;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    --card-border: 1px solid #F0EDE8;
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+    --scene-bar-height: 64px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%; overflow: hidden;
+    font-family: var(--font-body); color: var(--neutral-900); background: var(--bg);
+    -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+    user-select: none; -webkit-user-select: none;
+  }
+
+  .app { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; }
+  .view { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+  .view.active { display: flex; }
+  .view-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 24px; -webkit-overflow-scrolling: touch; }
+
+  /* ── Scene bar ── */
+  .scene-bar {
+    height: var(--scene-bar-height); min-height: var(--scene-bar-height);
+    background: #F5F3F0; border-top: 1px solid #E5E0DA;
+    display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 24px;
+  }
+  .scene-chip {
+    display: flex; align-items: center; gap: 7px;
+    padding: 0 16px; height: 42px; border-radius: 21px;
+    border: 1px solid var(--neutral-200); background: white;
+    font-size: 14px; font-weight: 500; color: var(--neutral-700);
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .scene-chip:active { transform: scale(0.96); background: var(--terracotta-tint); border-color: var(--terracotta); color: var(--terracotta); }
+  .scene-chip svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .scene-chip.scene-active { background: var(--terracotta-tint); border: 2px solid var(--terracotta); color: var(--terracotta); }
+
+  /* ── Home header ── */
+  .home-header { padding: 16px 24px 0; display: flex; justify-content: space-between; align-items: flex-start; }
+  .home-clock {
+    font-family: var(--font-display); font-size: 46px; font-weight: 350;
+    font-optical-sizing: auto; letter-spacing: -1px; color: var(--neutral-900); line-height: 1;
+  }
+  .home-clock .ampm { font-size: 20px; font-weight: 400; margin-left: 4px; color: var(--neutral-500); }
+  .home-greeting { font-family: var(--font-display); font-style: italic; font-size: 16px; font-weight: 350; color: var(--neutral-500); margin-top: 1px; }
+  .home-header-right { text-align: right; padding-top: 2px; }
+  .home-date { font-size: 15px; font-weight: 500; color: var(--neutral-700); }
+  .home-weather {
+    display: flex; align-items: center; gap: 6px; margin-top: 2px;
+    font-size: 14px; color: var(--neutral-500); cursor: pointer;
+    padding: 4px 8px; border-radius: 8px; margin-right: -8px; transition: background 0.15s;
+  }
+  .home-weather:active { background: var(--neutral-100); }
+  .home-weather .weather-temp { font-size: 18px; font-weight: 600; color: var(--neutral-700); }
+  .home-weather .weather-hilo { font-size: 13px; color: var(--neutral-400); }
+
+  /* ── Home main ── */
+  .home-main { flex: 1; display: grid; grid-template-columns: 1fr 320px; gap: 16px; padding: 10px 24px 8px; overflow: hidden; }
+
+  /* Action grid */
+  .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; gap: 12px; }
+  .action-btn {
+    background: var(--card-bg); border-radius: var(--card-radius); border: var(--card-border);
+    box-shadow: var(--card-shadow); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    cursor: pointer; transition: all 0.15s; position: relative;
+  }
+  .action-btn:active { transform: scale(0.97); box-shadow: none; }
+  .action-btn .action-icon {
+    width: 52px; height: 52px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .action-btn .action-icon svg { width: 28px; height: 28px; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+  .action-btn .action-label { font-size: 15px; font-weight: 600; color: var(--neutral-700); letter-spacing: -0.01em; }
+
+  .btn-lights .action-icon { background: #FEF3C7; }
+  .btn-lights .action-icon svg { stroke: #D97706; }
+  .btn-list .action-icon { background: var(--sage-light); }
+  .btn-list .action-icon svg { stroke: var(--sage); }
+  .btn-phone .action-icon { background: var(--terracotta-peach); }
+  .btn-phone .action-icon svg { stroke: var(--terracotta); }
+  .btn-timer .action-icon { background: #E0E7FF; }
+  .btn-timer .action-icon svg { stroke: #4F46E5; }
+  .btn-calendar .action-icon { background: var(--sage-light); }
+  .btn-calendar .action-icon svg { stroke: var(--sage); }
+  .btn-toby .action-icon { background: #FEF3C7; }
+  .btn-toby .action-icon svg { stroke: #B45309; }
+
+  /* Timer active on home screen */
+  .action-btn.btn-timer.timer-active { border-color: #818CF8; background: linear-gradient(135deg, #EEF2FF, white); }
+  .action-btn.btn-timer.timer-active .action-icon,
+  .action-btn.btn-timer.timer-active .action-label { display: none; }
+  .action-btn.btn-timer.timer-active .timer-mini { display: flex; }
+  .timer-mini { display: none; flex-direction: column; align-items: center; gap: 2px; }
+  .timer-mini-time { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--neutral-900); letter-spacing: -0.5px; }
+  .timer-mini-label { font-size: 12px; font-weight: 500; color: #6366F1; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── Secondary nav row (extensibility) ── */
+  .secondary-nav {
+    display: flex; gap: 8px; padding: 8px 0 0;
+    justify-content: center;
+  }
+  .secondary-nav-link {
+    font-size: 14px; font-weight: 500; color: var(--neutral-400);
+    padding: 7px 14px; border-radius: 10px; cursor: pointer; transition: all 0.15s;
+    text-decoration: none; display: flex; align-items: center; gap: 6px;
+    border: 1px solid transparent;
+  }
+  .secondary-nav-link:hover, .secondary-nav-link:active { color: var(--neutral-600); background: var(--neutral-100); border-color: var(--neutral-200); }
+  .secondary-nav-link svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── Agenda panel ── */
+  .home-right { display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+  .agenda-card {
+    background: var(--card-bg); border-radius: var(--card-radius); border: var(--card-border);
+    box-shadow: var(--card-shadow); padding: 16px 18px; flex: 1; overflow-y: auto; cursor: pointer;
+  }
+  .agenda-card:active { background: var(--neutral-50); }
+  .agenda-eyebrow {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--terracotta); display: flex; align-items: center; gap: 6px; margin-bottom: 10px;
+  }
+  .agenda-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--terracotta); animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .agenda-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+  .agenda-cal-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .agenda-time { font-size: 13px; font-weight: 500; color: var(--neutral-400); min-width: 54px; font-variant-numeric: tabular-nums; }
+  .agenda-title { font-size: 14px; font-weight: 500; color: var(--neutral-900); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .agenda-divider { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--neutral-400); margin-top: 10px; margin-bottom: 3px; }
+
+  /* Dinner pool card */
+  .dinner-pool-card {
+    background: var(--card-bg); border-radius: var(--card-radius); border: var(--card-border);
+    box-shadow: var(--card-shadow); padding: 14px 18px; cursor: pointer; transition: all 0.15s;
+  }
+  .dinner-pool-card:active { background: var(--neutral-50); }
+  .dinner-pool-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .dinner-pool-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--neutral-500); }
+  .dinner-pool-count { font-size: 12px; font-weight: 600; color: var(--sage); background: var(--sage-light); padding: 2px 8px; border-radius: 8px; }
+  .dinner-pool-meals { display: flex; gap: 6px; flex-wrap: wrap; }
+  .dinner-meal-chip { font-size: 13px; font-weight: 500; color: var(--neutral-700); background: var(--neutral-50); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--neutral-100); }
+  .dinner-meal-chip.meal-done { color: var(--neutral-400); text-decoration: line-through; background: transparent; border-color: transparent; }
+
+  /* ── Subview header ── */
+  .subview-header { padding: 16px 24px 12px; display: flex; align-items: center; gap: 14px; }
+  .back-btn {
+    width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--neutral-200);
+    background: white; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+  }
+  .back-btn:active { background: var(--neutral-100); transform: scale(0.95); }
+  .back-btn svg { width: 18px; height: 18px; stroke: var(--neutral-600); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .subview-title { font-family: var(--font-display); font-size: 26px; font-weight: 400; color: var(--neutral-900); }
+
+  /* ── Lights view ── */
+  .room-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 24px; }
+  .room-card {
+    background: var(--card-bg); border-radius: var(--card-radius); border: var(--card-border);
+    box-shadow: var(--card-shadow); padding: 16px; cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.2,0.9,0.3,1.2);
+    display: flex; flex-direction: column; gap: 12px; min-height: 165px;
+  }
+  .room-card:active { transform: scale(0.97); }
+  .room-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .room-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .room-name { font-family: var(--font-display); font-size: 16px; font-weight: 450; color: var(--neutral-900); }
+  .room-temp { font-size: 13px; color: var(--neutral-400); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .room-light-indicator { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .room-light-indicator svg { width: 16px; height: 16px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .room-light-indicator.light-on { background: #FEF3C7; }
+  .room-light-indicator.light-on svg { stroke: #D97706; }
+  .room-light-indicator.light-off { background: var(--neutral-100); }
+  .room-light-indicator.light-off svg { stroke: var(--neutral-400); }
+  .room-icon-tile { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .room-icon-tile svg { width: 26px; height: 26px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── Toby's Corner ── */
+  .toby-section-label {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--neutral-400); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .manage-btn { font-size: 12px; font-weight: 600; color: var(--sage); cursor: pointer; padding: 3px 10px; border-radius: 6px; transition: background 0.15s; }
+  .manage-btn:active { background: var(--sage-light); }
+
+  .checklist-grid { display: flex; gap: 12px; margin-bottom: 24px; padding: 0 24px; }
+  .checklist-card {
+    flex: 1; background: var(--card-bg); border-radius: var(--card-radius); border: var(--card-border);
+    box-shadow: var(--card-shadow); padding: 24px 20px; cursor: pointer; transition: all 0.15s;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    min-height: 160px;
+  }
+  .checklist-card:active { transform: scale(0.97); }
+  .checklist-icon-tile { width: 52px; height: 52px; border-radius: 13px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .checklist-icon-tile svg { width: 28px; height: 28px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .checklist-name { font-family: var(--font-display); font-size: 16px; font-weight: 450; color: var(--neutral-900); margin-bottom: 4px; }
+  .checklist-progress { font-size: 13px; color: var(--neutral-400); }
+  .checklist-progress-bar { height: 4px; border-radius: 2px; background: var(--neutral-100); margin-top: 8px; overflow: hidden; width: 100%; }
+  .checklist-progress-fill { height: 100%; border-radius: 2px; background: var(--sage); transition: width 0.3s ease; }
+
+  .bored-section { padding: 0 24px; }
+  .bored-card { background: var(--card-bg); border-radius: var(--card-radius); border: var(--card-border); box-shadow: var(--card-shadow); padding: 28px; text-align: center; }
+  .bored-spin-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 28px; border-radius: 14px; background: var(--terracotta); color: white;
+    font-family: var(--font-display); font-size: 18px; font-weight: 500;
+    border: none; cursor: pointer; transition: all 0.15s; margin-bottom: 16px;
+  }
+  .bored-spin-btn:active { transform: scale(0.95); background: #B5634A; }
+  .bored-spin-btn svg { width: 22px; height: 22px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .bored-result { font-family: var(--font-display); font-size: 26px; font-weight: 400; color: var(--neutral-900); margin-bottom: 16px; min-height: 38px; display: none; }
+  .bored-result.visible { display: block; }
+  .bored-add-row { display: flex; gap: 8px; max-width: 340px; margin: 0 auto; }
+  .bored-add-input {
+    flex: 1; height: 40px; padding: 0 14px; border-radius: 10px;
+    border: 1px solid var(--neutral-200); font-family: var(--font-body); font-size: 15px;
+    outline: none; background: var(--neutral-50); color: var(--neutral-900);
+  }
+  .bored-add-input:focus { border-color: var(--sage); background: white; }
+  .bored-add-input::placeholder { color: var(--neutral-400); }
+  .bored-add-btn { height: 40px; padding: 0 16px; border-radius: 10px; border: none; background: var(--sage); color: white; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.15s; }
+  .bored-add-btn:active { transform: scale(0.95); }
+  .bored-activities { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 14px; }
+  .bored-activity-tag { font-size: 13px; color: var(--neutral-500); background: var(--neutral-50); padding: 4px 10px; border-radius: 8px; border: 1px solid var(--neutral-100); }
+
+  /* Season manage */
+  .season-manage { display: none; padding: 0 24px; margin-bottom: 12px; }
+  .season-manage.visible { display: block; }
+  .season-manage-card { background: var(--card-bg); border-radius: var(--card-radius); border: var(--card-border); box-shadow: var(--card-shadow); padding: 12px 16px; }
+  .season-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+  .season-toggle-row + .season-toggle-row { border-top: 1px solid var(--neutral-100); }
+  .season-toggle-label { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: var(--neutral-700); }
+  .season-toggle-label .season-icon-mini { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .season-toggle-label .season-icon-mini svg { width: 16px; height: 16px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .toggle-switch { width: 46px; height: 26px; border-radius: 13px; background: var(--neutral-200); position: relative; cursor: pointer; transition: background 0.2s; }
+  .toggle-switch.on { background: var(--sage); }
+  .toggle-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.2s; }
+  .toggle-switch.on::after { transform: translateX(20px); }
+
+  /* ── Calendar view ── */
+  .calendar-controls { display: flex; align-items: center; gap: 8px; padding: 0 24px 12px; }
+  .cal-toggle-pill { padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: 1px solid var(--neutral-200); background: white; color: var(--neutral-600); }
+  .cal-toggle-pill.active { background: var(--sage); color: white; border-color: var(--sage); }
+  .cal-toggle-pill:active { transform: scale(0.95); }
+  .cal-add-event { margin-left: auto; padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid var(--sage); background: white; color: var(--sage); transition: all 0.15s; }
+  .cal-add-event:active { background: var(--sage-light); transform: scale(0.95); }
+  .cal-meals-link { padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid var(--neutral-200); background: white; color: var(--neutral-500); transition: all 0.15s; text-decoration: none; }
+  .cal-meals-link:active { background: var(--neutral-50); }
+
+  .calendar-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; padding: 0 24px; }
+  .cal-day { background: var(--card-bg); border-radius: 12px; border: var(--card-border); padding: 10px; min-height: 460px; }
+  .cal-day.today { background: #FFFDF9; border-color: var(--terracotta-peach); }
+  .cal-day-header { text-align: center; margin-bottom: 6px; }
+  .cal-day-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--neutral-400); }
+  .cal-day-number { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--neutral-900); }
+  .cal-day.today .cal-day-number { color: var(--terracotta); }
+  .cal-today-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--terracotta); display: none; }
+  .cal-day.today .cal-today-label { display: block; }
+  .cal-event { font-size: 12px; padding: 4px 6px; border-radius: 5px; margin-bottom: 3px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cal-event.cal-home { background: var(--sage-light); color: var(--sage); }
+  .cal-event.cal-work { background: #F3EDE8; color: #8E7065; }
+  .cal-event.cal-birthday { background: var(--terracotta-tint); color: var(--terracotta); }
+
+  /* ── Meals view ── */
+  .meals-pool-header { display: flex; justify-content: space-between; align-items: center; padding: 0 24px 10px; }
+  .meals-pool-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--neutral-400); }
+  .meals-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 24px 16px; }
+  .meal-card { background: var(--card-bg); border-radius: var(--card-radius); border: var(--card-border); box-shadow: var(--card-shadow); padding: 18px 16px; text-align: center; cursor: pointer; transition: all 0.15s; }
+  .meal-card:active { transform: scale(0.97); }
+  .meal-card.meal-tonight { border-color: var(--terracotta); background: var(--terracotta-tint); }
+  .meal-card-icon-tile { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; }
+  .meal-card-icon-tile svg { width: 26px; height: 26px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .meal-card-name { font-size: 14px; font-weight: 600; color: var(--neutral-900); margin-bottom: 5px; }
+  .meal-card-tag { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; padding: 3px 8px; border-radius: 6px; display: inline-block; }
+  .meal-card.meal-tonight .meal-card-tag { background: var(--terracotta-peach); color: var(--terracotta); }
+  .meal-card .meal-card-tag { background: var(--neutral-100); color: var(--neutral-400); }
+  .meal-card.meal-done { opacity: 0.5; }
+  .meal-card.meal-done .meal-card-name { text-decoration: line-through; }
+  .meals-recipe-section { padding: 0 24px 16px; }
+  .meals-recipe-label { font-family: var(--font-display); font-size: 19px; font-weight: 400; color: var(--neutral-900); margin-bottom: 12px; }
+  .recipe-browser-placeholder { background: var(--card-bg); border-radius: var(--card-radius); border: 2px dashed var(--neutral-200); padding: 40px; text-align: center; color: var(--neutral-400); font-size: 14px; }
+
+  /* ── Vertical centering for sparse views ── */
+  #viewLights .view-content { display: flex; flex-direction: column; justify-content: center; }
+  #viewToby .view-content { display: flex; flex-direction: column; justify-content: center; }
+
+  /* ── Room card hold affordance ── */
+  .room-card-grip { text-align: center; margin-top: auto; }
+  .room-card-grip span {
+    font-size: 16px; letter-spacing: 3px; color: var(--neutral-300);
+    line-height: 1; display: inline-block; transform: translateY(-2px);
+  }
+
+  /* ── Tonight chip in dinner pool ── */
+  .dinner-meal-chip.meal-tonight { background: var(--terracotta-tint); border-color: var(--terracotta-peach); color: var(--terracotta); font-weight: 600; }
+
+  /* ── Mock recipe cards ── */
+  .recipe-mock-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .recipe-mock-card {
+    background: var(--card-bg); border-radius: 12px; border: var(--card-border);
+    box-shadow: var(--card-shadow); overflow: hidden; cursor: pointer; transition: all 0.15s;
+  }
+  .recipe-mock-card:active { transform: scale(0.97); }
+  .recipe-mock-img {
+    height: 72px; background: var(--neutral-100);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .recipe-mock-img svg { width: 24px; height: 24px; stroke: var(--neutral-300); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .recipe-mock-info { padding: 10px 12px; }
+  .recipe-mock-name { font-size: 13px; font-weight: 600; color: var(--neutral-900); margin-bottom: 2px; }
+  .recipe-mock-time { font-size: 11px; color: var(--neutral-400); }
+
+  /* ── Popups ── */
+  .popup-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; align-items: center; justify-content: center; animation: fadeIn 0.15s ease; }
+  .popup-overlay.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .popup { background: var(--card-bg); border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); animation: popIn 0.2s cubic-bezier(0.2,0.9,0.3,1.1); max-height: 80vh; overflow-y: auto; }
+  @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .popup-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px 0; }
+  .popup-title { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--neutral-900); }
+  .popup-close { width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--neutral-100); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+  .popup-close:active { background: var(--neutral-200); }
+  .popup-close svg { width: 15px; height: 15px; stroke: var(--neutral-500); fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+  /* Add to List popup */
+  .popup-add-list { width: 400px; }
+  .add-list-form { padding: 16px 24px; display: flex; gap: 8px; }
+  .add-list-input { flex: 1; height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid var(--neutral-200); font-family: var(--font-body); font-size: 16px; outline: none; color: var(--neutral-900); transition: border-color 0.15s; }
+  .add-list-input:focus { border-color: var(--sage); }
+  .add-list-input::placeholder { color: var(--neutral-400); }
+  .add-list-submit { height: 48px; padding: 0 22px; border-radius: 12px; border: none; background: var(--sage); color: white; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.15s; }
+  .add-list-submit:active { transform: scale(0.95); }
+  .add-list-footer { padding: 0 24px 18px; text-align: center; }
+  .add-list-footer a { font-size: 14px; color: var(--sage); text-decoration: none; font-weight: 500; }
+
+  /* Timer popup */
+  .popup-timer { width: 380px; }
+  .timer-disc-container { display: flex; justify-content: center; padding: 20px 0 4px; }
+  .timer-disc { width: 170px; height: 170px; border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center; background: var(--neutral-100); }
+  .timer-disc-fill { position: absolute; inset: 0; border-radius: 50%; }
+  .timer-disc-inner { width: 132px; height: 132px; border-radius: 50%; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .timer-disc-time { font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--neutral-900); letter-spacing: -1px; }
+  .timer-disc-label { font-size: 12px; font-weight: 600; color: var(--neutral-400); text-transform: uppercase; letter-spacing: 0.5px; }
+  .timer-presets { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 16px 24px; }
+  .timer-preset { width: 56px; height: 44px; border-radius: 11px; border: 1px solid var(--neutral-200); background: white; font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--neutral-700); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+  .timer-preset:active { background: var(--terracotta-tint); border-color: var(--terracotta); color: var(--terracotta); transform: scale(0.95); }
+  .timer-actions { display: flex; justify-content: center; gap: 8px; padding: 4px 24px 20px; }
+  .timer-action-btn { height: 44px; padding: 0 24px; border-radius: 11px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; }
+  .timer-action-btn:active { transform: scale(0.95); }
+  .timer-action-btn.timer-pause { background: var(--neutral-100); color: var(--neutral-700); }
+  .timer-action-btn.timer-cancel { background: var(--terracotta-tint); color: var(--terracotta); }
+
+  /* Weather popup — horizontal bar style */
+  .popup-weather { width: 620px; }
+  .weather-bar-container { padding: 20px 22px 8px; }
+  .weather-bar-track { position: relative; height: 36px; border-radius: 18px; background: linear-gradient(90deg, #D6E4F0 0%, #C8D8E8 40%, #B8C8D8 70%, #A8B8C8 100%); display: flex; align-items: center; justify-content: center; }
+  .weather-bar-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+  .weather-bar-icon svg { width: 22px; height: 22px; stroke: var(--neutral-600); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .weather-bar-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    border-radius: 18px;
+    background: linear-gradient(90deg, #BDD0E4 0%, #C8D8E8 100%);
+  }
+  .weather-times {
+    display: flex; justify-content: space-between; padding: 10px 22px 18px;
+  }
+  .weather-tick { text-align: center; flex: 1; }
+  .weather-tick-time { font-size: 13px; font-weight: 500; color: var(--neutral-400); margin-bottom: 3px; }
+  .weather-tick-temp { font-size: 16px; font-weight: 700; color: var(--neutral-900); }
+
+  /* Dinner popup */
+  .popup-dinner { width: 440px; }
+  .dinner-popup-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px 24px; }
+  .dinner-popup-card { background: var(--neutral-50); border-radius: 14px; border: 1px solid var(--neutral-100); padding: 16px; text-align: center; cursor: pointer; transition: all 0.15s; }
+  .dinner-popup-card:active { transform: scale(0.97); }
+  .dinner-popup-card.tonight { background: var(--terracotta-tint); border-color: var(--terracotta-peach); }
+  .dinner-popup-icon-tile { width: 44px; height: 44px; border-radius: 11px; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; }
+  .dinner-popup-icon-tile svg { width: 24px; height: 24px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .dinner-popup-name { font-size: 15px; font-weight: 600; color: var(--neutral-900); margin-bottom: 8px; }
+  .dinner-popup-btn { display: inline-block; padding: 7px 16px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+  .dinner-popup-btn.pick-tonight { background: var(--terracotta); color: white; }
+  .dinner-popup-btn.pick-tonight:active { background: #B5634A; }
+  .dinner-popup-btn.is-tonight { background: var(--terracotta-peach); color: var(--terracotta); }
+  .dinner-popup-quick {
+    padding: 0 24px 16px;
+  }
+  .dinner-popup-divider {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+  }
+  .dinner-popup-divider::before, .dinner-popup-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--neutral-200);
+  }
+  .dinner-popup-divider span {
+    font-size: 12px; font-weight: 600; color: var(--neutral-400); text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .dinner-quick-row { display: flex; gap: 8px; }
+  .dinner-quick-input {
+    flex: 1; height: 44px; padding: 0 14px; border-radius: 11px;
+    border: 2px solid var(--neutral-200); font-family: var(--font-body); font-size: 15px;
+    outline: none; color: var(--neutral-900); transition: border-color 0.15s;
+  }
+  .dinner-quick-input:focus { border-color: var(--terracotta); }
+  .dinner-quick-input::placeholder { color: var(--neutral-400); }
+  .dinner-quick-btn {
+    height: 44px; padding: 0 18px; border-radius: 11px; border: none;
+    background: var(--terracotta); color: white; font-weight: 600; font-size: 14px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .dinner-quick-btn:active { transform: scale(0.95); background: #B5634A; }
+  .dinner-popup-done { padding: 0 24px 18px; }
+  .dinner-popup-done-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--neutral-400); margin-bottom: 4px; }
+  .dinner-popup-done-item { font-size: 14px; color: var(--neutral-400); text-decoration: line-through; padding: 3px 0; }
+
+  /* Checklist popup */
+  .popup-checklist { width: 400px; }
+  .checklist-popup-items { padding: 12px 22px 20px; }
+  .checklist-popup-item { display: flex; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px solid var(--neutral-100); cursor: pointer; }
+  .checklist-popup-item:last-child { border-bottom: none; }
+  .checklist-checkbox { width: 26px; height: 26px; border-radius: 7px; border: 2px solid var(--neutral-300); display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+  .checklist-checkbox.checked { background: var(--sage); border-color: var(--sage); }
+  .checklist-checkbox.checked svg { display: block; }
+  .checklist-checkbox svg { display: none; width: 15px; height: 15px; stroke: white; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .checklist-item-icon {
+    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .checklist-item-icon svg { width: 17px; height: 17px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .checklist-item-text { font-size: 15px; font-weight: 500; color: var(--neutral-900); }
+  .checklist-popup-item.checked-item .checklist-item-icon { opacity: 0.4; }
+  .checklist-popup-item.checked-item .checklist-item-text { color: var(--neutral-400); text-decoration: line-through; }
+
+  /* Find phone toast */
+  .find-phone-toast {
+    display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--terracotta); color: white; padding: 12px 24px; border-radius: 14px;
+    font-size: 15px; font-weight: 600; z-index: 200; box-shadow: 0 8px 30px rgba(200,116,86,0.4);
+    animation: toastIn 0.3s ease; align-items: center; gap: 10px;
+  }
+  .find-phone-toast.active { display: flex; }
+  @keyframes toastIn { from { transform: translateX(-50%) translateY(-20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+  .find-phone-toast svg { width: 20px; height: 20px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; animation: ring 0.5s ease infinite; }
+  @keyframes ring { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(15deg); } 75% { transform: rotate(-15deg); } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Find Phone Toast -->
+  <div class="find-phone-toast" id="findPhoneToast">
+    <svg viewBox="0 0 24 24"><path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    Ringing Petra's phone...
+  </div>
+
+  <!-- ════════════ HOME VIEW ════════════ -->
+  <div class="view active" id="viewHome">
+    <div class="home-header">
+      <div>
+        <div class="home-clock" id="liveClock">8:47 <span class="ampm">PM</span></div>
+        <div class="home-greeting" id="liveGreeting">Good evening, Bennetts.</div>
+      </div>
+      <div class="home-header-right">
+        <div class="home-date" id="liveDate">Wednesday, April 9</div>
+        <div class="home-weather" onclick="openPopup('weatherPopup')">
+          <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--neutral-500);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 0 9z"/><circle cx="8" cy="10" r="1" fill="var(--neutral-400)" stroke="none"/></svg>
+          <span class="weather-temp">62&#176;</span>
+          <span class="weather-hilo">H:68&#176; L:54&#176;</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-main">
+      <div style="display: flex; flex-direction: column;">
+        <div class="action-grid" style="flex:1">
+          <!-- Lights -->
+          <div class="action-btn btn-lights" onclick="showView('viewLights')">
+            <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
+            <div class="action-label">Lights</div>
+          </div>
+          <!-- Add to List -->
+          <div class="action-btn btn-list" onclick="openPopup('addListPopup')">
+            <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+            <div class="action-label">Add to List</div>
+          </div>
+          <!-- Find Phone -->
+          <div class="action-btn btn-phone" onclick="findPhone()">
+            <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+            <div class="action-label">Find Phone</div>
+          </div>
+          <!-- Timer -->
+          <div class="action-btn btn-timer" id="timerBtn" onclick="openPopup('timerPopup')">
+            <div class="action-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M5 3l2 2M19 3l-2 2M12 5V3"/></svg></div>
+            <div class="action-label">Timer</div>
+            <div class="timer-mini">
+              <div class="timer-mini-time" id="timerMiniTime">12:34</div>
+              <div class="timer-mini-label">Running</div>
+            </div>
+          </div>
+          <!-- Calendar -->
+          <div class="action-btn btn-calendar" onclick="showView('viewCalendar')">
+            <div class="action-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+            <div class="action-label">Calendar</div>
+          </div>
+          <!-- Toby -->
+          <div class="action-btn btn-toby" onclick="showView('viewToby')">
+            <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <div class="action-label">Toby</div>
+          </div>
+        </div>
+
+        <!-- Secondary nav — extensibility point -->
+        <div class="secondary-nav">
+          <a class="secondary-nav-link" onclick="showView('viewMeals')">
+            <svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+            Meals
+          </a>
+          <a class="secondary-nav-link">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+            Ben
+          </a>
+          <a class="secondary-nav-link">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+            Petra
+          </a>
+        </div>
+      </div>
+
+      <!-- Right panel: agenda + dinner pool -->
+      <div class="home-right">
+        <div class="agenda-card" onclick="showView('viewCalendar')">
+          <div class="agenda-eyebrow"><span class="dot"></span> Today</div>
+          <div class="agenda-item">
+            <div class="agenda-cal-dot" style="background: var(--sage)"></div>
+            <div class="agenda-time">9:00 AM</div>
+            <div class="agenda-title">Team standup</div>
+          </div>
+          <div class="agenda-item">
+            <div class="agenda-cal-dot" style="background: #8E7065"></div>
+            <div class="agenda-time">2:30 PM</div>
+            <div class="agenda-title">Sprint planning</div>
+          </div>
+          <div class="agenda-item">
+            <div class="agenda-cal-dot" style="background: var(--sage)"></div>
+            <div class="agenda-time">4:00 PM</div>
+            <div class="agenda-title">Pick up Toby</div>
+          </div>
+          <div class="agenda-divider">Tomorrow</div>
+          <div class="agenda-item">
+            <div class="agenda-cal-dot" style="background: var(--terracotta)"></div>
+            <div class="agenda-time">All day</div>
+            <div class="agenda-title">Petra PTO</div>
+          </div>
+          <div class="agenda-item">
+            <div class="agenda-cal-dot" style="background: var(--sage)"></div>
+            <div class="agenda-time">10:00 AM</div>
+            <div class="agenda-title">Vet appointment</div>
+          </div>
+        </div>
+
+        <div class="dinner-pool-card" onclick="openPopup('dinnerPopup')">
+          <div class="dinner-pool-header">
+            <div class="dinner-pool-label">This Week's Meals</div>
+            <div class="dinner-pool-count">3 left</div>
+          </div>
+          <div class="dinner-pool-meals">
+            <span class="dinner-meal-chip meal-done">Chicken Parm</span>
+            <span class="dinner-meal-chip meal-done">Stir Fry</span>
+            <span class="dinner-meal-chip meal-tonight">Pizza</span>
+            <span class="dinner-meal-chip">Tacos</span>
+            <span class="dinner-meal-chip">Pasta</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ LIGHTS VIEW ════════════ -->
+  <div class="view" id="viewLights">
+    <div class="subview-header">
+      <div class="back-btn" onclick="showView('viewHome')"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
+      <div class="subview-title">Lights</div>
+    </div>
+    <div class="view-content">
+      <div class="room-grid">
+        <div class="room-card" onclick="toggleRoom(this)">
+          <div class="room-card-top">
+            <div><div class="room-name">Front House</div><div class="room-temp">72.3&#176;F</div></div>
+            <div class="room-light-indicator light-on"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
+          </div>
+          <div class="room-icon-tile" style="background:rgba(200,116,86,0.14)"><svg viewBox="0 0 24 24" style="stroke:var(--terracotta)"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <div class="room-card-grip"><span>···</span></div>
+        </div>
+        <div class="room-card" onclick="toggleRoom(this)">
+          <div class="room-card-top">
+            <div><div class="room-name">Living Room</div><div class="room-temp">73.1&#176;F</div></div>
+            <div class="room-light-indicator light-off"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
+          </div>
+          <div class="room-icon-tile" style="background:rgba(74,124,89,0.14)"><svg viewBox="0 0 24 24" style="stroke:var(--sage)"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0z"/><path d="M4 18v2M20 18v2"/></svg></div>
+          <div class="room-card-grip"><span>···</span></div>
+        </div>
+        <div class="room-card" onclick="toggleRoom(this)">
+          <div class="room-card-top">
+            <div><div class="room-name">Kitchen</div><div class="room-temp" style="visibility:hidden">--</div></div>
+            <div class="room-light-indicator light-on"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
+          </div>
+          <div class="room-icon-tile" style="background:rgba(184,146,84,0.14)"><svg viewBox="0 0 24 24" style="stroke:#B89254"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6z"/><line x1="6" y1="17" x2="18" y2="17"/></svg></div>
+          <div class="room-card-grip"><span>···</span></div>
+        </div>
+        <div class="room-card" onclick="toggleRoom(this)">
+          <div class="room-card-top">
+            <div><div class="room-name">Bedroom</div><div class="room-temp">71.8&#176;F</div></div>
+            <div class="room-light-indicator light-off"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
+          </div>
+          <div class="room-icon-tile" style="background:rgba(142,112,101,0.14)"><svg viewBox="0 0 24 24" style="stroke:#8E7065"><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></svg></div>
+          <div class="room-card-grip"><span>···</span></div>
+        </div>
+        <div class="room-card" onclick="toggleRoom(this)">
+          <div class="room-card-top">
+            <div><div class="room-name">Toby's Room</div><div class="room-temp">70.2&#176;F</div></div>
+            <div class="room-light-indicator light-off"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
+          </div>
+          <div class="room-icon-tile" style="background:rgba(154,107,71,0.14)"><svg viewBox="0 0 24 24" style="stroke:#9A6B47"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01M17 12h.01M7 12h.01"/></svg></div>
+          <div class="room-card-grip"><span>···</span></div>
+        </div>
+        <div class="room-card" onclick="toggleRoom(this)">
+          <div class="room-card-top">
+            <div><div class="room-name">Outside</div><div class="room-temp">62&#176;F</div></div>
+            <div class="room-light-indicator light-on"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
+          </div>
+          <div class="room-icon-tile" style="background:rgba(110,142,77,0.14)"><svg viewBox="0 0 24 24" style="stroke:#6E8E4D"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 0 9z"/></svg></div>
+          <div class="room-card-grip"><span>···</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ TOBY'S CORNER ════════════ -->
+  <div class="view" id="viewToby">
+    <div class="subview-header">
+      <div class="back-btn" onclick="showView('viewHome')"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
+      <div class="subview-title">Toby's Corner</div>
+    </div>
+    <div class="view-content">
+      <div style="padding:0 24px">
+        <div class="toby-section-label">Checklists <span class="manage-btn" onclick="toggleSeasonManage()">Manage</span></div>
+      </div>
+      <div class="season-manage" id="seasonManage">
+        <div class="season-manage-card">
+          <div class="season-toggle-row">
+            <div class="season-toggle-label">
+              <span class="season-icon-mini" style="background:rgba(74,124,89,0.14)"><svg viewBox="0 0 24 24" style="stroke:var(--sage)"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+              School
+            </div>
+            <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="season-toggle-row">
+            <div class="season-toggle-label">
+              <span class="season-icon-mini" style="background:rgba(59,130,246,0.12)"><svg viewBox="0 0 24 24" style="stroke:#3B82F6"><path d="M2 12c2-4 6-4 10 0s8 4 10 0M2 18c2-4 6-4 10 0s8 4 10 0"/></svg></span>
+              Swimming
+            </div>
+            <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="season-toggle-row">
+            <div class="season-toggle-label">
+              <span class="season-icon-mini" style="background:rgba(154,107,71,0.14)"><svg viewBox="0 0 24 24" style="stroke:#9A6B47"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg></span>
+              Hockey
+            </div>
+            <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+      </div>
+      <div class="checklist-grid">
+        <div class="checklist-card" onclick="openPopup('checklistPopup')">
+          <div class="checklist-icon-tile" style="background:rgba(74,124,89,0.14)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--sage)"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <div class="checklist-name">School</div>
+          <div class="checklist-progress">3 of 7</div>
+          <div class="checklist-progress-bar"><div class="checklist-progress-fill" style="width:43%"></div></div>
+        </div>
+        <div class="checklist-card" onclick="openPopup('checklistPopup')">
+          <div class="checklist-icon-tile" style="background:rgba(59,130,246,0.12)">
+            <svg viewBox="0 0 24 24" style="stroke:#3B82F6"><path d="M2 12c2-4 6-4 10 0s8 4 10 0M2 18c2-4 6-4 10 0s8 4 10 0"/></svg>
+          </div>
+          <div class="checklist-name">Swimming</div>
+          <div class="checklist-progress">0 of 12</div>
+          <div class="checklist-progress-bar"><div class="checklist-progress-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="bored-section">
+        <div class="toby-section-label" style="padding:0">I'm Bored</div>
+        <div class="bored-card">
+          <div class="bored-result" id="boredResult"></div>
+          <button class="bored-spin-btn" onclick="spinBored()">
+            <svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+            Pick Something!
+          </button>
+          <div class="bored-add-row">
+            <input class="bored-add-input" type="text" placeholder="Add a new activity..." id="boredInput">
+            <button class="bored-add-btn" onclick="addActivity()">Add</button>
+          </div>
+          <div class="bored-activities" id="boredActivities">
+            <span class="bored-activity-tag">RC Cars</span>
+            <span class="bored-activity-tag">Read a Book</span>
+            <span class="bored-activity-tag">Build Lego</span>
+            <span class="bored-activity-tag">Board Games</span>
+            <span class="bored-activity-tag">Make a Movie</span>
+            <span class="bored-activity-tag">Marbles</span>
+            <span class="bored-activity-tag">Toy Cars</span>
+            <span class="bored-activity-tag">Draw</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ CALENDAR VIEW ════════════ -->
+  <div class="view" id="viewCalendar">
+    <div class="subview-header">
+      <div class="back-btn" onclick="showView('viewHome')"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
+      <div class="subview-title">Calendar</div>
+    </div>
+    <div class="calendar-controls">
+      <div class="cal-toggle-pill active">Week</div>
+      <div class="cal-toggle-pill">Month</div>
+      <span class="cal-meals-link" onclick="showView('viewMeals')">Plan Meals</span>
+      <div class="cal-add-event">+ Add Event</div>
+    </div>
+    <div class="view-content">
+      <div class="calendar-week">
+        <div class="cal-day"><div class="cal-day-header"><div class="cal-day-name">Mon</div><div class="cal-day-number">7</div></div><div class="cal-event cal-work">Sprint retro</div></div>
+        <div class="cal-day"><div class="cal-day-header"><div class="cal-day-name">Tue</div><div class="cal-day-number">8</div></div><div class="cal-event cal-home">Grocery run</div><div class="cal-event cal-work">1:1 with Kim</div></div>
+        <div class="cal-day today"><div class="cal-day-header"><div class="cal-day-name">Wed</div><div class="cal-day-number">9</div><div class="cal-today-label">Today</div></div><div class="cal-event cal-work">Standup</div><div class="cal-event cal-work">Sprint planning</div><div class="cal-event cal-home">Pick up Toby</div></div>
+        <div class="cal-day"><div class="cal-day-header"><div class="cal-day-name">Thu</div><div class="cal-day-number">10</div></div><div class="cal-event cal-birthday">Petra PTO</div><div class="cal-event cal-home">Vet appt</div></div>
+        <div class="cal-day"><div class="cal-day-header"><div class="cal-day-name">Fri</div><div class="cal-day-number">11</div></div><div class="cal-event cal-work">Demo day</div></div>
+        <div class="cal-day"><div class="cal-day-header"><div class="cal-day-name">Sat</div><div class="cal-day-number">12</div></div></div>
+        <div class="cal-day"><div class="cal-day-header"><div class="cal-day-name">Sun</div><div class="cal-day-number">13</div></div><div class="cal-event cal-birthday">Mom's birthday</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ MEALS VIEW ════════════ -->
+  <div class="view" id="viewMeals">
+    <div class="subview-header">
+      <div class="back-btn" onclick="showView('viewCalendar')"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
+      <div class="subview-title">Plan Meals</div>
+    </div>
+    <div class="view-content">
+      <div class="meals-pool-header"><div class="meals-pool-title">This Week</div></div>
+      <div class="meals-grid">
+        <div class="meal-card meal-done">
+          <div class="meal-card-icon-tile" style="background:rgba(74,124,89,0.08)"><svg viewBox="0 0 24 24" style="stroke:var(--neutral-400)"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div>
+          <div class="meal-card-name">Chicken Parm</div><div class="meal-card-tag">Done</div>
+        </div>
+        <div class="meal-card meal-done">
+          <div class="meal-card-icon-tile" style="background:rgba(74,124,89,0.08)"><svg viewBox="0 0 24 24" style="stroke:var(--neutral-400)"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div>
+          <div class="meal-card-name">Stir Fry</div><div class="meal-card-tag">Done</div>
+        </div>
+        <div class="meal-card meal-tonight">
+          <div class="meal-card-icon-tile" style="background:rgba(200,116,86,0.14)"><svg viewBox="0 0 24 24" style="stroke:var(--terracotta)"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div>
+          <div class="meal-card-name">Pizza</div><div class="meal-card-tag">Tonight</div>
+        </div>
+        <div class="meal-card">
+          <div class="meal-card-icon-tile" style="background:rgba(74,124,89,0.08)"><svg viewBox="0 0 24 24" style="stroke:var(--sage)"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div>
+          <div class="meal-card-name">Tacos</div><div class="meal-card-tag">Available</div>
+        </div>
+        <div class="meal-card">
+          <div class="meal-card-icon-tile" style="background:rgba(74,124,89,0.08)"><svg viewBox="0 0 24 24" style="stroke:var(--sage)"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div>
+          <div class="meal-card-name">Pasta</div><div class="meal-card-tag">Available</div>
+        </div>
+        <div class="meal-card" style="border-style:dashed;border-color:var(--neutral-300)">
+          <div class="meal-card-icon-tile" style="background:var(--neutral-50)"><svg viewBox="0 0 24 24" style="stroke:var(--neutral-400)"><path d="M12 5v14M5 12h14"/></svg></div>
+          <div class="meal-card-name" style="color:var(--neutral-400)">Add Meal</div><div class="meal-card-tag" style="visibility:hidden">-</div>
+        </div>
+      </div>
+      <div class="meals-recipe-section">
+        <div class="meals-recipe-label">Recipe Browser</div>
+        <div class="recipe-mock-grid">
+          <div class="recipe-mock-card"><div class="recipe-mock-img"><svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div><div class="recipe-mock-info"><div class="recipe-mock-name">Chicken Tikka</div><div class="recipe-mock-time">45 min</div></div></div>
+          <div class="recipe-mock-card"><div class="recipe-mock-img"><svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div><div class="recipe-mock-info"><div class="recipe-mock-name">Fish Tacos</div><div class="recipe-mock-time">30 min</div></div></div>
+          <div class="recipe-mock-card"><div class="recipe-mock-img"><svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div><div class="recipe-mock-info"><div class="recipe-mock-name">Beef Stew</div><div class="recipe-mock-time">1 hr 20 min</div></div></div>
+          <div class="recipe-mock-card"><div class="recipe-mock-img"><svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div><div class="recipe-mock-info"><div class="recipe-mock-name">Pad Thai</div><div class="recipe-mock-time">25 min</div></div></div>
+          <div class="recipe-mock-card"><div class="recipe-mock-img"><svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div><div class="recipe-mock-info"><div class="recipe-mock-name">Czech Rizek</div><div class="recipe-mock-time">40 min</div></div></div>
+          <div class="recipe-mock-card"><div class="recipe-mock-img"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div><div class="recipe-mock-info"><div class="recipe-mock-name" style="color:var(--neutral-400)">Add Recipe</div><div class="recipe-mock-time">&nbsp;</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene bar (persistent) -->
+  <div class="scene-bar">
+    <div class="scene-chip" onclick="activateScene(this)"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Relax</div>
+    <div class="scene-chip" onclick="activateScene(this)"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/><line x1="4" y1="4" x2="20" y2="20" style="stroke-width:2.5"/></svg>All Off</div>
+    <div class="scene-chip scene-active" onclick="activateScene(this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Bright</div>
+    <div class="scene-chip" onclick="activateScene(this)"><svg viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg>Morning</div>
+    <div class="scene-chip" onclick="activateScene(this)"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><path d="M16 6l2 2M13 3l1 3"/></svg>Good Night</div>
+  </div>
+</div>
+
+<!-- ════════════ POPUPS ════════════ -->
+
+<!-- Add to List -->
+<div class="popup-overlay" id="addListPopup" onclick="closePopupOverlay(event)">
+  <div class="popup popup-add-list" onclick="event.stopPropagation()">
+    <div class="popup-header">
+      <div class="popup-title">Add to Shopping List</div>
+      <button class="popup-close" onclick="closePopup('addListPopup')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="add-list-form">
+      <input class="add-list-input" type="text" placeholder="Milk, eggs, bread..." id="addListInput">
+      <button class="add-list-submit" onclick="addListItem()">Add</button>
+    </div>
+    <div class="add-list-footer"><a href="#" onclick="closePopup('addListPopup');return false">View full list &rarr;</a></div>
+  </div>
+</div>
+
+<!-- Timer -->
+<div class="popup-overlay" id="timerPopup" onclick="closePopupOverlay(event)">
+  <div class="popup popup-timer" onclick="event.stopPropagation()">
+    <div class="popup-header">
+      <div class="popup-title">Timer</div>
+      <button class="popup-close" onclick="closePopup('timerPopup')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="timer-disc-container">
+      <div class="timer-disc">
+        <div class="timer-disc-fill" id="timerDiscFill"></div>
+        <div class="timer-disc-inner">
+          <div class="timer-disc-time" id="timerDiscTime">0:00</div>
+          <div class="timer-disc-label" id="timerDiscLabel">Ready</div>
+        </div>
+      </div>
+    </div>
+    <div class="timer-presets">
+      <button class="timer-preset" onclick="startTimer(5)">5m</button>
+      <button class="timer-preset" onclick="startTimer(10)">10m</button>
+      <button class="timer-preset" onclick="startTimer(15)">15m</button>
+      <button class="timer-preset" onclick="startTimer(20)">20m</button>
+      <button class="timer-preset" onclick="startTimer(30)">30m</button>
+      <button class="timer-preset" onclick="startTimer(45)">45m</button>
+    </div>
+    <div class="timer-actions" id="timerActions" style="display:none">
+      <button class="timer-action-btn timer-pause" id="timerPauseBtn" onclick="pauseTimer()">Pause</button>
+      <button class="timer-action-btn timer-cancel" onclick="cancelTimer()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Weather — horizontal bar style -->
+<div class="popup-overlay" id="weatherPopup" onclick="closePopupOverlay(event)">
+  <div class="popup popup-weather" onclick="event.stopPropagation()">
+    <div class="popup-header">
+      <div class="popup-title">Hourly Forecast</div>
+      <button class="popup-close" onclick="closePopup('weatherPopup')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="weather-bar-container">
+      <div class="weather-bar-track">
+        <div class="weather-bar-icon">
+          <svg viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 0 9z"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="weather-times" id="weatherTimes"></div>
+  </div>
+</div>
+
+<!-- Dinner Pool -->
+<div class="popup-overlay" id="dinnerPopup" onclick="closePopupOverlay(event)">
+  <div class="popup popup-dinner" onclick="event.stopPropagation()">
+    <div class="popup-header">
+      <div class="popup-title">What's for dinner?</div>
+      <button class="popup-close" onclick="closePopup('dinnerPopup')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="dinner-popup-grid">
+      <div class="dinner-popup-card tonight">
+        <div class="dinner-popup-icon-tile" style="background:rgba(200,116,86,0.14)"><svg viewBox="0 0 24 24" style="stroke:var(--terracotta)"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div>
+        <div class="dinner-popup-name">Pizza</div>
+        <button class="dinner-popup-btn is-tonight">Tonight</button>
+      </div>
+      <div class="dinner-popup-card" onclick="pickTonight(this)">
+        <div class="dinner-popup-icon-tile" style="background:rgba(74,124,89,0.08)"><svg viewBox="0 0 24 24" style="stroke:var(--sage)"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div>
+        <div class="dinner-popup-name">Tacos</div>
+        <button class="dinner-popup-btn pick-tonight">Pick for tonight</button>
+      </div>
+      <div class="dinner-popup-card" onclick="pickTonight(this)">
+        <div class="dinner-popup-icon-tile" style="background:rgba(74,124,89,0.08)"><svg viewBox="0 0 24 24" style="stroke:var(--sage)"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div>
+        <div class="dinner-popup-name">Pasta</div>
+        <button class="dinner-popup-btn pick-tonight">Pick for tonight</button>
+      </div>
+    </div>
+    <div class="dinner-popup-quick">
+      <div class="dinner-popup-divider"><span>or</span></div>
+      <div class="dinner-quick-row">
+        <input class="dinner-quick-input" type="text" placeholder="Takeout, leftovers..." id="dinnerQuickInput">
+        <button class="dinner-quick-btn" onclick="quickDinner()">Add</button>
+      </div>
+    </div>
+    <div class="dinner-popup-done">
+      <div class="dinner-popup-done-label">Done this week</div>
+      <div class="dinner-popup-done-item">Chicken Parmesan</div>
+      <div class="dinner-popup-done-item">Stir Fry</div>
+    </div>
+  </div>
+</div>
+
+<!-- Checklist -->
+<div class="popup-overlay" id="checklistPopup" onclick="closePopupOverlay(event)">
+  <div class="popup popup-checklist" onclick="event.stopPropagation()">
+    <div class="popup-header">
+      <div class="popup-title">School Checklist</div>
+      <button class="popup-close" onclick="closePopup('checklistPopup')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="checklist-popup-items">
+      <div class="checklist-popup-item checked-item" onclick="toggleCheckItem(this)"><div class="checklist-checkbox checked"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-item-icon" style="background:rgba(74,124,89,0.12)"><svg viewBox="0 0 24 24" style="stroke:#4A7C59"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg></div><div class="checklist-item-text">Brush teeth</div></div>
+      <div class="checklist-popup-item checked-item" onclick="toggleCheckItem(this)"><div class="checklist-checkbox checked"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-item-icon" style="background:rgba(154,107,71,0.12)"><svg viewBox="0 0 24 24" style="stroke:#9A6B47"><path d="M20.4 3.5 16 2l-4 3-4-3-4.4 1.5a2 2 0 0 0-1.3 2.2l.6 3.5a1 1 0 0 0 1 .8H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.2a1 1 0 0 0 1-.8l.6-3.5a2 2 0 0 0-1.4-2.2z"/></svg></div><div class="checklist-item-text">Get dressed</div></div>
+      <div class="checklist-popup-item checked-item" onclick="toggleCheckItem(this)"><div class="checklist-checkbox checked"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-item-icon" style="background:rgba(200,116,86,0.12)"><svg viewBox="0 0 24 24" style="stroke:#C87456"><path d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg></div><div class="checklist-item-text">Eat breakfast</div></div>
+      <div class="checklist-popup-item" onclick="toggleCheckItem(this)"><div class="checklist-checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-item-icon" style="background:rgba(184,146,84,0.12)"><svg viewBox="0 0 24 24" style="stroke:#B89254"><path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></div><div class="checklist-item-text">Pack lunch</div></div>
+      <div class="checklist-popup-item" onclick="toggleCheckItem(this)"><div class="checklist-checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-item-icon" style="background:rgba(142,112,101,0.12)"><svg viewBox="0 0 24 24" style="stroke:#8E7065"><path d="M4 20V10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"/></svg></div><div class="checklist-item-text">Pack backpack</div></div>
+      <div class="checklist-popup-item" onclick="toggleCheckItem(this)"><div class="checklist-checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-item-icon" style="background:rgba(59,130,246,0.10)"><svg viewBox="0 0 24 24" style="stroke:#3B82F6"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div><div class="checklist-item-text">Water bottle</div></div>
+      <div class="checklist-popup-item" onclick="toggleCheckItem(this)"><div class="checklist-checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="checklist-item-icon" style="background:rgba(110,142,77,0.12)"><svg viewBox="0 0 24 24" style="stroke:#6E8E4D"><path d="M4 16v-2.4C4 11.5 3 10.5 3 8c0-2.7 1.5-6 4.5-6C9.4 2 10 3.8 10 5.5 10 7.3 8 9.4 8 11M8 16H4M20 16v-2.4c0-2.1 1-3.1 1-5.6 0-2.7-1.5-6-4.5-6-1.9 0-2.5 1.8-2.5 3.5 0 1.8 2 3.9 2 5.5M16 16h4"/></svg></div><div class="checklist-item-text">Shoes on</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+  function openPopup(id) { document.getElementById(id).classList.add('active'); const inp = document.getElementById(id).querySelector('input[type="text"]'); if (inp) setTimeout(() => inp.focus(), 200); }
+  function closePopup(id) { document.getElementById(id).classList.remove('active'); }
+  function closePopupOverlay(e) { if (e.target.classList.contains('popup-overlay')) e.target.classList.remove('active'); }
+
+  function findPhone() { const t = document.getElementById('findPhoneToast'); t.classList.add('active'); setTimeout(() => t.classList.remove('active'), 3000); }
+
+  // Timer
+  let timerInterval = null, timerRemaining = 0, timerTotal = 0, timerPaused = false;
+  function startTimer(m) {
+    timerTotal = m * 60; timerRemaining = timerTotal; timerPaused = false;
+    document.getElementById('timerActions').style.display = 'flex';
+    document.getElementById('timerPauseBtn').textContent = 'Pause';
+    document.getElementById('timerBtn').classList.add('timer-active');
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(tickTimer, 1000); updateTimerDisplay();
+  }
+  function tickTimer() {
+    if (timerPaused) return; timerRemaining--;
+    if (timerRemaining <= 0) { clearInterval(timerInterval); timerInterval = null; timerRemaining = 0;
+      document.getElementById('timerDiscLabel').textContent = 'Done!';
+      document.getElementById('timerDiscFill').style.background = 'var(--sage-light)';
+      document.getElementById('timerBtn').classList.remove('timer-active');
+      document.getElementById('timerActions').style.display = 'none';
+    } updateTimerDisplay();
+  }
+  function updateTimerDisplay() {
+    const m = Math.floor(timerRemaining / 60), s = timerRemaining % 60;
+    const ts = m + ':' + (s < 10 ? '0' : '') + s;
+    document.getElementById('timerDiscTime').textContent = ts;
+    document.getElementById('timerMiniTime').textContent = ts;
+    if (timerRemaining > 0) {
+      document.getElementById('timerDiscLabel').textContent = timerPaused ? 'Paused' : 'Remaining';
+      const pct = (timerRemaining / timerTotal) * 360;
+      document.getElementById('timerDiscFill').style.background = `conic-gradient(var(--terracotta) 0deg, var(--terracotta) ${pct}deg, var(--neutral-100) ${pct}deg)`;
+    }
+  }
+  function pauseTimer() { timerPaused = !timerPaused; document.getElementById('timerPauseBtn').textContent = timerPaused ? 'Resume' : 'Pause'; updateTimerDisplay(); }
+  function cancelTimer() {
+    clearInterval(timerInterval); timerInterval = null; timerRemaining = 0; timerTotal = 0;
+    document.getElementById('timerDiscTime').textContent = '0:00';
+    document.getElementById('timerDiscLabel').textContent = 'Ready';
+    document.getElementById('timerDiscFill').style.background = 'var(--neutral-100)';
+    document.getElementById('timerActions').style.display = 'none';
+    document.getElementById('timerBtn').classList.remove('timer-active');
+  }
+
+  function activateScene(chip) { document.querySelectorAll('.scene-chip').forEach(c => c.classList.remove('scene-active')); chip.classList.add('scene-active'); }
+  function toggleRoom(card) { const i = card.querySelector('.room-light-indicator'); i.classList.toggle('light-on'); i.classList.toggle('light-off'); }
+  function addListItem() { const inp = document.getElementById('addListInput'); if (inp.value.trim()) { inp.value = ''; inp.placeholder = 'Added! Type another...'; setTimeout(() => inp.placeholder = 'Milk, eggs, bread...', 1500); } }
+
+  const activities = ['RC Cars', 'Read a Book', 'Build Lego', 'Board Games', 'Make a Movie', 'Marbles', 'Toy Cars', 'Draw'];
+  function spinBored() {
+    const r = document.getElementById('boredResult'); r.classList.add('visible');
+    let c = 0; const si = setInterval(() => {
+      r.textContent = activities[Math.floor(Math.random() * activities.length)]; c++;
+      if (c > 10) { clearInterval(si); r.textContent = activities[Math.floor(Math.random() * activities.length)]; r.style.animation = 'none'; r.offsetHeight; r.style.animation = 'popIn 0.3s ease'; }
+    }, 80);
+  }
+  function addActivity() { const inp = document.getElementById('boredInput'), v = inp.value.trim(); if (!v) return; activities.push(v); const t = document.createElement('span'); t.className = 'bored-activity-tag'; t.textContent = v; document.getElementById('boredActivities').appendChild(t); inp.value = ''; }
+  function pickTonight(card) {
+    document.querySelectorAll('.dinner-popup-card').forEach(c => { c.classList.remove('tonight'); const b = c.querySelector('.dinner-popup-btn'); if (b) { b.className = 'dinner-popup-btn pick-tonight'; b.textContent = 'Pick for tonight'; } });
+    card.classList.add('tonight'); const b = card.querySelector('.dinner-popup-btn'); b.className = 'dinner-popup-btn is-tonight'; b.textContent = 'Tonight';
+  }
+  function quickDinner() {
+    const inp = document.getElementById('dinnerQuickInput');
+    const v = inp.value.trim(); if (!v) return;
+    // Clear existing tonight selection
+    document.querySelectorAll('.dinner-popup-card').forEach(c => { c.classList.remove('tonight'); const b = c.querySelector('.dinner-popup-btn'); if (b) { b.className = 'dinner-popup-btn pick-tonight'; b.textContent = 'Pick for tonight'; } });
+    inp.value = ''; inp.placeholder = v + ' — set!';
+    setTimeout(() => { inp.placeholder = 'Takeout, leftovers...'; }, 2000);
+  }
+  function toggleCheckItem(item) { item.classList.toggle('checked-item'); item.querySelector('.checklist-checkbox').classList.toggle('checked'); }
+  function toggleSeasonManage() { document.getElementById('seasonManage').classList.toggle('visible'); }
+
+  // Weather bar times
+  (function() {
+    const el = document.getElementById('weatherTimes'); const now = new Date(); let h = now.getHours();
+    const temps = [68, 66, 65, 63, 62, 60];
+    for (let i = 0; i < 6; i++) {
+      const hr = (h + i * 2) % 24; const ampm = hr >= 12 ? ' PM' : ' AM'; const h12 = hr === 0 ? 12 : hr > 12 ? hr - 12 : hr;
+      const d = document.createElement('div'); d.className = 'weather-tick';
+      d.innerHTML = `<div class="weather-tick-time">${i === 0 ? 'Now' : h12 + ampm}</div><div class="weather-tick-temp">${temps[i]}&#176;</div>`;
+      el.appendChild(d);
+    }
+  })();
+
+  // Live clock
+  function updateClock() {
+    const now = new Date(); let h = now.getHours(); const m = now.getMinutes();
+    const ampm = h >= 12 ? 'PM' : 'AM'; h = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    document.getElementById('liveClock').innerHTML = h + ':' + (m < 10 ? '0' : '') + m + ' <span class="ampm">' + ampm + '</span>';
+    const hr = now.getHours(); let g = 'Good morning'; if (hr >= 12 && hr < 17) g = 'Good afternoon'; else if (hr >= 17) g = 'Good evening';
+    document.getElementById('liveGreeting').textContent = g + ', Bennetts.';
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('liveDate').textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate();
+  }
+  updateClock(); setInterval(updateClock, 10000);
+</script>
+</body>
+</html>
