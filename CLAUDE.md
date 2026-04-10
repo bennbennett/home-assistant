@@ -740,11 +740,18 @@ What we built (Apr 9-10, 2026):
 |--------|---------|
 | `timer.kitchen_timer` | Kitchen timer with popup disc display |
 | `input_text.add_to_list_item` | Shopping list quick-add input |
+| `input_text.toby_new_activity` | "Add a new activity" text input on Toby's Corner |
+| `input_select.toby_activity_selector` | Stores Toby's activity pool (options are dynamic) |
+| `input_boolean.season_school` | Toggle School checklist visibility (Manage popup) |
+| `input_boolean.season_swimming` | Toggle Swimming checklist visibility |
+| `input_boolean.season_hockey` | Toggle Hockey checklist visibility |
 
 **New scripts:**
 | Script | Purpose |
 |--------|---------|
 | `script.ct_add_to_shopping_list` | Adds item to Google Keep, clears input |
+| `script.toby_add_activity` | Adds new activity from input_text to activity_selector options |
+| `script.toby_random_activity` | Picks random activity from input_select options (updated to read dynamically) |
 
 **Key files:**
 | File | Purpose |
@@ -761,6 +768,25 @@ What we built (Apr 9-10, 2026):
 - `position: fixed` CSS on cards is fragile — use layout-card grid rows instead.
 - `ll-custom` event dispatch for service calls is unreliable — use separate button-cards with `tap_action: call-service`.
 - HA dashboard URL keys must contain a hyphen (`the-countertop`, not `countertop`).
+
+What we changed (Apr 10, 2026 — Phase 2: iPad Visual Fidelity):
+- **Scene bar chips**: Full-width stretched → compact centered pills using dual-spacer pattern (`1fr repeat(5, auto) 1fr`). Padding fixed from `10px 24px` → `0 24px`.
+- **Calendar controls**: Replaced `horizontal-stack` (forces equal width) with `layout-card` grid (`repeat(3, auto) 1fr auto`). Added missing "+ Add Event" button, right-aligned.
+- **Secondary nav links**: Replaced inert HTML divs with 3 separate navigable button-cards in a layout-card grid.
+- **Agenda + dinner pool tap actions**: Changed from `tap_action: none` to navigate to Calendar/Meals respectively.
+- **Action button height**: `min-height` bumped from `110px` → `140px` to match mockup proportions on iPad 6th gen (1024x768 viewport).
+- **Home grid right panel**: Narrowed from `320px` → `300px` to give action grid more room at 1024px.
+- **Card borders**: `#F0EDE8` → `#E8E4DE` (slightly darker, visible on iPad at arm's length).
+- **Calendar max-height**: Added `max-height: calc(100vh - 210px)` + `overflow-y: auto` + `compact: true` on week-planner-card so scene bar stays visible on iPad.
+- **Recipe text sizing**: Name `13px` → `14px`, time `11px` → `12px`, image area `72px` → `80px` for arm's-length readability.
+- **Vertical centering (Lights + Toby)**: JS patcher in `home-hub-fonts.js` sets `height: fit-content` + `alignSelf: center` on the vertical-stack inside `grid-layout`'s shadow root. card_mod can't reach nested shadow roots — JS patching is the only way.
+- **Find Phone toast**: `browser_mod.sequence` calls ring script then shows terracotta popup ("Ringing Petra's phone...") with 3s timeout.
+- **Shopping list popup**: Redesigned with inline input+Add layout and "View full list →" link.
+- **Toby's Corner**: Added MANAGE button (same line as CHECKLISTS label, opens season toggle popup), Add Activity input+button, dynamic activity list from `input_select`.
+- **Recipe browser serialization fix**: Namespace loop in `mealie_fetch_recipes` automation to transform Python repr string → clean dicts with string-only values. Same pattern as mealplan fix.
+
+**iPad cache-busting for JS files:**
+When updating `home-hub-fonts.js`, bump the `?v=N` query parameter on the URL in `configuration.yaml` `extra_module_url` (e.g., `?v=2` → `?v=3`), then restart HA. The companion app's WKWebView caches aggressively — `command_clear_cache` notification alone is NOT reliable. The `?v=N` URL change is the bulletproof approach.
 
 ## Troubleshooting
 

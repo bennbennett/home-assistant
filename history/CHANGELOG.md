@@ -2,6 +2,33 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 10, 2026 — The Countertop Phase 2: iPad Visual Fidelity]
+
+Side-by-side comparison of real iPad 6th gen screenshots against the HTML mockup revealed proportion, spacing, and interactivity gaps. Two rounds of fixes closed most of them.
+
+### Fixed
+- **Scene bar chips** no longer stretch full-width. Dual-spacer grid pattern (`1fr repeat(5, auto) 1fr`) keeps them as compact centered pills on all 5 views
+- **Calendar controls** are now compact left-aligned pills with "+ Add Event" right-aligned (was stretched `horizontal-stack`)
+- **Action buttons are taller** (140px min-height, up from 110px) to match mockup proportions on the iPad's 1024x768 viewport
+- **Card borders visible on iPad** — darkened from `#F0EDE8` to `#E8E4DE` for arm's-length readability
+- **Calendar scene bar always visible** — `max-height: calc(100vh - 210px)` + `compact: true` constrains the planner card so the scene bar doesn't get pushed below the fold
+- **Recipe names and cook times now render** — fixed serialization bug where `sensor.mealie_recipe_browser` stored items as a Python repr string instead of a list
+- **Vertical centering on Lights and Toby** — JS patcher in `home-hub-fonts.js` sets `height: fit-content` + `alignSelf: center` on the vertical-stack inside grid-layout's shadow root (card_mod can't reach nested shadow roots)
+- **Secondary nav links navigate** — "Meals", "Ben", "Petra" are now separate button-cards with tap actions (were inert HTML divs)
+- **Agenda and dinner pool are tappable** — navigate to Calendar and Meals respectively (were `tap_action: none`)
+- **Find Phone shows feedback** — terracotta toast popup "Ringing Petra's phone..." via `browser_mod.sequence`
+- **Recipe text bumped** for arm's-length readability (name 14px, time 12px, image area 80px)
+- **Shopping list popup** restyled with inline input+Add layout and "View full list" link
+
+### Added
+- **Toby MANAGE button** — same line as CHECKLISTS label, opens season toggle popup (`input_boolean.season_school/swimming/hockey`)
+- **Toby Add Activity** — text input + Add button below I'm Bored card. Activities stored in `input_select.toby_activity_selector`, randomizer reads dynamically
+
+### Technical
+- iPad companion app WKWebView caches `extra_module_url` JS files aggressively. Force-close and hard reset do NOT clear it. Bump `?v=N` parameter on the URL in `configuration.yaml` + restart HA to bust the cache
+- `horizontal-stack` in HA forces equal-width children. Replace with `layout-card` grid using `auto` columns for auto-sizing pills
+- `card_mod` `grid-layout$:` nested shadow targeting does not work for layout-card's inner grid. JS DOM patching via `setInterval` is the proven fallback
+
 ## [April 9-10, 2026 — The Countertop]
 
 New kitchen fridge iPad dashboard, built from the ground up in 7 staged steps. Hub-and-spoke navigation (5 views, max depth 1), persistent scene bar, designed for an ADHD family of 3 doing quick transactions at arm's length.

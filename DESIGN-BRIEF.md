@@ -127,7 +127,7 @@ Room icon tiles derive their background from each room's accent color at 14% alp
 |----------|-------|
 | Background | `#FFFFFF` |
 | Border radius | `16px` |
-| Border | `1px solid #F0EDE8` |
+| Border | `1px solid #E8E4DE` |
 | Shadow | `0 1px 3px rgba(0,0,0,0.06)` |
 | Page background | `#fbfaf9` (warm off-white) |
 
@@ -232,5 +232,15 @@ Key entities needed:
 - `todo.google_keep_shopping_list` (for Add to List popup)
 
 The dashboard is registered as `mode: yaml` at `/the-countertop/home` with `kiosk_mode: kiosk: true`. Note: HA requires a hyphen in the dashboard URL key.
+
+**Phase 2 refinements** (April 10, 2026): After comparing iPad screenshots against the mockup, visual fidelity fixes were applied:
+- Action button `min-height` bumped to `140px` (iPad 6th gen viewport is 1024x768, smaller than the mockup's assumed 1180x820)
+- Home grid right panel narrowed from `320px` to `300px` for better action grid proportions
+- Card border darkened to `#E8E4DE` (visible on iPad at arm's length)
+- Calendar `max-height: calc(100vh - 210px)` + `compact: true` keeps scene bar visible
+- Recipe text bumped for readability (name 14px, time 12px, image area 80px)
+- Vertical centering on Lights/Toby via JS patcher in `home-hub-fonts.js` (`height: fit-content` + `alignSelf: center`)
+- Scene bar chips: dual-spacer grid pattern for compact centered pills
+- Toby: MANAGE button + season toggles, Add Activity input with dynamic `input_select`
 
 The audience is a family with ADHD using a kitchen fridge iPad. Calm, warm, confident, functional.

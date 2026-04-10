@@ -76,7 +76,7 @@ home-assistant/
 │   └── button_card_templates.yaml
 ├── www/
 │   ├── kiosk-mode/          # Kiosk mode JS (hides HA chrome)
-│   └── home-hub-fonts.js    # Fraunces serif loader + animation keyframes + hourly-weather warm patcher
+│   └── home-hub-fonts.js    # Fraunces serif loader + animation keyframes + hourly-weather warm patcher + Countertop vertical centering
 └── .storage/                # Integration configs
 ```
 
