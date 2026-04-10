@@ -788,6 +788,31 @@ What we changed (Apr 10, 2026 — Phase 2: iPad Visual Fidelity):
 **iPad cache-busting for JS files:**
 When updating `home-hub-fonts.js`, bump the `?v=N` query parameter on the URL in `configuration.yaml` `extra_module_url` (e.g., `?v=2` → `?v=3`), then restart HA. The companion app's WKWebView caches aggressively — `command_clear_cache` notification alone is NOT reliable. The `?v=N` URL change is the bulletproof approach.
 
+What we changed (Apr 10, 2026 — Phase 3: Final Polish):
+Three rounds of second-opinion review (Codex) drove the remaining gap from "functional but HA-looking" to "feels like part of the dashboard." The biggest wins were replacing HA's native input field chrome via JS shadow DOM patching, upgrading checklist popups from entities-card toggles to custom packing-list rows, and removing the modal overlay from Find Phone.
+
+- **Checklist popup redesign**: Replaced `type: entities` toggle switches with `ct_checklist_item` button-card template. Each row: left-side 22px SVG checkbox (green/blue fill when checked, gray outline when unchecked), 36x36 tinted icon tile (16-key SVG map: apple, lunch, water, jacket, notebook, laptop, pencil, bag, shirt, swim, goggles, towel, sun, droplet, shorts), 15px label. Strikethrough + muted colors when checked. 56px row height, 8px horizontal padding, warm dividers (#F0EFED).
+- **All popup chrome cleaned up**: Every popup (shopping, timer, phone toast, both checklists) now has `popup_styles` hiding `ha-dialog-header` and setting `--ha-dialog-border-radius: 24px`. Popup titles rendered as Fraunces serif inside the content instead of the HA dialog header.
+- **Timer popup state fix**: Pause/Cancel row wrapped in `type: conditional` with `state_not: idle` — idle state shows only preset buttons. Added `size: narrow`.
+- **Meals fixed 7-day layout**: Replaced dynamic-count grid with Mon-Sun slots. Each slot shows the assigned meal with day label badge, or a dashed placeholder ("Add Meal" + day abbreviation). Today's empty slot gets terracotta dashing and tint. Grid always stable regardless of how many meals are assigned.
+- **Room card subtitle removal**: Removed "Lights off" fallback text from `ct_room_card` `rm_temp` field. Returns empty 13px spacer instead — the lightbulb icon already conveys on/off state.
+- **Toby add-activity visual merge**: Bored card gets `border-radius: 16px 16px 0 0` with no bottom border. Add activity row gets `card_mod` with `0 0 16px 16px` bottom radius, matching white background, no top border. Reads as one continuous card.
+- **Action button height**: `min-height` bumped from `140px` → `200px` in `ct_action_btn` to fill more vertical space on the iPad.
+- **Swimming progress bar**: Hardcoded `#4A7C59` sage changed to `${color}` variable so it uses the card's `checklist_color` (blue for Swimming).
+- **Calendar cleanup**: Hidden legend and weather on week view, set `compact: false` to give day cards more breathing room. Month view legend also hidden.
+- **JS input patcher** (`patchInputFields()` in `home-hub-fonts.js`): New shadow DOM patcher that finds all `hui-input-text-entity-row` elements (including inside browser_mod popup shadow roots), hides the `state-badge` leading icon, and injects a `<style>` into each `ha-textfield` shadow root. Patches: hides `.mdc-line-ripple` (underline), `.mdc-floating-label`, `.mdc-notched-outline`; adds `border: 1px solid #E8E4DE`, `border-radius: 12px`, `height: 44px`; terracotta focus ring (`border-color: #C87456`). Route-gated to `/the-countertop`, runs every 1500ms. Handles both inline inputs (Toby page) and popup inputs (Shopping List dialog).
+- **Find Phone transparent scrim**: Added `--mdc-dialog-scrim-color: transparent` to popup_styles — removes the screen-dimming modal overlay. Added `hh-fade-in` animation and light shadow for a toast-like feel.
+- **Cache bust**: `?v=2` → `?v=3` on `extra_module_url` in `configuration.yaml`. HA restart required.
+
+**New template:** `ct_checklist_item` in `/Volumes/config/dashboards/countertop/button_card_templates.yaml`
+- Variables: `item_name` (string), `item_icon` (key into SVG map), `item_color` (hex)
+- Entity: the `input_boolean` for this checklist item
+- Tap action: toggle
+- Icon map keys: apple, lunch, water, jacket, notebook, laptop, pencil, bag, shirt, swim, goggles, towel, sun, droplet, shorts
+
+**JS patcher pattern (input fields):**
+Uses the recursive `findAll` walker (like `patchHourlyWeather`, not the explicit-chain walker). Required because popup inputs live inside `browser-mod-popup` elements appended to `document.body` outside the normal HA shadow DOM tree. Deduplication via `data-ct-input` attribute on injected style tags.
+
 ## Troubleshooting
 
 ### API Returns Empty / JSON Parse Errors

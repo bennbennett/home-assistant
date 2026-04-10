@@ -2,6 +2,34 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 10, 2026 — The Countertop Phase 3: Final Polish]
+
+Three rounds of second-opinion review closed the remaining visual/interaction gaps. Inputs no longer look like HA admin forms, popups feel like part of the dashboard, and Find Phone no longer dims the screen.
+
+### Changed
+- **Checklist popups redesigned** — School and Swimming popups now use custom `ct_checklist_item` rows instead of HA's default entities-card toggle switches. Each row has a left-side checkbox (green/blue fill when checked), a 36x36 tinted icon tile, and a 15px label with strikethrough on completion. Reads like a packing list, not a settings page
+- **All popup chrome hidden** — Shopping list, timer, phone toast, and both checklists now use `popup_styles` to hide the HA dialog header and set 24px border-radius. Titles rendered as Fraunces serif inside the popup content
+- **Timer idle state cleaned up** — Pause/Cancel buttons only appear when the timer is active or paused. Idle state shows presets only
+- **Meals uses fixed 7-day grid** — Mon through Sun slots always visible with day labels. Assigned meals show their name, empty slots show a dashed "Add Meal" placeholder. Today's empty slot gets terracotta accent. Grid is always stable regardless of data
+- **Find Phone no longer dims the screen** — `--mdc-dialog-scrim-color: transparent` removes the modal overlay. Feedback appears as a floating terracotta pill with `hh-fade-in` animation
+- **Action buttons taller** — `min-height` bumped from 140px to 200px, filling more of the iPad's vertical space
+- **Room card subtitle removed** — "Lights off" fallback text replaced with empty spacer. The lightbulb icon already conveys state
+- **Toby add-activity merged into bored card** — Border-radius hack (16px top on bored card, 16px bottom on add row, no border between) makes them read as one card
+
+### Added
+- **JS input field patcher** (`patchInputFields()` in `home-hub-fonts.js`) — Patches `ha-textfield` shadow DOM on countertop routes to hide the MDC underline, floating label, and leading icon. Adds clean 12px-radius bordered input with terracotta focus ring. Handles both inline inputs and popup inputs via recursive DOM walker
+- **16 checklist icons** — SVG icon map in `ct_checklist_item` template (apple, lunch, water, jacket, notebook, laptop, pencil, bag, shirt, swim, goggles, towel, sun, droplet, shorts)
+
+### Fixed
+- **Swimming progress bar** used hardcoded sage green instead of the card's blue accent color
+- **Calendar legend/weather** hidden on week view to reclaim vertical space. `compact: false` gives day cards more room
+- **Checklist dividers** softened from cold gray (#F3F4F6) to warm (#F0EFED), padding widened from 4px to 8px for better touch targets
+
+### Technical
+- Cache bust: `?v=2` → `?v=3` on `extra_module_url`. HA restart required
+- Input patcher uses recursive `findAll` walker (not explicit chain) because popup inputs live inside `browser-mod-popup` elements outside the normal HA shadow DOM tree
+- `--mdc-dialog-scrim-color` is a standard MDC CSS variable. If HA switches to native `<dialog>` with `::backdrop`, a JS fallback patcher may be needed
+
 ## [April 10, 2026 — The Countertop Phase 2: iPad Visual Fidelity]
 
 Side-by-side comparison of real iPad 6th gen screenshots against the HTML mockup revealed proportion, spacing, and interactivity gaps. Two rounds of fixes closed most of them.
