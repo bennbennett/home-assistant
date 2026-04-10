@@ -209,7 +209,9 @@ The mockup (`mockup-countertop.html`) has been through 3 critique-and-fix cycles
 
 ## Implementation Notes
 
-This mockup is ready to be converted into a YAML-mode Lovelace dashboard. Implementation will use:
+**Status: Implemented** (April 9-10, 2026). Dashboard live at `/the-countertop/home`. Built in 7 staged steps. See `CLAUDE.md` "The Countertop Dashboard" section for full technical details.
+
+This mockup was converted into a YAML-mode Lovelace dashboard using:
 
 - `custom:button-card` for all custom cards (action buttons, room cards, checklist cards, agenda, dinner pool)
 - `browser_mod` for popups (Add to List, Timer, Weather, Dinner, Checklist)
@@ -229,6 +231,6 @@ Key entities needed:
 - `input_text.dinner_quick_add` (new — for the quick-add dinner feature)
 - `todo.google_keep_shopping_list` (for Add to List popup)
 
-The dashboard should be registered as `mode: yaml` at `/countertop/home` with `kiosk_mode: kiosk: true`.
+The dashboard is registered as `mode: yaml` at `/the-countertop/home` with `kiosk_mode: kiosk: true`. Note: HA requires a hyphen in the dashboard URL key.
 
 The audience is a family with ADHD using a kitchen fridge iPad. Calm, warm, confident, functional.

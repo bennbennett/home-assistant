@@ -2,6 +2,25 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 9-10, 2026 — The Countertop]
+
+New kitchen fridge iPad dashboard, built from the ground up in 7 staged steps. Hub-and-spoke navigation (5 views, max depth 1), persistent scene bar, designed for an ADHD family of 3 doing quick transactions at arm's length.
+
+### Added
+- **The Countertop dashboard** (`/the-countertop/home`) — a new fridge-mounted iPad dashboard separate from the Home Hub. Five views: Home (clock, action grid, agenda, dinner pool), Lights (6 room cards with toggle/hold), Calendar (week-planner-card with week/month toggle), Toby's Corner (School + Swimming checklists, I'm Bored randomizer), and Meals (dinner pool cards, recipe browser)
+- **Persistent scene bar** on every view — 5 chips (Relax, All Off, Bright, Morning, Good Night) always visible at bottom, pinned via `layout-card` grid rows
+- **Kitchen Timer** — `timer.kitchen_timer` entity with popup showing conic-gradient terracotta countdown disc, 6 preset buttons (5/10/15/20/30/45m), pause/cancel controls. Timer button on Home screen shows live mm:ss countdown when active
+- **Add to Shopping List** popup — text input + Add button, writes to Google Keep via `script.ct_add_to_shopping_list`
+- **Find Phone** instant action — one tap rings Petra's iPhone (no confirmation dialog, no popup)
+- **Checklist popups** — School (7 items) and Swimming (12 items) checklists open as `browser_mod.popup` with toggleable `entities` cards. Summary cards show progress bars
+
+### Technical
+- Dashboard key must contain a hyphen (`the-countertop`, not `countertop`) — HA validation requirement
+- SVG icons defined inside JS templates as icon-key maps (never as YAML variables — they get HTML-escaped)
+- `!include` paths in nested view files resolve relative to the view file's directory (`../scene_bar.yaml`)
+- Button-card variables don't support YAML lists — use comma-separated strings, split in JS
+- Scene bar uses `grid-template-rows: 1fr auto` (not `position: fixed`)
+
 ## [April 7, 2026 — Phase 5: Coherence pass]
 
 After the Editorial Kitchen redesign (Phases 1-4) landed at 24/40, `/critique` flagged two issues that broke the warm direction even though everything else was working: the calendar repeated multi-day events as identical pills across every cell, and the Rooms/Devices/Family icons were still in a leftover Material UI rainbow that didn't sit in the Editorial Kitchen palette. Phase 5 fixes both.

@@ -23,6 +23,7 @@
 | **Config Access** | Samba mount at `/Volumes/config/` |
 | **iPad Dashboard** | `/lovelace/ipad` (tablet-dashboard) |
 | **Home Hub Dashboard** | `/home-hub/rooms` (home-hub) |
+| **Countertop Dashboard** | `/the-countertop/home` (the-countertop) |
 | **Mobile Dashboard** | `/mobile-dashboard/home` (mobile-dashboard) |
 | **HA Version** | 2026.3.0 |
 
@@ -281,6 +282,8 @@ Mount Samba share: `open "smb://192.168.68.114/config"`
 | `/Volumes/config/dashboards/popups/calendar_event_popup_home_hub.yaml` | Add Event popup (green palette, Home Hub only) |
 | `/Volumes/config/dashboards/button_card_templates.yaml` | Card templates |
 | `/Volumes/config/dashboards/home-hub.yaml` | Home Hub dashboard (includes kiosk_mode config) |
+| `/Volumes/config/dashboards/countertop.yaml` | Countertop kitchen iPad dashboard |
+| `/Volumes/config/dashboards/countertop/` | Countertop templates and views |
 | `/Volumes/config/dashboards/home-hub/` | Home Hub templates and views |
 | `/Volumes/config/dashboards/home-hub/views/ben.yaml` | Ben's personal subpage |
 | `/Volumes/config/dashboards/home-hub/views/petra.yaml` | Petra's personal subpage |
@@ -705,6 +708,59 @@ Troubleshooting:
 - **ButtonCardJSTemplateError: Identifier 'html' has already been declared** - Don't use `html` as a variable name in button-card JavaScript templates. It conflicts with button-card's built-in `html` template helper. Use `output`, `result`, or another name instead.
 - **Recipe Browser area not clickable / default entity popup opens on click** - If using a `custom:button-card` as a JS-rendered container, avoid root card entity tap behavior intercepting child controls. Remove root `entity` binding for the container card (or ensure root actions do not capture click events), and read data from `states['sensor.*']` inside JS.
 - **Trigger-based sensor attributes are strings instead of lists** - If a Mealie (or other integration) service call returns Python objects with non-JSON-serializable types (e.g., `datetime.date`, enums), passing them directly through `{{ variable }}` in event_data produces a Python repr string that HA can't parse back. Fix: transform to flat dicts with only string/number values in the automation before firing the event.
+
+## The Countertop Dashboard (Kitchen Fridge iPad)
+
+Location: `/the-countertop/*` views, config in `/Volumes/config/dashboards/countertop/`
+
+What we built (Apr 9-10, 2026):
+- **New kitchen fridge iPad dashboard** with hub-and-spoke navigation (5 views, max depth 1)
+- Design brief at `DESIGN-BRIEF.md`, mockup at `mockup-countertop.html` (scored 31/40)
+- Built in 7 stages after a failed first attempt that tried to do everything at once
+
+**Architecture (different from Home Hub):**
+- No sidebar — hub-and-spoke from Home screen
+- Persistent scene bar on every view via `layout-card` with `grid-template-rows: 1fr auto`
+- `type: panel` views with `custom:layout-card` as outer container
+- Button card templates with SVGs defined inside JS (icon-key maps, never YAML variables)
+- Scene bar included via `!include ../scene_bar.yaml` (relative from views/ dir)
+- Dashboard key requires hyphen: `the-countertop` (HA validation rule)
+
+**Views:**
+| Path | Content |
+|------|---------|
+| `/the-countertop/home` | Clock, 3x2 action grid, agenda, dinner pool, secondary nav |
+| `/the-countertop/lights` | 3x2 room cards (toggle + hold for controls) |
+| `/the-countertop/calendar` | Week/month toggle, week-planner-card |
+| `/the-countertop/toby` | School + Swimming checklists, I'm Bored randomizer |
+| `/the-countertop/meals` | Dinner pool cards, recipe browser |
+
+**New entities:**
+| Entity | Purpose |
+|--------|---------|
+| `timer.kitchen_timer` | Kitchen timer with popup disc display |
+| `input_text.add_to_list_item` | Shopping list quick-add input |
+
+**New scripts:**
+| Script | Purpose |
+|--------|---------|
+| `script.ct_add_to_shopping_list` | Adds item to Google Keep, clears input |
+
+**Key files:**
+| File | Purpose |
+|------|---------|
+| `/Volumes/config/dashboards/countertop.yaml` | Main dashboard (kiosk, resources, views) |
+| `/Volumes/config/dashboards/countertop/button_card_templates.yaml` | 4 templates (scene_chip, action_btn, room_card, checklist_card) |
+| `/Volumes/config/dashboards/countertop/scene_bar.yaml` | Shared bottom bar (5 scene chips) |
+| `/Volumes/config/dashboards/countertop/views/*.yaml` | 5 view files |
+
+**Implementation lessons (avoid repeating):**
+- Never pass SVG markup as YAML variables — it gets HTML-escaped. Use icon-key maps in JS.
+- `!include` paths in view files resolve relative to the view file's directory, not the dashboard root.
+- YAML list variables in button-card cause "Configuration error" — use comma-separated strings, split in JS.
+- `position: fixed` CSS on cards is fragile — use layout-card grid rows instead.
+- `ll-custom` event dispatch for service calls is unreliable — use separate button-cards with `tap_action: call-service`.
+- HA dashboard URL keys must contain a hyphen (`the-countertop`, not `countertop`).
 
 ## Troubleshooting
 

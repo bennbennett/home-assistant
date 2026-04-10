@@ -68,8 +68,10 @@ home-assistant/
 ├── lights.yaml              # Light templates
 ├── dashboards/              # Dashboard files
 │   ├── tablet.yaml          # Original iPad dashboard
-│   ├── home-hub.yaml        # Home Hub dashboard (new)
+│   ├── home-hub.yaml        # Home Hub dashboard (sidebar)
 │   ├── home-hub/            # Home Hub templates & views
+│   ├── countertop.yaml      # Countertop kitchen iPad dashboard
+│   ├── countertop/          # Countertop templates & views
 │   ├── views/rooms.yaml
 │   └── button_card_templates.yaml
 ├── www/
