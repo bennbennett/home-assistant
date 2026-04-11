@@ -29,6 +29,7 @@
 | 09 | [Procedures](09-procedures.md) | Maintenance, backup, token refresh |
 | 10 | [Patterns](10-patterns.md) | Reusable solutions (templates, popup patterns) |
 | 11 | [Home Hub Sidebar Debugging](11-home-hub-sidebar-debugging.md) | **MOSTLY RESOLVED** - Sidebar layout working; weather content alignment pending |
+| 12 | [Countertop Live Remediation (Apr 11, 2026)](12-countertop-live-remediation-2026-04-11.md) | Codex session log: Phase 4 interaction remediation on `/Volumes/config` live. 7/8 tasks complete; dinner popup still broken |
 
 ## System Summary
 

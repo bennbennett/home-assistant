@@ -2,6 +2,42 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 11, 2026 — The Countertop Phase 4: Live Remediation]
+
+Seven of the eight broken interactions from Phase 3 now work. Shopping and Toby Add Activity fields actually accept typing on iPad (including the spacebar). The kitchen timer popup shows a live countdown with a draining terracotta ring. The Home weather block is no longer dead — tap it for an hourly forecast. The dinner popup still has a broken assignment action, which is the one remaining gap from this cycle. Full session log at [`docs/12-countertop-live-remediation-2026-04-11.md`](../docs/12-countertop-live-remediation-2026-04-11.md).
+
+### Changed
+- **Shopping list popup actually works on iPad.** The input field accepts typing and the spacebar, the Add button fires the service call, and the popup reads like part of the dashboard instead of an HA admin dialog. Rebuilt around an `entities` card wrapping `input_text.add_to_list_item` + a native button calling `script.ct_add_to_shopping_list`
+- **Toby Add Activity inline field works.** Same rebuild pattern as the shopping popup but inline on the Toby page. Text entry, spacebar, and Add all work. The visual shell still merges into the Bored card as one continuous block
+- **Kitchen timer popup shows a live countdown and ring.** Previously the popup could display a snapshot of timer state, but the ring and countdown didn't animate once the popup opened. Switched the popup renderer to `custom:simple-timer-card` (which maintains its own update interval) and it now updates in real time. Pause/Cancel only appear when the timer is active or paused; idle state shows presets only
+- **Home weather area opens an hourly forecast popup.** Tapping the Home header opens a Browser Mod popup with the warm-tinted hourly weather strip. Narrowing the tap target to the weather block only (instead of the whole header) is a known follow-up
+- **Find Phone uses a transient top-center toast.** Replaced the modal-style feedback with a Browser Mod toast restyled via `home-hub-fonts.js`. No dimming overlay, no modal shell, auto-dismisses
+- **Toby Manage popup controls seasonal visibility.** The `season_school` / `season_swimming` / `season_hockey` booleans in the popup now actually show/hide their respective checklist cards on the Toby page. Calm empty state renders if all three are off
+- **Hockey checklist restored.** Hockey had been removed in an earlier pass. Reintroduced `input_boolean.season_hockey` in the Manage popup, restored the Hockey checklist card on the Toby page, and added Hockey icon mappings to the checklist template
+- **Home tile timer countdown animates.** The tile itself computes remaining time client-side so the mm:ss text ticks on the Home screen, not just inside the popup
+
+### Added
+- **`custom:simple-timer-card` resource** — New popup timer renderer that replaces `circular-timer-card`. Added to `dashboards/resources.yaml`. `circular-timer-card` stays installed but is no longer wired up
+- **`countertop_assign_meal_to_tonight` script** — Wrapper in `scripts.yaml` that reads today from `now().strftime('%A')`, sets it on `input_select.meal_day_selector`, sets the recipe on `input_select.recipe_selector`, and fires the existing `assign_meal_to_day` flow. Falls back to the current selector value if no recipe is explicitly passed (needed for the native selector-driven popup approach)
+- **`countertop_kitchen_timer_finished_alert` automation** — Listens for `timer.finished` on `timer.kitchen_timer` and sends an audible critical notification to the mounted iPad. The kitchen beeps when the timer runs out
+- **Hourly weather popup partial** — `dashboards/popups/countertop_hourly_weather_popup.yaml`, wired to the Home header tap action
+- **Best-effort screen wake lock** — `home-hub-fonts.js` now requests wake lock while `timer.kitchen_timer` is active, route-gated to Countertop. Releases when the timer stops, the page is hidden, or you navigate away. Falls back silently if Safari declines
+
+### Fixed
+- **Browser Mod popup inputs broken on iPad Safari.** Custom HTML `<input>` elements inside button-card JS templates couldn't reliably hold focus, accept spacebar, or dispatch tap actions through the popup DOM. Root fix: stop rendering controls as raw HTML inside popups. Every broken input got rebuilt as an `entities` card wrapping `input_text` + a service-call button-card, with `home-hub-fonts.js` patching the `ha-textfield` shadow DOM to strip HA form chrome. This pattern is the unifying insight from the pass — it can be reused anywhere an input needs to live inside a popup
+- **`circular-timer-card` didn't animate in popups.** The card could render a correct static position but didn't maintain an update loop, so the ring froze as soon as the popup opened. `simple-timer-card` has the internal interval and animates correctly
+
+### Known gaps
+- **Dinner popup assignment still doesn't commit.** The popup shell opens and reads correctly, but tapping "Assign to Tonight" doesn't write the assignment. Next pass needs to isolate the selected recipe value at click time, validate the wrapper script call path inside the popup context, and decide whether the popup should close or refresh after assignment. Tracked as the single open item from this remediation cycle
+- **Find Phone toast** not re-verified in the final live cycle — the target iPhone was unavailable to disturb
+- **Weather popup tap target** is the whole Home header, not just the weather block. Functional, but a known refinement
+
+### Technical
+- Work was performed directly against `/Volumes/config` over Samba. The repo copy was not treated as authoritative for this pass
+- **Native Lovelace inside Browser Mod was the pivot.** Every broken control got rebuilt the same way: `entities` card → `input_text` → service-call button-card → shadow DOM patch for visual polish. Bubble Card was available but deliberately not introduced — Browser Mod + native controls + shadow DOM patching was enough
+- **`home-hub-fonts.js` patches after this pass**: Fraunces loading, shared animation keyframes, hourly-weather warm style, Countertop sparse-view vertical centering, top-center toast restyle, wake lock gated to `timer.kitchen_timer`, and the native `ha-textfield` shadow DOM input patch
+- Timer popup went through four implementations (existing custom → more custom HTML → `circular-timer-card` → `simple-timer-card`) before landing on one that animated live
+
 ## [April 10, 2026 — The Countertop Phase 3: Final Polish]
 
 Three rounds of second-opinion review closed the remaining visual/interaction gaps. Inputs no longer look like HA admin forms, popups feel like part of the dashboard, and Find Phone no longer dims the screen.
