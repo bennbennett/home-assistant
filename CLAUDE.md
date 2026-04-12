@@ -917,6 +917,64 @@ Redesigned the Lights view room cards and added per-room control popups in the H
 
 **Files changed:** `mockup-countertop.html` (302 insertions, 55 deletions), `DESIGN-BRIEF.md` (Lights view description updated).
 
+What we changed (Apr 12, 2026 — Countertop Phase 6: iPad Screenshot QA + P0/P1 Fixes):
+Compared live iPad screenshots against HTML mockup screenshots side-by-side for all 5 views + 8 popups. Fixed 2 P0 bugs, 3 P1 regressions, and discovered HA 2026.3's internal component migration from MDC to Web Awesome.
+
+**P0 Fix: Dinner popup recipe cards showing "—" dashes (FIXED).**
+- **Root cause (card names):** `entity.attributes.items` returns falsy for `sensor.mealie_recipe_browser` inside browser_mod popup context, even though the sensor has data (7 recipes, 3346 bytes). Fix: switched all 6 recipe card name templates from `entity.attributes.items` to `states['sensor.mealie_recipe_browser'].attributes.items` (global hass states object, always complete).
+- **Root cause (tap action):** `[[[ ]]]` JS templates inside `browser_mod.sequence > data > recipe_name` are NOT evaluated by browser_mod (it lacks button-card's template context). Fix: created `script.countertop_assign_recipe_by_index` that accepts a static integer `index` (0-5), resolves the recipe name server-side via Jinja2 (`state_attr('sensor.mealie_recipe_browser', 'items')[index].name`), and delegates to `countertop_assign_meal_to_tonight`. Each card's tap_action now passes `index: N` (static) instead of a JS template.
+- **Validation guard fix:** Updated `countertop_assign_meal_to_tonight` to validate against sensor items (`map(attribute='name')`) instead of `input_select.recipe_selector` options (which can desync).
+- **Verified:** Full assignment chain fires correctly via API (index 0 → "Instant Pot Butter Chicken" → assigned to Sunday).
+- **Known gap (deferred):** Assignment flow still doesn't fully commit from the iPad popup — the underlying `assign_meal_to_day` → `shell_command.mealie_assign_meal` chain needs further investigation. Deferred to a separate session.
+
+**P0 Fix: Input fields showing raw HA chrome (FIXED — with one remaining cosmetic issue).**
+- **Discovery:** HA 2026.3 replaced MDC (Material Design Components) with **Web Awesome** components. The shadow DOM hierarchy is now: `hui-input-text-entity-row > ha-textfield > [SR] > ha-input > [SR] > wa-input > [SR] > label.label + div.text-field + input.control`. The old `INPUT_PATCH` CSS targeted `.mdc-text-field`, `.mdc-line-ripple`, `.mdc-floating-label` — none of which exist anymore.
+- **Fix:** Rewrote `patchInputFields()` in `home-hub-fonts.js` to dive three shadow root levels deep:
+  1. Find `ha-textfield` → clear its chrome (`border:none; background:transparent`)
+  2. Find `ha-input` inside `ha-textfield.shadowRoot` → clear its chrome
+  3. Find `wa-input` inside `ha-input.shadowRoot` → inject styles targeting the actual elements:
+     - `:host` → border, radius, background, focus ring
+     - `.label` → `display:none` (hides "(empty value)" text)
+     - `.text-field` → transparent container
+     - `input.control` → font styling, caret color
+  4. Set context-appropriate placeholders: "Add a new activity..." on Toby, "Milk, eggs, bread..." on shopping popup
+- **card_mod approach also added:** CSS custom properties (`--mdc-text-field-*`) on the `entities` card for belt-and-suspenders. Plus `hui-input-text-entity-row $ state-badge { display: none }` to hide the leading icon.
+- **Known remaining cosmetic issue:** The HA `entities` card renders a thin horizontal divider line below the input row. `#states > * { border-bottom: none }` via card_mod doesn't eliminate it. Deferred to next session.
+- **Cache-bust history:** `?v=4` → `?v=13` through iterative debugging. Each bump required HA restart since `extra_module_url` is in `configuration.yaml`.
+
+**P1 Fix: Timer popup missing circular progress ring (FIXED).**
+- Added `min-height: 200px !important` to `simple-timer-card` card_mod in `countertop_timer_popup.yaml`. The `narrow` popup container wasn't giving the SVG ring enough vertical space.
+
+**P1 Fix: Ringing toast wrong position and style (FIXED).**
+- Replaced `browser_mod.notification` (which creates an HA snackbar the JS patcher couldn't target) with `browser_mod.popup` styled as a toast: terracotta background (#C87456), transparent scrim, tap-to-dismiss. Popup content is a button-card with `tap_action: browser_mod.close_popup`.
+- Also added MutationObserver to `patchCountertopToasts()` for instant detection of any future `ha-toast` elements (belt-and-suspenders).
+
+**P1 Fix: Vertical centering on Toby (FIXED).**
+- Changed `patchCountertopCentering()` from `first.style.height = 'fit-content'` to `first.style.setProperty('height', 'fit-content', 'important')` (same for `align-self`).
+
+**HA 2026.3 Web Awesome component migration (new knowledge):**
+The `ha-textfield` component's shadow DOM no longer contains MDC (Material Design Components). The hierarchy is:
+```
+ha-textfield [SR]
+  └─ ha-input [SR]
+      └─ wa-input.no-label.hint-hidden [SR]
+          ├─ label.label          ← "(empty value)" text
+          ├─ div.text-field       ← container
+          ├─ input.control        ← the actual <input>
+          └─ slot elements
+```
+Any shadow DOM patcher targeting MDC classes (`.mdc-text-field`, `.mdc-line-ripple`, `.mdc-floating-label`) will silently fail in HA 2026.3+. Must target `wa-input` classes (`.label`, `.text-field`, `input.control`) instead.
+
+**Files changed** (all on `/Volumes/config`, not the repo):
+- `scripts.yaml` — added `countertop_assign_recipe_by_index`, updated `countertop_assign_meal_to_tonight` validation
+- `dashboards/popups/countertop_tonight_meal_popup.yaml` — fixed 6 recipe card names + tap_actions
+- `dashboards/popups/countertop_timer_popup.yaml` — added min-height to simple-timer-card
+- `dashboards/popups/countertop_shopping_popup.yaml` — added card_mod CSS custom properties + state-badge hide
+- `dashboards/countertop/views/home.yaml` — replaced browser_mod.notification with popup toast
+- `dashboards/countertop/views/toby.yaml` — added card_mod CSS custom properties + state-badge hide
+- `www/home-hub-fonts.js` — rewrote input patcher for wa-input, added toast MutationObserver, added centering !important
+- `configuration.yaml` — cache-bust `?v=4` → `?v=13`
+
 ## Troubleshooting
 
 ### API Returns Empty / JSON Parse Errors

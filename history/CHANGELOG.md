@@ -2,6 +2,28 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 12, 2026 — Countertop Phase 6: iPad Screenshot QA + P0/P1 Fixes]
+
+Side-by-side comparison of all 5 Countertop views + 8 popups (live iPad screenshots vs HTML mockup). Fixed dinner popup recipe cards, input field styling, timer ring, ringing toast, and vertical centering. Discovered HA 2026.3's migration from MDC to Web Awesome components.
+
+### Fixed
+- **Dinner popup recipe cards now show recipe names** instead of "—" dashes. Switched from `entity.attributes.items` to `states['sensor.mealie_recipe_browser'].attributes.items` (global hass states object works in popup context where entity binding doesn't). Tap actions now use index-based server-side resolution via new `countertop_assign_recipe_by_index` script — no JS templates in `browser_mod.sequence` service_data
+- **Input fields styled** on Toby's Corner and Shopping List popup. Rewrote the shadow DOM patcher for HA 2026.3's new `ha-textfield > ha-input > wa-input` hierarchy (3 levels deep). Targets `.label` (hide), `.text-field` (transparent container), `input.control` (text styling). Context-aware placeholders: "Add a new activity..." and "Milk, eggs, bread..."
+- **Timer popup now shows the circular progress ring** — added `min-height: 200px` to `simple-timer-card` card_mod
+- **Ringing toast is now a terracotta popup** — replaced `browser_mod.notification` (unstyleable snackbar) with `browser_mod.popup` styled as a toast with transparent scrim and tap-to-dismiss
+- **Toby's Corner content vertically centered** — added `!important` to centering patcher styles
+
+### Added
+- `script.countertop_assign_recipe_by_index` — resolves recipe name by index via Jinja2 server-side, delegates to `countertop_assign_meal_to_tonight`. Eliminates JS template evaluation issues in browser_mod
+- MutationObserver in toast patcher for instant detection of transient `ha-toast` elements
+
+### Known Issues
+- Entities card row divider (thin horizontal line under input fields) still showing — card_mod `#states > * { border-bottom: none }` doesn't eliminate it
+- Meal assignment flow fires correctly via API but doesn't fully commit from iPad popup tap — deferred to separate session
+
+### Technical Discovery
+- HA 2026.3 replaced MDC (Material Design Components) with **Web Awesome** (`wa-input`). Shadow DOM patchers targeting `.mdc-text-field`, `.mdc-line-ripple`, `.mdc-floating-label` silently fail. Must target `wa-input` shadow root classes: `.label`, `.text-field`, `input.control`
+
 ## [April 12, 2026 — Countertop Lights View Redesign (Mockup)]
 
 Redesigned the Lights view cards from scratch and added per-room control popups in the Countertop HTML mockup. Three design iterations driven by user feedback and the ADHD mandate — the first two attempts were too busy (badge pills, inconsistent layout). Final design uses a ring-centered card with the brightness ring as the visual hero.
