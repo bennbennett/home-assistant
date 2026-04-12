@@ -188,23 +188,126 @@
   .room-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 24px; }
   .room-card {
     background: var(--card-bg); border-radius: var(--card-radius); border: var(--card-border);
-    box-shadow: var(--card-shadow); padding: 16px; cursor: pointer;
+    box-shadow: var(--card-shadow); padding: 14px 16px; cursor: pointer;
     transition: all 0.2s cubic-bezier(0.2,0.9,0.3,1.2);
-    display: flex; flex-direction: column; gap: 12px; min-height: 165px;
+    display: flex; flex-direction: column; min-height: 165px;
   }
   .room-card:active { transform: scale(0.97); }
   .room-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-  .room-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
-  .room-name { font-family: var(--font-display); font-size: 16px; font-weight: 450; color: var(--neutral-900); }
-  .room-temp { font-size: 13px; color: var(--neutral-400); margin-top: 2px; font-variant-numeric: tabular-nums; }
-  .room-light-indicator { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-  .room-light-indicator svg { width: 16px; height: 16px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-  .room-light-indicator.light-on { background: #FEF3C7; }
-  .room-light-indicator.light-on svg { stroke: #D97706; }
-  .room-light-indicator.light-off { background: var(--neutral-100); }
-  .room-light-indicator.light-off svg { stroke: var(--neutral-400); }
-  .room-icon-tile { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-  .room-icon-tile svg { width: 26px; height: 26px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Card row 1: name + temp */
+  .room-card-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .room-name { font-family: var(--font-display); font-size: 15px; font-weight: 450; color: var(--neutral-900); }
+  .room-temp { font-size: 13px; color: var(--neutral-400); font-variant-numeric: tabular-nums; }
+
+  /* Card row 2: brightness ring (hero, centered) */
+  .room-ring-wrap { flex: 1; display: flex; align-items: center; justify-content: center; }
+  .room-ring { width: 64px; height: 64px; position: relative; }
+  .room-ring > svg { width: 100%; height: 100%; display: block; }
+  .ring-track { fill: none; stroke: var(--neutral-200); stroke-width: 3; }
+  .ring-fill { fill: none; stroke: #D97706; stroke-width: 3; stroke-linecap: round;
+    transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset 0.4s ease; }
+  .ring-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 36px; height: 36px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.3s ease; }
+  .ring-icon svg { width: 20px; height: 20px; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .room-ring.off .ring-fill { stroke: transparent; }
+  .room-ring.off .ring-icon { opacity: 0.35; }
+
+  /* Card row 3: sensor indicators */
+  .room-sensors { display: flex; gap: 10px; justify-content: flex-end; align-items: center; min-height: 14px; }
+  .sensor { display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+  .sensor.closed { color: #22c55e; }
+  .sensor.open { color: #ef4444; }
+  .sensor-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* ── Room popup ── */
+  .popup-room { width: 420px; }
+  .rp-head { display: flex; align-items: center; gap: 14px;
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--neutral-100); }
+  .rp-icon { width: 44px; height: 44px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .rp-icon svg { width: 24px; height: 24px; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .rp-title { flex: 1; min-width: 0; }
+  .rp-name { font-family: var(--font-display); font-size: 20px; font-weight: 400; color: var(--neutral-900); }
+  .rp-sub { font-size: 13px; color: var(--neutral-400); margin-top: 1px; }
+  .rp-master { width: 52px; height: 30px; border-radius: 15px; background: var(--neutral-200);
+    position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .rp-master.on { background: var(--sage); }
+  .rp-master::after { content:''; position: absolute; top: 3px; left: 3px;
+    width: 24px; height: 24px; border-radius: 50%; background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18); transition: transform 0.2s; }
+  .rp-master.on::after { transform: translateX(22px); }
+
+  .rp-lights { padding: 16px 24px 8px; }
+  .rp-light { padding: 12px 0; border-bottom: 1px solid var(--neutral-100); }
+  .rp-light:last-child { border-bottom: none; }
+  .rp-light-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .rp-light-name { flex: 1; font-size: 15px; font-weight: 600; color: var(--neutral-900); }
+  .rp-light.off .rp-light-name { color: var(--neutral-400); }
+  .rp-light-pct { font-size: 13px; color: var(--neutral-400); font-variant-numeric: tabular-nums; min-width: 30px; text-align: right; }
+  .rp-light-toggle { width: 44px; height: 26px; border-radius: 13px; background: var(--neutral-200);
+    position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .rp-light-toggle.on { background: #D97706; }
+  .rp-light-toggle::after { content:''; position: absolute; top: 3px; left: 3px;
+    width: 20px; height: 20px; border-radius: 50%; background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18); transition: transform 0.2s; }
+  .rp-light-toggle.on::after { transform: translateX(18px); }
+
+  .rp-slider { height: 6px; border-radius: 3px; background: var(--neutral-100);
+    position: relative; cursor: pointer; overflow: visible; }
+  .rp-slider-fill { height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, #FBBF24, #F59E0B); pointer-events: none; }
+  .rp-light.off .rp-slider { cursor: default; }
+  .rp-light.off .rp-slider-fill { background: var(--neutral-200); }
+  .rp-slider-thumb { position: absolute; top: 50%; transform: translate(-50%,-50%);
+    width: 18px; height: 18px; border-radius: 50%; background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2); pointer-events: none; }
+  .rp-light.off .rp-slider-thumb { display: none; }
+
+  .rp-scenes { display: flex; gap: 8px; padding: 8px 24px; }
+  .rp-scene { flex: 1; height: 44px; border-radius: 11px;
+    border: 1px solid var(--neutral-200); background: white;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-size: 14px; font-weight: 600; color: var(--neutral-600);
+    cursor: pointer; transition: all 0.15s; }
+  .rp-scene:active { transform: scale(0.95);
+    background: var(--terracotta-tint); border-color: var(--terracotta); color: var(--terracotta); }
+  .rp-scene svg { width: 16px; height: 16px; stroke: currentColor;
+    fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .rp-info { padding: 4px 24px 20px; }
+  .rp-info-row { display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--neutral-100); }
+  .rp-info-row:last-child { border-bottom: none; }
+  .rp-info-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .rp-info-label { font-size: 14px; color: var(--neutral-500); flex: 1; }
+  .rp-info-val { font-size: 14px; font-weight: 600; color: var(--neutral-900); font-variant-numeric: tabular-nums; }
+
+  .rp-special { padding: 4px 24px 20px; }
+  .rp-special-card { background: var(--neutral-50); border-radius: 12px;
+    border: 1px solid var(--neutral-100); padding: 14px; }
+  .rp-special-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .rp-special-icon { width: 34px; height: 34px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .rp-special-icon svg { width: 18px; height: 18px; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .rp-special-name { font-size: 14px; font-weight: 600; color: var(--neutral-900); }
+  .rp-special-sub { font-size: 12px; color: var(--neutral-400); }
+  .rp-special-btns { display: flex; gap: 8px; }
+  .rp-special-btn { flex: 1; height: 40px; border-radius: 10px;
+    border: 1px solid var(--neutral-200); background: white;
+    font-size: 14px; font-weight: 600; color: var(--neutral-600);
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .rp-special-btn:active { transform: scale(0.95);
+    background: var(--sage-light); border-color: var(--sage); color: var(--sage); }
+  .rp-special-btn svg { width: 15px; height: 15px; stroke: currentColor;
+    fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
   /* ── Toby's Corner ── */
   .toby-section-label {
@@ -612,53 +715,62 @@
     </div>
     <div class="view-content">
       <div class="room-grid">
-        <div class="room-card" onclick="toggleRoom(this)">
-          <div class="room-card-top">
-            <div><div class="room-name">Front House</div><div class="room-temp">72.3&#176;F</div></div>
-            <div class="room-light-indicator light-on"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
-          </div>
-          <div class="room-icon-tile" style="background:rgba(200,116,86,0.14)"><svg viewBox="0 0 24 24" style="stroke:var(--terracotta)"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-          <div class="room-card-grip"><span>···</span></div>
+        <!-- Front House — on 65% -->
+        <div class="room-card" onclick="openPopup('rpFrontHouse')">
+          <div class="room-card-head"><span class="room-name">Front House</span><span class="room-temp">72.3&#176;F</span></div>
+          <div class="room-ring-wrap"><div class="room-ring">
+            <svg viewBox="0 0 64 64"><circle class="ring-track" cx="32" cy="32" r="28"/><circle class="ring-fill" cx="32" cy="32" r="28" stroke-dasharray="176" stroke-dashoffset="62"/></svg>
+            <div class="ring-icon" style="background:rgba(200,116,86,0.14)"><svg viewBox="0 0 24 24" style="stroke:#C87456"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          </div></div>
+          <div class="room-sensors"></div>
         </div>
-        <div class="room-card" onclick="toggleRoom(this)">
-          <div class="room-card-top">
-            <div><div class="room-name">Living Room</div><div class="room-temp">73.1&#176;F</div></div>
-            <div class="room-light-indicator light-off"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
-          </div>
-          <div class="room-icon-tile" style="background:rgba(74,124,89,0.14)"><svg viewBox="0 0 24 24" style="stroke:var(--sage)"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0z"/><path d="M4 18v2M20 18v2"/></svg></div>
-          <div class="room-card-grip"><span>···</span></div>
+        <!-- Living Room — off -->
+        <div class="room-card" onclick="openPopup('rpLivingRoom')">
+          <div class="room-card-head"><span class="room-name">Living Room</span><span class="room-temp">73.1&#176;F</span></div>
+          <div class="room-ring-wrap"><div class="room-ring off">
+            <svg viewBox="0 0 64 64"><circle class="ring-track" cx="32" cy="32" r="28"/><circle class="ring-fill" cx="32" cy="32" r="28" stroke-dasharray="176" stroke-dashoffset="176"/></svg>
+            <div class="ring-icon" style="background:rgba(74,124,89,0.14)"><svg viewBox="0 0 24 24" style="stroke:#4A7C59"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0z"/><path d="M4 18v2M20 18v2"/></svg></div>
+          </div></div>
+          <div class="room-sensors"></div>
         </div>
-        <div class="room-card" onclick="toggleRoom(this)">
-          <div class="room-card-top">
-            <div><div class="room-name">Kitchen</div><div class="room-temp" style="visibility:hidden">--</div></div>
-            <div class="room-light-indicator light-on"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
-          </div>
-          <div class="room-icon-tile" style="background:rgba(184,146,84,0.14)"><svg viewBox="0 0 24 24" style="stroke:#B89254"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6z"/><line x1="6" y1="17" x2="18" y2="17"/></svg></div>
-          <div class="room-card-grip"><span>···</span></div>
+        <!-- Kitchen — on 80% -->
+        <div class="room-card" onclick="openPopup('rpKitchen')">
+          <div class="room-card-head"><span class="room-name">Kitchen</span><span class="room-temp"></span></div>
+          <div class="room-ring-wrap"><div class="room-ring">
+            <svg viewBox="0 0 64 64"><circle class="ring-track" cx="32" cy="32" r="28"/><circle class="ring-fill" cx="32" cy="32" r="28" stroke-dasharray="176" stroke-dashoffset="35"/></svg>
+            <div class="ring-icon" style="background:rgba(184,146,84,0.14)"><svg viewBox="0 0 24 24" style="stroke:#B89254"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6z"/><line x1="6" y1="17" x2="18" y2="17"/></svg></div>
+          </div></div>
+          <div class="room-sensors"></div>
         </div>
-        <div class="room-card" onclick="toggleRoom(this)">
-          <div class="room-card-top">
-            <div><div class="room-name">Bedroom</div><div class="room-temp">71.8&#176;F</div></div>
-            <div class="room-light-indicator light-off"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
-          </div>
-          <div class="room-icon-tile" style="background:rgba(142,112,101,0.14)"><svg viewBox="0 0 24 24" style="stroke:#8E7065"><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></svg></div>
-          <div class="room-card-grip"><span>···</span></div>
+        <!-- Bedroom — off -->
+        <div class="room-card" onclick="openPopup('rpBedroom')">
+          <div class="room-card-head"><span class="room-name">Master Bedroom</span><span class="room-temp">71.8&#176;F</span></div>
+          <div class="room-ring-wrap"><div class="room-ring off">
+            <svg viewBox="0 0 64 64"><circle class="ring-track" cx="32" cy="32" r="28"/><circle class="ring-fill" cx="32" cy="32" r="28" stroke-dasharray="176" stroke-dashoffset="176"/></svg>
+            <div class="ring-icon" style="background:rgba(142,112,101,0.14)"><svg viewBox="0 0 24 24" style="stroke:#8E7065"><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></svg></div>
+          </div></div>
+          <div class="room-sensors"></div>
         </div>
-        <div class="room-card" onclick="toggleRoom(this)">
-          <div class="room-card-top">
-            <div><div class="room-name">Toby's Room</div><div class="room-temp">70.2&#176;F</div></div>
-            <div class="room-light-indicator light-off"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
-          </div>
-          <div class="room-icon-tile" style="background:rgba(154,107,71,0.14)"><svg viewBox="0 0 24 24" style="stroke:#9A6B47"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01M17 12h.01M7 12h.01"/></svg></div>
-          <div class="room-card-grip"><span>···</span></div>
+        <!-- Toby's Room — off -->
+        <div class="room-card" onclick="openPopup('rpToby')">
+          <div class="room-card-head"><span class="room-name">Toby's Room</span><span class="room-temp">70.2&#176;F</span></div>
+          <div class="room-ring-wrap"><div class="room-ring off">
+            <svg viewBox="0 0 64 64"><circle class="ring-track" cx="32" cy="32" r="28"/><circle class="ring-fill" cx="32" cy="32" r="28" stroke-dasharray="176" stroke-dashoffset="176"/></svg>
+            <div class="ring-icon" style="background:rgba(154,107,71,0.14)"><svg viewBox="0 0 24 24" style="stroke:#9A6B47"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8" cy="8" r="1.5" fill="#9A6B47" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="#9A6B47" stroke="none"/><circle cx="16" cy="16" r="1.5" fill="#9A6B47" stroke="none"/></svg></div>
+          </div></div>
+          <div class="room-sensors"></div>
         </div>
-        <div class="room-card" onclick="toggleRoom(this)">
-          <div class="room-card-top">
-            <div><div class="room-name">Outside</div><div class="room-temp">62&#176;F</div></div>
-            <div class="room-light-indicator light-on"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></div>
+        <!-- Outside — on 45%, gate closed, shed closed -->
+        <div class="room-card" onclick="openPopup('rpOutside')">
+          <div class="room-card-head"><span class="room-name">Outside</span><span class="room-temp">62&#176;F</span></div>
+          <div class="room-ring-wrap"><div class="room-ring">
+            <svg viewBox="0 0 64 64"><circle class="ring-track" cx="32" cy="32" r="28"/><circle class="ring-fill" cx="32" cy="32" r="28" stroke-dasharray="176" stroke-dashoffset="97"/></svg>
+            <div class="ring-icon" style="background:rgba(110,142,77,0.14)"><svg viewBox="0 0 24 24" style="stroke:#6E8E4D"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 0 9z"/></svg></div>
+          </div></div>
+          <div class="room-sensors">
+            <span class="sensor closed"><span class="sensor-dot"></span> Gate</span>
+            <span class="sensor closed"><span class="sensor-dot"></span> Shed</span>
           </div>
-          <div class="room-icon-tile" style="background:rgba(110,142,77,0.14)"><svg viewBox="0 0 24 24" style="stroke:#6E8E4D"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 0 9z"/></svg></div>
-          <div class="room-card-grip"><span>···</span></div>
         </div>
       </div>
     </div>
@@ -951,6 +1063,135 @@
   </div>
 </div>
 
+<!-- ════════════ ROOM POPUPS (uniform template) ════════════ -->
+
+<!-- Front House -->
+<div class="popup-overlay" id="rpFrontHouse" onclick="closePopupOverlay(event)">
+  <div class="popup popup-room" onclick="event.stopPropagation()">
+    <div class="rp-head">
+      <div class="rp-icon" style="background:rgba(200,116,86,0.14)"><svg viewBox="0 0 24 24" style="stroke:#C87456"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <div class="rp-title"><div class="rp-name">Front House</div><div class="rp-sub">3 of 5 on</div></div>
+      <div class="rp-master on" onclick="this.classList.toggle('on')"></div>
+      <button class="popup-close" onclick="closePopup('rpFrontHouse')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="rp-lights">
+      <div class="rp-light"><div class="rp-light-row"><span class="rp-light-name">Front House All</span><span class="rp-light-pct">65%</span><div class="rp-light-toggle on" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider" onclick="adjustSlider(event,this)"><div class="rp-slider-fill" style="width:65%"></div><div class="rp-slider-thumb" style="left:65%"></div></div></div>
+      <div class="rp-light"><div class="rp-light-row"><span class="rp-light-name">Living Room</span><span class="rp-light-pct">80%</span><div class="rp-light-toggle on" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider" onclick="adjustSlider(event,this)"><div class="rp-slider-fill" style="width:80%"></div><div class="rp-slider-thumb" style="left:80%"></div></div></div>
+      <div class="rp-light"><div class="rp-light-row"><span class="rp-light-name">Kitchen</span><span class="rp-light-pct">50%</span><div class="rp-light-toggle on" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider" onclick="adjustSlider(event,this)"><div class="rp-slider-fill" style="width:50%"></div><div class="rp-slider-thumb" style="left:50%"></div></div></div>
+      <div class="rp-light off"><div class="rp-light-row"><span class="rp-light-name">Bedroom</span><span class="rp-light-pct">Off</span><div class="rp-light-toggle" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider"><div class="rp-slider-fill" style="width:0"></div></div></div>
+      <div class="rp-light off"><div class="rp-light-row"><span class="rp-light-name">Outdoor Lights</span><span class="rp-light-pct">Off</span><div class="rp-light-toggle" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider"><div class="rp-slider-fill" style="width:0"></div></div></div>
+    </div>
+    <div class="rp-scenes">
+      <div class="rp-scene"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Relax</div>
+      <div class="rp-scene"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Energize</div>
+      <div class="rp-scene"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Night</div>
+    </div>
+    <div class="rp-info">
+      <div class="rp-info-row"><div class="rp-info-dot" style="background:var(--neutral-300)"></div><span class="rp-info-label">Temperature</span><span class="rp-info-val">72.3&#176;F</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Living Room -->
+<div class="popup-overlay" id="rpLivingRoom" onclick="closePopupOverlay(event)">
+  <div class="popup popup-room" onclick="event.stopPropagation()">
+    <div class="rp-head">
+      <div class="rp-icon" style="background:rgba(74,124,89,0.14)"><svg viewBox="0 0 24 24" style="stroke:#4A7C59"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0z"/></svg></div>
+      <div class="rp-title"><div class="rp-name">Living Room</div><div class="rp-sub">All off</div></div>
+      <div class="rp-master" onclick="this.classList.toggle('on')"></div>
+      <button class="popup-close" onclick="closePopup('rpLivingRoom')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="rp-lights">
+      <div class="rp-light off"><div class="rp-light-row"><span class="rp-light-name">Main Light</span><span class="rp-light-pct">Off</span><div class="rp-light-toggle" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider"><div class="rp-slider-fill" style="width:0"></div></div></div>
+      <div class="rp-light off"><div class="rp-light-row"><span class="rp-light-name">LED Strip</span><span class="rp-light-pct">Off</span><div class="rp-light-toggle" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider"><div class="rp-slider-fill" style="width:0"></div></div></div>
+    </div>
+    <div class="rp-info">
+      <div class="rp-info-row"><div class="rp-info-dot" style="background:var(--neutral-300)"></div><span class="rp-info-label">Temperature</span><span class="rp-info-val">73.1&#176;F</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Kitchen -->
+<div class="popup-overlay" id="rpKitchen" onclick="closePopupOverlay(event)">
+  <div class="popup popup-room" onclick="event.stopPropagation()">
+    <div class="rp-head">
+      <div class="rp-icon" style="background:rgba(184,146,84,0.14)"><svg viewBox="0 0 24 24" style="stroke:#B89254"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6z"/></svg></div>
+      <div class="rp-title"><div class="rp-name">Kitchen &amp; Dining</div><div class="rp-sub">1 of 3 on</div></div>
+      <div class="rp-master on" onclick="this.classList.toggle('on')"></div>
+      <button class="popup-close" onclick="closePopup('rpKitchen')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="rp-lights">
+      <div class="rp-light"><div class="rp-light-row"><span class="rp-light-name">All Kitchen &amp; Dining</span><span class="rp-light-pct">80%</span><div class="rp-light-toggle on" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider" onclick="adjustSlider(event,this)"><div class="rp-slider-fill" style="width:80%"></div><div class="rp-slider-thumb" style="left:80%"></div></div></div>
+      <div class="rp-light off"><div class="rp-light-row"><span class="rp-light-name">Dining Room</span><span class="rp-light-pct">Off</span><div class="rp-light-toggle" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider"><div class="rp-slider-fill" style="width:0"></div></div></div>
+      <div class="rp-light off"><div class="rp-light-row"><span class="rp-light-name">Kitchen</span><span class="rp-light-pct">Off</span><div class="rp-light-toggle" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider"><div class="rp-slider-fill" style="width:0"></div></div></div>
+    </div>
+    <div class="rp-special">
+      <div class="rp-special-card">
+        <div class="rp-special-row"><div class="rp-special-icon" style="background:rgba(37,99,235,0.08)"><svg viewBox="0 0 24 24" style="stroke:#2563EB"><circle cx="12" cy="12" r="10"/><path d="M12 12h.01"/></svg></div><div><div class="rp-special-name">Roomba McRoomba</div><div class="rp-special-sub">Docked &middot; 92% battery</div></div></div>
+        <div class="rp-special-btns"><div class="rp-special-btn"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Start</div><div class="rp-special-btn"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Dock</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bedroom -->
+<div class="popup-overlay" id="rpBedroom" onclick="closePopupOverlay(event)">
+  <div class="popup popup-room" onclick="event.stopPropagation()">
+    <div class="rp-head">
+      <div class="rp-icon" style="background:rgba(142,112,101,0.14)"><svg viewBox="0 0 24 24" style="stroke:#8E7065"><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></svg></div>
+      <div class="rp-title"><div class="rp-name">Master Bedroom</div><div class="rp-sub">All off</div></div>
+      <div class="rp-master" onclick="this.classList.toggle('on')"></div>
+      <button class="popup-close" onclick="closePopup('rpBedroom')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="rp-lights">
+      <div class="rp-light off"><div class="rp-light-row"><span class="rp-light-name">Bedroom Light</span><span class="rp-light-pct">Off</span><div class="rp-light-toggle" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider"><div class="rp-slider-fill" style="width:0"></div></div></div>
+      <div class="rp-light off"><div class="rp-light-row"><span class="rp-light-name">Petra's Lamp</span><span class="rp-light-pct">Off</span><div class="rp-light-toggle" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider"><div class="rp-slider-fill" style="width:0"></div></div></div>
+    </div>
+    <div class="rp-info">
+      <div class="rp-info-row"><div class="rp-info-dot" style="background:var(--neutral-300)"></div><span class="rp-info-label">Temperature</span><span class="rp-info-val">71.8&#176;F</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toby's Room -->
+<div class="popup-overlay" id="rpToby" onclick="closePopupOverlay(event)">
+  <div class="popup popup-room" onclick="event.stopPropagation()">
+    <div class="rp-head">
+      <div class="rp-icon" style="background:rgba(154,107,71,0.14)"><svg viewBox="0 0 24 24" style="stroke:#9A6B47"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8" cy="8" r="1.5" fill="#9A6B47" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="#9A6B47" stroke="none"/><circle cx="16" cy="16" r="1.5" fill="#9A6B47" stroke="none"/></svg></div>
+      <div class="rp-title"><div class="rp-name">Toby's Room</div><div class="rp-sub">All off</div></div>
+      <div class="rp-master" onclick="this.classList.toggle('on')"></div>
+      <button class="popup-close" onclick="closePopup('rpToby')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="rp-lights">
+      <div class="rp-light off"><div class="rp-light-row"><span class="rp-light-name">Room Light</span><span class="rp-light-pct">Off</span><div class="rp-light-toggle" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider"><div class="rp-slider-fill" style="width:0"></div></div></div>
+      <div class="rp-light off"><div class="rp-light-row"><span class="rp-light-name">Toby's Lamp</span><span class="rp-light-pct">Off</span><div class="rp-light-toggle" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider"><div class="rp-slider-fill" style="width:0"></div></div></div>
+    </div>
+    <div class="rp-info">
+      <div class="rp-info-row"><div class="rp-info-dot" style="background:var(--neutral-300)"></div><span class="rp-info-label">Temperature</span><span class="rp-info-val">70.2&#176;F</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Outside -->
+<div class="popup-overlay" id="rpOutside" onclick="closePopupOverlay(event)">
+  <div class="popup popup-room" onclick="event.stopPropagation()">
+    <div class="rp-head">
+      <div class="rp-icon" style="background:rgba(110,142,77,0.14)"><svg viewBox="0 0 24 24" style="stroke:#6E8E4D"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 0 9z"/></svg></div>
+      <div class="rp-title"><div class="rp-name">Outside</div><div class="rp-sub">String lights on</div></div>
+      <div class="rp-master on" onclick="this.classList.toggle('on')"></div>
+      <button class="popup-close" onclick="closePopup('rpOutside')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="rp-lights">
+      <div class="rp-light"><div class="rp-light-row"><span class="rp-light-name">String Lights</span><span class="rp-light-pct">45%</span><div class="rp-light-toggle on" onclick="this.classList.toggle('on')"></div></div><div class="rp-slider" onclick="adjustSlider(event,this)"><div class="rp-slider-fill" style="width:45%"></div><div class="rp-slider-thumb" style="left:45%"></div></div></div>
+    </div>
+    <div class="rp-info">
+      <div class="rp-info-row"><div class="rp-info-dot" style="background:#22c55e"></div><span class="rp-info-label">Outside Gate</span><span class="rp-info-val" style="color:#16A34A">Closed</span></div>
+      <div class="rp-info-row"><div class="rp-info-dot" style="background:#22c55e"></div><span class="rp-info-label">Shed Door</span><span class="rp-info-val" style="color:#16A34A">Closed</span></div>
+      <div class="rp-info-row"><div class="rp-info-dot" style="background:var(--neutral-300)"></div><span class="rp-info-label">Temperature</span><span class="rp-info-val">62&#176;F</span></div>
+    </div>
+  </div>
+</div>
+
 <script>
   function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
   function openPopup(id) { document.getElementById(id).classList.add('active'); const inp = document.getElementById(id).querySelector('input[type="text"]'); if (inp) setTimeout(() => inp.focus(), 200); }
@@ -1000,7 +1241,13 @@
   }
 
   function activateScene(chip) { document.querySelectorAll('.scene-chip').forEach(c => c.classList.remove('scene-active')); chip.classList.add('scene-active'); }
-  function toggleRoom(card) { const i = card.querySelector('.room-light-indicator'); i.classList.toggle('light-on'); i.classList.toggle('light-off'); }
+  function adjustSlider(e, track) {
+    const r = track.getBoundingClientRect();
+    const pct = Math.max(5, Math.min(100, Math.round(((e.clientX - r.left) / r.width) * 100)));
+    const fill = track.querySelector('.rp-slider-fill'); if (fill) fill.style.width = pct + '%';
+    const thumb = track.querySelector('.rp-slider-thumb'); if (thumb) thumb.style.left = pct + '%';
+    const row = track.closest('.rp-light'); if (row) { const p = row.querySelector('.rp-light-pct'); if (p) p.textContent = pct + '%'; }
+  }
   function addListItem() { const inp = document.getElementById('addListInput'); if (inp.value.trim()) { inp.value = ''; inp.placeholder = 'Added! Type another...'; setTimeout(() => inp.placeholder = 'Milk, eggs, bread...', 1500); } }
 
   const activities = ['RC Cars', 'Read a Book', 'Build Lego', 'Board Games', 'Make a Movie', 'Marbles', 'Toy Cars', 'Draw'];

@@ -2,6 +2,28 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 12, 2026 — Countertop Lights View Redesign (Mockup)]
+
+Redesigned the Lights view cards from scratch and added per-room control popups in the Countertop HTML mockup. Three design iterations driven by user feedback and the ADHD mandate — the first two attempts were too busy (badge pills, inconsistent layout). Final design uses a ring-centered card with the brightness ring as the visual hero.
+
+### Changed
+- **Room cards redesigned from scratch.** Brightness ring centered in each card — amber arc fills proportionally to brightness, room icon nested inside. Temperature in the top-right corner, room name top-left. No badge pills, no grip dots, no status text. The ring communicates on/off and approximate brightness in a single visual element
+- **Toby's Room icon changed from layers to dice.** Three diagonal pips on a rounded square — fits his board games and play interests without being childish
+- **Bedroom card renamed to "Master Bedroom"** to match the popup title
+
+### Added
+- **Per-room control popups for all 6 rooms.** Tap any room card to open a popup with individual light sliders, per-light toggles, temperature, and room-specific extras. Every light in every popup gets a slider track (even off lights show the empty track) so all popups are structurally identical
+- **Front House popup includes scene buttons** (Relax, Energize, Night)
+- **Kitchen popup includes Roomba controls** (Start/Dock buttons with docked status)
+- **Outside popup shows door sensor status** (Gate and Shed, individually listed with green/red coloring)
+- **Outside card shows sensor dots** — individually labeled "Gate" and "Shed" with colored dots at the card bottom. Other cards have an empty row at fixed height for grid alignment
+
+### Design Decisions
+- Ring-centered layout chosen over the original top-left/top-right pattern to make brightness the primary visual signal
+- Door sensors shown as labeled dots (not combined "Doors closed" text) so each door is individually identifiable at a glance
+- Temperature removed from popup subtitles — lives exclusively in the info section to avoid duplication
+- Adaptive lighting rows removed from all popups (not actionable for the family)
+
 ## [April 11, 2026 — Countertop QA + P0 Fixes (Post-Phase 4)]
 
 QA session scored the live Countertop dashboard 33/40 against the mockup. Three P0 regressions fixed, plus one pre-existing bug discovered and fixed. Full QA report at `qa-2026-04-11/REPORT.md`.

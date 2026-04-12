@@ -882,6 +882,41 @@ QA session run against the live Countertop dashboard at iPad 1024x768, comparing
 - **`hui-input-text-entity-row` shadow root structure:** The row has its own shadow root containing `card-mod` + `hui-generic-entity-row`. `ha-textfield` lives deeper in that subtree, NOT in light DOM. Any patcher targeting input rows must walk shadow roots recursively.
 - **Mealie HA integration `mealie.get_recipes` does not populate `id`:** Jinja `r.id` and `r['id']` both return empty. The field may be named differently in the integration's response objects. Workaround: use the slug (which IS populated) and resolve to UUID via Mealie's REST API directly.
 
+What we changed (Apr 12, 2026 — Countertop Lights View Redesign):
+Redesigned the Lights view room cards and added per-room control popups in the HTML mockup (`mockup-countertop.html`). Design driven by the ADHD mandate ("if it's busy, it's overwhelming") and the established editorial kitchen principles.
+
+**Ring-centered card design (from scratch):**
+- **Brightness ring** is the visual hero — 64px SVG circle centered in each card. Amber arc fills proportionally to brightness (stroke-dashoffset math: `176 * (1 - brightness/100)`). When off: gray track only, icon dims to 35% opacity.
+- **Room icon** nested inside the ring (36px tile, room color at 14% alpha background).
+- **Top row**: room name (left, Fraunces 15px) + temperature (right, tabular-nums). Always same positions.
+- **Bottom row**: sensor dots — only Outside has them (`Gate ●  Shed ●`, individually labeled, green=closed/red=open). All other cards: empty row at fixed 14px height for grid alignment.
+- **No grip dots, no badge pills, no status text.** The ring communicates everything. One piece of info max beyond the ring (door sensors for Outside, nothing for others).
+- Every card follows the identical template. Structure varies by data only, never by layout.
+
+**Uniform per-room control popups:**
+- **Header**: Room icon tile + name (Fraunces 20px) + subtitle (light count only, no temperature) + master on/off toggle + close button. Border-bottom separator.
+- **Light rows**: Every light in every room gets a slider track + percentage + per-light toggle. Even off lights show the empty track (no thumb, grayed fill). This ensures all 6 popups are structurally identical.
+- **Scenes**: Front House only — 3 pill buttons (Relax, Energize, Night) below the lights section.
+- **Info section**: Temperature row (all rooms with sensors), door sensor rows (Outside only). Consistent dot + label + value row style.
+- **Special section**: Kitchen only — Roomba card with Start/Dock buttons.
+- Sliders are interactive — click anywhere on the track to adjust.
+- All touch targets 44px+ for arm's-length iPad use.
+
+**Specific changes from user feedback:**
+- Bedroom card renamed to "Master Bedroom" (matching popup).
+- Adaptive lighting rows removed from all popups (Front House and Bedroom had them).
+- Temperature removed from popup subtitles — lives exclusively in the info section at bottom.
+- Every popup has a temperature info row (Kitchen excepted — no sensor).
+- Toby's Room icon changed from layers/gamepad to **dice** (3 diagonal pips on rounded square) — fits his board games/play energy without being childish.
+
+**Design principles applied:**
+- **Gestalt similarity**: Every card has identical structure. Rooms without sensors have empty bottom rows, not missing rows.
+- **ADHD mandate**: One contextual element max per card beyond the ring. No badge rows. Ring communicates on/off + brightness in a single visual.
+- **Consistency (Nielsen #4)**: All popups use the same template. All lights get sliders. No structural variation by room.
+- **Progressive disclosure**: Cards show state, popups provide actions.
+
+**Files changed:** `mockup-countertop.html` (302 insertions, 55 deletions), `DESIGN-BRIEF.md` (Lights view description updated).
+
 ## Troubleshooting
 
 ### API Returns Empty / JSON Parse Errors

@@ -52,7 +52,7 @@ Three zones:
 
 Each has: back arrow top-left, view content, persistent scene bar at bottom.
 
-- **Lights**: 3x2 room card grid. Each card shows room name, temperature, light status (on/off indicator). Tap toggles lights. Hold opens brightness/color temp popup. Room cards use colored icon tiles (each room has its own color from the palette).
+- **Lights**: 3x2 room card grid with ring-centered card design. Brightness ring is the visual hero — centered in each card, amber arc fills proportionally to brightness, room icon nested inside (dimmed when off). Top row: room name (left) + temperature (right). Bottom row: sensor dots (Outside only — individually labeled Gate/Shed, green=closed/red=open). Tap opens per-room control popup with individual light sliders, per-light toggles, scene buttons (Front House only), temperature, and room-specific extras (Roomba for Kitchen, door sensors for Outside).
 - **Calendar**: Week/month toggle, week-planner-card (7 days), "Plan Meals" link, "+ Add Event" button.
 - **Toby's Corner**: Season-toggled checklists (School, Swimming, Hockey — parents toggle seasons on/off via a manage panel, maybe 4x/year). "I'm Bored" randomizer with activity list backed by a `todo` entity so adding new activities is just typing into a text input.
 - **Meals** (accessed from Calendar or secondary nav): "Dinner Pool" model — meals are planned weekly for grocery shopping, but the nightly choice is flexible. Cards show Available / Tonight / Done states. Includes recipe browser.
