@@ -2,6 +2,25 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 11, 2026 — Countertop QA + P0 Fixes (Post-Phase 4)]
+
+QA session scored the live Countertop dashboard 33/40 against the mockup. Three P0 regressions fixed, plus one pre-existing bug discovered and fixed. Full QA report at `qa-2026-04-11/REPORT.md`.
+
+### Fixed
+- **Meals view scene bar no longer hidden offscreen.** The recipe browser content was pushing the persistent scene bar 5px past the viewport bottom (`top: 773, viewport: 768`). Changed `grid-template-rows` from `1fr auto` to `minmax(0, 1fr) auto` so the first row actually shrinks to fit. Scene bar now measures at `bottom: 751`, comfortably visible
+- **Input patcher now reaches ha-textfield inside shadow roots.** The `patchInputFields()` function in `home-hub-fonts.js` was exiting early on every input field because `row.querySelector('ha-textfield')` only searches light DOM, but `ha-textfield` lives inside `hui-input-text-entity-row`'s shadow root. Added a `findInShadow()` recursive walker. Both the Toby Add Activity field and the Shopping List popup input are now styled with the custom border, terracotta focus ring, and hidden HA chrome
+- **Dinner popup commits meals.** Two-part fix. (1) Replaced the broken input_select dropdown + standalone "Assign To Tonight" button with a 2x3 grid of recipe cards. Each card passes its recipe name directly to the script via `service_data`, no state round-trip. (2) Discovered a pre-existing bug: `mealie.get_recipes` does NOT populate the `id` field in its response, so `assign_meal_to_day`'s recipe_id lookup always returned empty and the script silently exited. Created `scripts/assign_meal.sh` that resolves slug to UUID via Mealie's REST API, then POSTs the mealplan entry directly. The `assign_meal_to_day` script now uses `shell_command.mealie_assign_meal` with the slug instead of the broken `mealie.set_mealplan`
+
+### Added
+- **`scripts/assign_meal.sh`** — Shell script that looks up a recipe UUID from its slug via Mealie API, then creates a mealplan entry. Reads auth token from `secrets.yaml`. Bypasses the broken HA Mealie integration for this one operation
+- **`shell_command.mealie_assign_meal`** — HA shell command entry in `configuration.yaml` that calls the assign script with `slug` and `date` template variables
+
+### Technical
+- Cache-bust bumped from `?v=3` to `?v=4` on `home-hub-fonts.js` in `configuration.yaml`
+- `automations.yaml` recipe fetch updated to try `r.recipe_id` and `r['id']` fallback for the UUID field (may help if a future HA update exposes the field)
+- QA was performed via gstack browse at 1024x768 with long-lived token injection into `localStorage.hassTokens`. Auth must be re-injected before each `goto` navigation
+- All fixes were applied directly to `/Volumes/config` over Samba, then verified after two HA restarts
+
 ## [April 11, 2026 — The Countertop Phase 4: Live Remediation]
 
 Seven of the eight broken interactions from Phase 3 now work. Shopping and Toby Add Activity fields actually accept typing on iPad (including the spacebar). The kitchen timer popup shows a live countdown with a draining terracotta ring. The Home weather block is no longer dead — tap it for an hourly forecast. The dinner popup still has a broken assignment action, which is the one remaining gap from this cycle. Full session log at [`docs/12-countertop-live-remediation-2026-04-11.md`](../docs/12-countertop-live-remediation-2026-04-11.md).

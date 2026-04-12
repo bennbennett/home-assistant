@@ -859,6 +859,29 @@ Codex session run directly against `/Volumes/config` over Samba (not the repo co
 - Added: `dashboards/popups/countertop_hourly_weather_popup.yaml`
 - Changed: `dashboards/countertop/views/home.yaml`, `dashboards/countertop/views/toby.yaml`, `dashboards/countertop/button_card_templates.yaml`, `dashboards/resources.yaml`, `dashboards/popups/countertop_shopping_popup.yaml`, `dashboards/popups/countertop_tonight_meal_popup.yaml`, `dashboards/popups/countertop_timer_popup.yaml`, `www/home-hub-fonts.js`, `scripts.yaml`, `automations.yaml`
 
+What we changed (Apr 11, 2026 — Phase 5: QA + P0 Fixes):
+QA session run against the live Countertop dashboard at iPad 1024x768, comparing each of the 5 views against `mockup-countertop.html`. Scored 33/40. Three P0 regressions found and fixed; one pre-existing bug discovered and fixed during the process. Full QA report: `qa-2026-04-11/REPORT.md`.
+
+**P0-1: Meals scene bar offscreen (FIXED).** The scene bar on `/the-countertop/meals` was rendered at `top: 773, viewport: 768`, pushed 5px past the visible area by the recipe browser content. Root cause: CSS Grid `1fr` in `grid-template-rows: 1fr auto` stretches to fit min-content, but the Meals view's vertical-stack (header + label + 7-meal grid + label + 6-recipe grid) exceeded the available 1fr space, pushing the `auto` row (scene bar) offscreen. Fix: changed `grid-template-rows` from `1fr auto` to `minmax(0, 1fr) auto` in `dashboards/countertop/views/meals.yaml`. Verified: scene bar now at `top: 711, bottom: 751, visible: true`.
+
+**P0-2: Input patcher shadow DOM walker (FIXED).** The `patchInputFields()` function in `www/home-hub-fonts.js` was not styling any `input_text` fields because `patchOne()` used `row.querySelector('ha-textfield')` which only searches light DOM, but `ha-textfield` lives INSIDE `hui-input-text-entity-row`'s shadow root. Fix: added a `findInShadow()` recursive walker that traverses shadow roots to find both `ha-textfield` and `state-badge`. Cache-bust bumped from `?v=3` to `?v=4` in `configuration.yaml`. Verified: `patchedStyle: true, badgeHidden: "none"` on live Toby DOM. Both Toby Add Activity AND Shopping List popup inputs are now styled.
+
+**P0-3: Dinner popup assignment (FIXED).** Two-part fix:
+1. **Popup wiring:** Replaced the `entities` card dropdown + standalone "Assign To Tonight" button (which called the script with no `service_data`) with a 2x3 grid of 6 `custom:button-card` instances. Each card reads its recipe name from `sensor.mealie_recipe_browser.attributes.items[N]` via JS template and passes it directly to `script.countertop_assign_meal_to_tonight` in `service_data.recipe_name`. No state round-trip, no race condition, single-tap commit.
+2. **Pre-existing recipe_id bug (discovered during Fix 3):** The HA Mealie integration's `mealie.get_recipes` does NOT populate the `id` field in its response variable (every recipe returned `recipe_id: ''` in the sensor). This meant `assign_meal_to_day`'s condition `recipe_id | trim | length > 0` silently failed and no meal was EVER assigned via the dashboard, regardless of popup wiring. Fix: created `/config/scripts/assign_meal.sh` that resolves slug to UUID via Mealie's REST API (`GET /api/recipes/{slug}` returns `id: UUID`), then POSTs the mealplan entry directly to `POST /api/households/mealplans`. The `assign_meal_to_day` script now uses `shell_command.mealie_assign_meal` with the recipe slug (which IS populated) instead of the broken `mealie.set_mealplan` with empty recipe_id. Verified: "Traditional Czech Rizek" assigned to today's slot via API call, mealplan sensor updated after refresh.
+
+**One remaining verification for iPad:** The dinner popup's 2x3 recipe grid uses `[[[ ]]]` JS templating inside `browser_mod.sequence.data.sequence[].data.recipe_name`. This nested-template path needs manual verification on the physical iPad. If it doesn't evaluate, the fallback is to use card-level `variables:` blocks.
+
+**Files changed** (all on `/Volumes/config`, not the repo):
+- Changed: `dashboards/countertop/views/meals.yaml` (minmax grid fix), `dashboards/popups/countertop_tonight_meal_popup.yaml` (6-card recipe grid), `www/home-hub-fonts.js` (shadow DOM walker), `configuration.yaml` (?v=4 + shell_command.mealie_assign_meal), `scripts.yaml` (assign_meal_to_day uses slug + shell_command), `automations.yaml` (recipe_id field fallback)
+- Added: `scripts/assign_meal.sh` (slug-to-UUID lookup + mealplan POST)
+
+**Key learnings from this session:**
+- **HA frontend auth for headless browse:** Long-lived tokens injected via `localStorage.hassTokens` work for the first page load but must be re-injected before each navigation. Pattern: goto `/auth/authorize` → set localStorage → goto target. Single inject only works once.
+- **YAML-mode dashboard reload:** The WebSocket trick `lovelace/config force:true` did NOT reliably reload `the-countertop` dashboard from disk. HA restart was the only bulletproof method.
+- **`hui-input-text-entity-row` shadow root structure:** The row has its own shadow root containing `card-mod` + `hui-generic-entity-row`. `ha-textfield` lives deeper in that subtree, NOT in light DOM. Any patcher targeting input rows must walk shadow roots recursively.
+- **Mealie HA integration `mealie.get_recipes` does not populate `id`:** Jinja `r.id` and `r['id']` both return empty. The field may be named differently in the integration's response objects. Workaround: use the slug (which IS populated) and resolve to UUID via Mealie's REST API directly.
+
 ## Troubleshooting
 
 ### API Returns Empty / JSON Parse Errors
