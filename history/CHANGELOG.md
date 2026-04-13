@@ -2,6 +2,28 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 13, 2026 — Countertop Lights YAML Implementation + Bug Fixes]
+
+Implemented the ring-centered Lights view mockup as live YAML. Added per-room control popups with split tap zones (ring toggles, card opens popup). Fixed calendar agenda bugs and shopping list iPad touch issues.
+
+### Changed
+- **Lights view cards now use brightness ring design.** Rewrote `ct_room_card` template from grid layout to ring-centered column. 64px SVG ring with amber arc proportional to brightness, room icon centered inside. Temperature in header row, sensor dots at bottom (Outside only)
+- **Bedroom card renamed to "Master Bedroom"**, Toby's icon changed from layers to dice
+- **Timer popup presets** changed from 3x2 grid to 5-across + centered 45m below, matching mockup
+- **Timer popup circle** enlarged to 140px with thicker 8px ring stroke, entity name and icon badge hidden via CSS. Time and status text overlay the ring. Still needs refinement for pixel-perfect alignment
+
+### Added
+- **Per-room control popups for all 6 rooms.** Fraunces serif header with dynamic "X of Y on" subtitle, mushroom-light-card brightness sliders with amber accent. Front House has scene buttons, Kitchen has Roomba, Outside has door sensor status rows
+- **Split tap zones on room cards.** Tapping the brightness ring toggles the light (via explicit onclick with stopPropagation). Tapping anywhere else on the card opens the room control popup. Uses `data-eid` attribute + triple event handler pattern (onclick/onmousedown/ontouchstart) proven in existing room_card template
+
+### Fixed
+- **Shopping list "Add" button now works on iPad.** Converted from button-card `tap_action: call-service` (fails in nested popup on iPad Safari) to explicit onclick handler calling `hass.callService()` directly
+- **Calendar "Tomorrow" section was showing day-after-tomorrow events.** `toISOString()` converts to UTC before extracting the date string, shifting dates forward in evening hours. Fixed to use `getFullYear()`/`getMonth()`/`getDate()` for local time
+- **Calendar agenda showed events beyond tomorrow** under the Tomorrow heading (no group separator). Added skip for events past tomorrow since the home page is a glance view
+
+### In Progress
+- Timer popup circle/text alignment not yet pixel-perfect — needs further CSS tuning
+
 ## [April 12, 2026 — Countertop Phase 6: iPad Screenshot QA + P0/P1 Fixes]
 
 Side-by-side comparison of all 5 Countertop views + 8 popups (live iPad screenshots vs HTML mockup). Fixed dinner popup recipe cards, input field styling, timer ring, ringing toast, and vertical centering. Discovered HA 2026.3's migration from MDC to Web Awesome components.

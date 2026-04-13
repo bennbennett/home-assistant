@@ -975,6 +975,71 @@ Any shadow DOM patcher targeting MDC classes (`.mdc-text-field`, `.mdc-line-ripp
 - `www/home-hub-fonts.js` — rewrote input patcher for wa-input, added toast MutationObserver, added centering !important
 - `configuration.yaml` — cache-bust `?v=4` → `?v=13`
 
+What we changed (Apr 13, 2026 — Countertop Lights YAML Implementation + Bug Fixes):
+Implemented the ring-centered Lights view mockup as live YAML, added per-room control popups, and fixed several bugs across the Countertop dashboard.
+
+**Lights view card implementation (`ct_room_card` template rewrite):**
+- Rewrote from 5-field grid (`rm_header`/`rm_temp`/`rm_icon`/`rm_status`/`rm_grip`) to 3-field column layout (`rm_head`/`rm_ring`/`rm_sensors`)
+- `rm_head`: room name (Fraunces 15px) + temperature in a flex row
+- `rm_ring`: 64px brightness ring SVG with amber arc, room icon centered inside 36px tinted tile. Off state = transparent arc + 35% icon opacity. Brightness math: `dashOffset = 176 * (1 - brightness/255)`
+- `rm_sensors`: door sensor dots from `sensor_entities` variable (format: `"Label:entity_id,..."`)
+- Updated icon map: `home` and `bed` paths from mockup, added `dice` icon (rounded rect + 3 filled pips), removed `layers`
+- Bedroom → "Master Bedroom", Toby's icon → `dice`, Outside got `sensor_entities`
+
+**Split tap zones (ring = toggle, card = popup):**
+- Card `tap_action: none` in template (overridden per card instance to `fire-dom-event` popup)
+- Ring div gets explicit `onclick`/`onmousedown`/`ontouchstart` handlers with `stopPropagation()` + `stopImmediatePropagation()`
+- Ring calls `document.querySelector('home-assistant').hass.callService('light','toggle',{entity_id})` directly
+- Entity ID passed via `data-eid` attribute (avoids quoting nightmare in nested JS)
+- `pointer-events: auto` on ring, `cursor: pointer` for affordance
+- Same proven pattern as iPad `room_card` template's interactive status icons
+
+**Per-room control popups (6 files):**
+All popups at `/Volumes/config/dashboards/popups/countertop_lights_*.yaml`:
+- Consistent structure: Fraunces header (icon tile + name + "X of Y on" subtitle) → mushroom-light-card controls → optional sections
+- `--mushroom-accent-color: #D97706` (amber) across all rooms
+- Front House: 3 lights + Relax/Energize/Night scene buttons + temperature info
+- Living Room: 2 lights (Main Light + LED Strip) + temperature info
+- Kitchen: 2 lights (All Kitchen & Dining + Kitchen) + Roomba card (Start/Dock buttons)
+- Master Bedroom: 2 lights (Bedroom Light + Petra's Lamp) + temperature info
+- Toby's Room: 1 light (Room Lights) — simplest popup
+- Outside: 1 light (String Lights) + Gate/Shed door sensor status rows
+- Opened via `!include /config/dashboards/popups/countertop_lights_*.yaml` in `fire-dom-event`
+
+**Shopping list Add button iPad fix:**
+- Converted from `tap_action: call-service` (fails on iPad in nested popup context) to explicit `onclick` handler using same ring pattern
+- `custom_fields.add_btn` renders "Add" text with `onclick → hass.callService('script','ct_add_to_shopping_list',{})`
+- `pointer-events: auto` + `stopPropagation` ensures reliable touch handling
+
+**Timer popup styling (in progress):**
+- Preset grid changed from 3×2 to 5+1 layout (5 across + 45m centered below)
+- Circle CSS overrides via card_mod targeting simple-timer-card shadow DOM classes:
+  - `.vcircle-wrap`: absolute positioned, 140px, centered behind text
+  - `.vcol`: relative positioning for text overlay
+  - `.display`/`.vstatus`: z-index 1 to sit on top of ring
+  - `.vtitle`/`.icon-wrap`: hidden (entity name + timer badge)
+  - `.vc-track`/`.vc-prog`: stroke-width 8px
+- **Still needs refinement** — text/circle alignment not yet pixel-perfect
+
+**Calendar agenda bug fixes (home page):**
+- **Timezone fix**: `toISOString().split('T')[0]` converts to UTC before extracting date, causing off-by-one in evenings. Fixed to use `getFullYear()`/`getMonth()`/`getDate()` (local time components), matching the Home Hub's working approach.
+- **"Later" events leaking into Tomorrow**: Events beyond tomorrow had no group header and flowed into the Tomorrow section. Added `if (group === 'later') continue;` to skip events past tomorrow (home page is a glance view, full calendar is one tap away).
+
+**New files created:**
+- `/Volumes/config/dashboards/popups/countertop_lights_front_house.yaml`
+- `/Volumes/config/dashboards/popups/countertop_lights_living_room.yaml`
+- `/Volumes/config/dashboards/popups/countertop_lights_kitchen.yaml`
+- `/Volumes/config/dashboards/popups/countertop_lights_bedroom.yaml`
+- `/Volumes/config/dashboards/popups/countertop_lights_toby.yaml`
+- `/Volumes/config/dashboards/popups/countertop_lights_outside.yaml`
+
+**Files changed** (on `/Volumes/config`):
+- `dashboards/countertop/button_card_templates.yaml` — `ct_room_card` template rewrite
+- `dashboards/countertop/views/lights.yaml` — card variables + tap_action popups
+- `dashboards/countertop/views/home.yaml` — calendar agenda date fixes
+- `dashboards/popups/countertop_timer_popup.yaml` — preset layout + circle CSS
+- `dashboards/popups/countertop_shopping_popup.yaml` — Add button onclick fix
+
 ## Troubleshooting
 
 ### API Returns Empty / JSON Parse Errors
