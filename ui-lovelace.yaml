@@ -1,0 +1,1167 @@
+##############################################################################
+#                            Lovelace Configuration                         #
+##############################################################################
+title: iPad Dashboard  # Your dashboard title
+
+##############################################################################
+#                           1) Lovelace Resources                           #
+# Ensure all custom cards and dependencies are listed here.                 #
+##############################################################################
+resources:
+
+  - url: /local/community/button-card/button-card.js
+    type: module
+  - url: /local/community/decluttering-card/decluttering-card.js
+    type: module
+  - url: /local/community/lovelace-card-mod/card-mod.js
+    type: module
+  - url: /local/community/lovelace-layout-card/layout-card.js
+    type: module
+  - url: /local/community/lovelace-mushroom/mushroom.js
+    type: module
+  - url: /local/community/vertical-stack-in-card/vertical-stack-in-card.js
+    type: module
+  - url: /local/community/week-planner-card/week-planner-card.js
+    type: module
+
+
+##############################################################################
+#                      2) Decluttering Templates Section                   #
+# Define reusable templates here.                                            #
+##############################################################################
+button_card_templates:
+  room_card:
+    show_icon: true
+    show_name: true
+    show_state: true
+
+    styles:
+      card:
+        - aspect-ratio: 1/1
+        - border-radius: 12px
+        - padding-top: 40px # Increased from 16px
+        - padding-left: 24px
+        - padding-bottom: 24px
+        - padding-right: 24px
+        - position: relative
+      grid:
+        - grid-template-areas: '"n n" "s s" "i i"'
+        - grid-template-columns: 1fr auto
+        - grid-template-rows: auto auto 1fr
+      name:
+        - font-size: 18px
+        - font-weight: 500
+        - padding-bottom: 8px
+        - justify-self: start # Forces left alignment
+        - opacity: 0.9
+      state:
+        - font-size: 14px
+        - color: var(--secondary-text-color)
+        - justify-self: start # Forces left alignment
+        - margin-bottom: 16px
+      icon:
+        - width: 110px # Slightly reduced
+        - height: 180px
+        - color: '[[[ return variables.color ]]]'
+        - z-index: 2
+        - align-self: end
+        - justify-self: start
+        - margin-left: 0px
+        - margin-bottom: 0px
+      custom_fields:
+        circle:
+          - position: absolute
+          - left: -50px
+          - bottom: -50px
+          - width: 250px
+          - height: 250px
+          - border-radius: 100% !important
+          - background-color: '[[[ return variables.color + "15" ]]]'
+          - z-index: 1
+        status:
+          - position: absolute
+          - top: 24px
+          - right: 24px
+          - display: flex
+          - flex-direction: column
+          - gap: 12px
+
+
+    tap_action:
+      action: fire-dom-event
+      browser_mod:
+        command: popup
+        title: "{{ name }}"  # Uses the card's name
+        large: true
+        card:
+          type: vertical-stack
+          cards:
+            # Temperature Display
+            - type: custom:mushroom-template-card
+              primary: Temperature
+              secondary: "{{ states(entity) }}°F"
+              icon: mdi:thermometer
+              icon_color: blue
+              card_mod:
+                style: |
+                  ha-card {
+                    background: rgb(239, 246, 255);
+                    margin-bottom: 12px;
+                  }
+
+            # Light Controls 
+            - type: custom:mushroom-light-card
+              entity: '[[[ return variables.light_entity ]]]'
+              name: Main Light
+              icon: mdi:ceiling-light
+              show_brightness_control: true
+              show_color_temp_control: true
+              use_light_color: true
+              card_mod:
+                style: |
+                  ha-card {
+                    background: rgb(249, 250, 251);
+                  }
+
+
+    custom_fields:
+      circle: "<div style='position:absolute; width:100%; height:100%; border-radius:50%; background:transparent;'></div>"
+      status: |
+        [[[
+          // Use a fallback array if indicator_colors is undefined
+          const colors = variables.indicator_colors || ["#22c55e", "#3b82f6", "#f59e0b"];
+          return colors.map(color => `
+            <div style="
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              background: ${color}15;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin: 4px;">
+              <div style="
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: ${color};">
+              </div>
+            </div>
+          `).join('');
+        ]]]
+
+
+
+
+  popup_base:
+    card_mod:
+      style: |
+        ha-card {
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          border-radius: 20px;
+          padding: 24px;
+          margin: 16px;
+          box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+          max-width: 800px;
+          width: 90vw;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 999;
+        }
+    styles:
+      card:
+        - background: rgba(255, 255, 255, 0.95)
+        - backdrop-filter: blur(10px)
+      name:
+        - font-size: 24px
+        - font-weight: 500
+        - margin-bottom: 16px
+
+  # Template for a light control section
+  light_control_section:
+    show_name: true
+    show_icon: true
+    styles:
+      card:
+        - border-radius: 12px
+        - padding: 16px
+        - background: rgba(0, 0, 0, 0.04)
+      grid:
+        - grid-template-areas: '"i n s"'
+        - grid-template-columns: min-content auto max-content
+      name:
+        - justify-self: start
+        - font-weight: 400
+      icon:
+        - width: 24px
+        - color: var(--primary-color)
+      state:
+        - justify-self: end
+        - font-size: 14px
+
+  # Template for temperature display
+  temp_display_section:
+    show_name: true
+    show_state: true
+    styles:
+      card:
+        - border-radius: 12px
+        - padding: 16px
+        - background: rgba(0, 0, 0, 0.04)
+      grid:
+        - grid-template-areas: '"i n s"'
+        - grid-template-columns: min-content auto max-content
+      name:
+        - justify-self: start
+        - font-weight: 400
+      state:
+        - font-size: 20px
+        - color: var(--primary-color)
+
+  variables:
+    status_map:
+      light: '[[[ return variables.light_entity ? states[variables.light_entity].state === "on" : false ]]]'
+      temp: '[[[ return states[entity].state > 70 ]]]'
+      motion: '[[[ return variables.motion_entity ? states[variables.motion_entity].state === "on" : false ]]]'
+
+  custom_fields:
+    status: |
+      [[[
+        const getStatusColor = (type) => {
+          const colors = {
+            light: '#22c55e',
+            temp: '#3b82f6', 
+            motion: '#f59e0b'
+          };
+          const opacity = variables.status_map[type] ? '1' : '0.3';
+          const color = colors[type];
+          return `
+            <div style="width:32px;height:32px;border-radius:50%;background:${color}15;display:flex;align-items:center;justify-content:center">
+              <div style="width:12px;height:12px;border-radius:50%;background:${color};opacity:${opacity}"></div>
+            </div>
+          `;
+        };
+        return `
+          ${getStatusColor('light')}
+          ${getStatusColor('temp')}
+          ${getStatusColor('motion')}
+        `;
+      ]]]
+
+
+
+
+decluttering_templates:
+  side_menu:
+    card:
+      type: vertical-stack
+      card_mod:
+        style: |
+          ha-card {
+            height: calc(100vh);
+            width: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;  # Increased from 16px
+            padding: 48px 0;  # Increased from 24px
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            margin: 0;
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+          }
+      cards:
+        # --- Button #1: Calendar ---
+        - type: custom:button-card
+          icon: mdi:calendar-month
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace/calendar
+          styles:
+            card:
+              - width: 60px
+              - height: 60px
+              - border-radius: 12px
+              - padding: 0px
+              - margin: 8px
+              - padding: 0px
+              - background-color: >
+                  [[[ return window.location.pathname.endsWith('/calendar')
+                      ? 'rgb(219, 234, 254)'
+                      : 'rgba(219, 234, 254, 0.5)' ]]]
+              - box-shadow: >
+                  [[[ return window.location.pathname.endsWith('/calendar')
+                      ? '0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06)'
+                      : 'none'
+                  ]]]
+              - '&:before':
+                - content: "''"
+                - position: absolute
+                - left: -8px
+                - height: 24px
+                - width: 3px
+                - background-color: rgb(59, 130, 246)
+                - border-radius: 0 4px 4px 0
+                - opacity: >
+                    [[[
+                      if(window.location.pathname.endsWith('/calendar')) return '1';
+                      return '0';
+                    ]]]
+            icon:
+              - width: 30px
+              - height: 30px
+              - color: >
+                  [[[ return window.location.pathname.endsWith('/calendar')
+                      ? 'rgb(59, 130, 246)'
+                      : 'rgba(59, 130, 246, 0.6)' 
+                  ]]]
+        # --- Button #2: Tasks & Lists ---
+        - type: custom:button-card
+          icon: mdi:format-list-checks
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace/tasks
+          styles:
+            card:
+              - width: 60px
+              - height: 60px
+              - border-radius: 12px
+              - padding: 0px
+              - margin: 8px
+              - background-color: >
+                  [[[ return window.location.pathname.endsWith('/tasks')
+                      ? 'rgb(254, 226, 219)'
+                      : 'rgba(254, 226, 219, 0.5)' ]]]
+              - box-shadow: >
+                  [[[ return window.location.pathname.endsWith('/tasks')
+                      ? '0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06)'
+                      : 'none'
+                  ]]]
+              - '&:before':
+                  - content: "''"
+                  - position: absolute
+                  - left: -8px
+                  - height: 24px
+                  - width: 3px
+                  - background-color: rgb(249, 115, 22)
+                  - border-radius: 0 4px 4px 0
+                  - opacity: >
+                      [[[
+                        if(window.location.pathname.endsWith('/tasks')) return '1';
+                        return '0';
+                      ]]]
+            icon:
+              - width: 30px
+              - height: 30px
+              - color: >
+                  [[[ return window.location.pathname.endsWith('/tasks')
+                      ? 'rgb(249, 115, 22)'
+                      : 'rgba(249, 115, 22, 0.6)' ]]]
+        # --- Button #3: Rooms ---
+        - type: custom:button-card
+          icon: mdi:home
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace/rooms
+          show_name: false
+          styles:
+            card:
+              - width: 60px
+              - height: 60px
+              - border-radius: 12px
+              - margin: 8px
+              - padding: 0px
+              - background-color: >
+                  [[[ return window.location.pathname.endsWith('/rooms')
+                      ? 'rgb(220, 252, 231)'
+                      : 'rgba(220, 252, 231, 0.5)' ]]]
+              - box-shadow: >
+                  [[[ return window.location.pathname.endsWith('/rooms')
+                      ? '0 4px 6px -1px rgba(22, 163, 74, 0.1), 0 2px 4px -1px rgba(22, 163, 74, 0.06)'
+                      : 'none'
+                  ]]]
+              - '&:before':
+                  - content: "''"
+                  - position: absolute
+                  - left: -8px
+                  - height: 24px
+                  - width: 3px
+                  - background-color: rgb(22, 163, 74)
+                  - border-radius: 0 4px 4px 0
+                  - opacity: >
+                      [[[
+                        if(window.location.pathname.endsWith('/rooms')) return '1';
+                        return '0';
+                      ]]]
+            icon:
+              - width: 30px
+              - height: 30px
+              - color: >
+                  [[[ return window.location.pathname.endsWith('/rooms')
+                      ? 'rgb(22, 163, 74)'
+                      : 'rgba(22, 163, 74, 0.6)' ]]]
+        # --- Button #4: Devices ---
+        - type: custom:button-card
+          icon: mdi:devices
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace/devices
+          show_name: false
+          styles:
+            card:
+              - width: 60px
+              - height: 60px
+              - border-radius: 12px
+              - margin: 8px
+              - padding: 0px
+              - background-color: >
+                  [[[ return window.location.pathname.endsWith('/devices')
+                      ? 'rgb(254, 226, 226)'
+                      : 'rgba(254, 226, 226, 0.5)' ]]]
+              - box-shadow: >
+                  [[[ return window.location.pathname.endsWith('/devices')
+                      ? '0 4px 6px -1px rgba(220, 38, 38, 0.1), 0 2px 4px -1px rgba(220, 38, 38, 0.06)'
+                      : 'none'
+                  ]]]
+              - '&:before':
+                  - content: "''"
+                  - position: absolute
+                  - left: -8px
+                  - height: 24px
+                  - width: 3px
+                  - background-color: rgb(220, 38, 38)
+                  - border-radius: 0 4px 4px 0
+                  - opacity: >
+                      [[[
+                        if(window.location.pathname.endsWith('/devices')) return '1';
+                        return '0';
+                      ]]]
+            icon:
+              - width: 30px
+              - height: 30px
+              - color: >
+                  [[[ return window.location.pathname.endsWith('/devices')
+                      ? 'rgb(220, 38, 38)'
+                      : 'rgba(220, 38, 38, 0.6)' ]]]
+        # --- Button #5: People ---
+        - type: custom:button-card
+          icon: mdi:account-group
+          tap_action:
+            action: navigate
+            navigation_path: /lovelace/people
+          show_name: false
+          styles:
+            card:
+              - width: 60px
+              - height: 60px
+              - border-radius: 12px
+              - margin: 8px
+              - padding: 0px
+              - background-color: >
+                  [[[ return window.location.pathname.endsWith('/people')
+                      ? 'rgb(233, 213, 255)'
+                      : 'rgba(233, 213, 255, 0.5)' ]]]
+              - box-shadow: >
+                  [[[ return window.location.pathname.endsWith('/people')
+                      ? '0 4px 6px -1px rgba(109, 40, 217, 0.1), 0 2px 4px -1px rgba(109, 40, 217, 0.06)'
+                      : 'none'
+                  ]]]
+              - '&:before':
+                  - content: "''"
+                  - position: absolute
+                  - left: -8px
+                  - height: 24px
+                  - width: 3px
+                  - background-color: rgb(109, 40, 217)
+                  - border-radius: 0 4px 4px 0
+                  - opacity: >
+                      [[[
+                        if(window.location.pathname.endsWith('/people')) return '1';
+                        return '0';
+                      ]]]
+            icon:
+              - width: 30px
+              - height: 30px
+              - color: >
+                  [[[ return window.location.pathname.endsWith('/people')
+                      ? 'rgb(109, 40, 217)'
+                      : 'rgba(109, 40, 217, 0.6)' ]]]
+
+        # ... Add more buttons as needed
+
+
+##############################################################################
+#                      3) Define Your Views (panels, dashboards)          #
+##############################################################################
+views:
+  - title: Home
+    path: home
+    type: panel
+    cards:
+      - type: horizontal-stack  # Replacing grid with horizontal-stack
+        cards:
+          # --- Menu Column ---
+          - type: custom:decluttering-card
+            template: side_menu
+
+
+          # --- Main Content Column ---
+          - type: custom:vertical-stack-in-card  # Allows applying card_mod
+            card_mod:
+              style: |
+                ha-card {
+                  background: none;
+                  margin: 0;
+                  padding: 16px;
+                  height: 100%;
+                }
+            cards:
+              - type: markdown
+                content: |
+                  # Home Page Content Here
+
+  - title: Calendar
+    path: calendar
+    type: panel
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 80px 1fr
+          grid-template-rows: 1fr
+          margin: 0
+          padding: 0
+          grid-gap: 0
+        cards:
+          # Left Menu
+          - type: custom:decluttering-card
+            template: side_menu
+            view_layout:
+              grid-column: 1
+
+          # Main Content Area
+          - type: vertical-stack
+            view_layout:
+              grid-column: 2
+            card_mod:
+              style: |
+                :host {
+                  padding: 16px 8px !important;
+                  margin: 0 !important;
+                }
+            cards:
+              # Title and View Toggle Section
+
+
+              # View Toggle Buttons
+              - type: horizontal-stack
+                cards:
+                  - type: custom:button-card
+                    icon: mdi:view-week
+                    name: Week
+                    entity: input_boolean.calendar_week_view
+                    tap_action:
+                      action: call-service
+                      service: script.toggle_week_view
+                    styles:
+                      card:
+                        - border-radius: 12px
+                        - padding: 12px 16px
+                        - margin: 4px
+                        - width: 140px
+                        - background-color: >
+                            [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                                ? 'rgb(219, 234, 254)'
+                                : 'rgba(219, 234, 254, 0.5)' ]]]
+                      grid:
+                        - grid-template-areas: '"i n"'
+                        - grid-template-columns: min-content 1fr
+                      icon:
+                        - width: 24px
+                        - height: 24px
+                        - color: >
+                            [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                                ? 'rgb(59, 130, 246)'
+                                : 'rgba(59, 130, 246, 0.6)' ]]]
+                      name:
+                        - color: >
+                            [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                                ? 'rgb(59, 130, 246)'
+                                : 'rgba(59, 130, 246, 0.6)' ]]]
+                        - font-size: 14px
+                        - margin-left: 8px
+                  
+                  - type: custom:button-card
+                    icon: mdi:calendar-month
+                    name: Month
+                    entity: input_boolean.calendar_month_view
+                    tap_action:
+                      action: call-service
+                      service: script.toggle_month_view
+                      service_data: {}
+                    styles:
+                      card:
+                        - border-radius: 12px
+                        - padding: 12px 16px
+                        - margin: 4px
+                        - width: 140px
+                        - background-color: >
+                            [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                                ? 'rgb(219, 234, 254)'
+                                : 'rgba(219, 234, 254, 0.5)' ]]]
+                      grid:
+                        - grid-template-areas: '"i n"'
+                        - grid-template-columns: min-content 1fr
+                      icon:
+                        - width: 24px
+                        - height: 24px
+                        - color: >
+                            [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                                ? 'rgb(59, 130, 246)'
+                                : 'rgba(59, 130, 246, 0.6)' ]]]
+                      name:
+                        - color: >
+                            [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                                ? 'rgb(59, 130, 246)'
+                                : 'rgba(59, 130, 246, 0.6)' ]]]
+                        - font-size: 14px
+                        - margin-left: 8px
+
+              # Calendar Content Area
+              - type: conditional
+                conditions:
+                  - entity: input_boolean.calendar_week_view
+                    state: "on"
+                card:
+                  type: custom:week-planner-card
+                  calendars:
+                    - entity: calendar.home_calendar
+                      color: '#e6c229'
+                    - entity: calendar.meals
+                      color: '#5F9EA0'
+                    - entity: calendar.holidays_in_united_states
+                      color: '#FF0000'
+                  days: 7
+                  startingDay: 'today'
+                  updateInterval: 60
+                  locale: 'en'
+                  compact: true  # or false, your choice
+                  card_mod:
+                    style: |
+                      ha-card {
+                        background: rgb(249, 250, 251);
+                        border-radius: 12px;
+                        margin-top: 16px;
+                        overflow-x: auto;
+                        overflow-y: hidden;
+                        white-space: nowrap;
+                      }
+                      /* :host might or might not be needed, depending on your exact setup */
+                      :host {
+                        display: block;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                      }
+                      /* Force each day column to be inline-block, non-wrapping */
+                      .day {
+                        display: inline-block !important;
+                        width: calc(100% / 7) !important; /* or 14.2857% or 100px, etc. */
+                        vertical-align: top;
+                      }
+                      /* If time column is present, shrink it if you like: */
+                      .time-column {
+                        width: 35px !important;
+                      }
+
+              - type: conditional
+                conditions:
+                  - entity: input_boolean.calendar_month_view
+                    state: "on"
+                card:
+                  type: calendar
+                  entities:
+                    - calendar.home_calendar
+                    - calendar.holidays_in_united_states
+                  initial_view: dayGridMonth
+                  card_mod:
+                    style: |
+                      ha-card {
+                        background: rgb(249, 250, 251);
+                        border-radius: 12px;
+                        padding: 16px;
+                        margin-top: 16px;
+                      }
+
+  - title: Tasks and Lists
+    path: tasks
+    type: panel
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 80px 1fr
+        cards:
+          # Left Menu (side_menu decluttering template)
+          - type: custom:decluttering-card
+            template: side_menu
+            view_layout:
+              grid-column: 1
+              grid-row: 1
+
+          # Main Content Area
+          - type: vertical-stack
+            view_layout:
+              grid-column: 2
+            cards:
+              # Single grid with 2 columns
+              - type: grid
+                columns: 2
+                square: false
+                cards:
+                  # ==============
+                  #  SHOPPING LIST
+                  # ==============
+                  - type: vertical-stack
+
+                    cards:
+                      - type: custom:mushroom-template-card
+                        primary: Shopping List
+                        secondary: >
+                          {{ state_attr('todo.google_keep_shopping_list', 'items') | count }} items
+                        icon: mdi:cart
+                        icon_color: orange
+                        card_mod:
+                          style: |
+                            ha-card {
+                              margin-bottom: -8px
+                              background: none;
+                              box-shadow: none;
+                            }
+
+                      - type: todo-list
+
+                        entity: todo.google_keep_shopping_list
+                        hide_completed: true 
+                        card_mod:
+                          style: |
+                            ha-card {
+                              background: rgb(255, 247, 237);
+                              border-radius: 12px;
+                            }
+                            .add-item {
+                              padding: 16px;
+                              border-bottom: 1px solid rgba(0,0,0,0.1);
+                            }
+                            .add-item ha-icon {
+                              color: rgb(249, 115, 22);
+                            }
+                            .items {
+                              padding: 8px 16px;
+                            }
+                            .item ha-checkbox {
+                              --mdc-checkbox-unchecked-color rgb(249, 115, 22);
+                              --mdc-checkbox-disabled-color: rgb(249, 115, 22);
+                            }
+
+                  # =========
+                  #   TASKS
+                  # =========
+                  - type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-template-card
+                        primary: "Family Todo"
+                        icon: mdi:checkbox-marked-outline
+                        icon_color: blue
+
+                      - type: todo-list
+                        entity: todo.google_keep_family_todo
+                        hide_completed: true 
+                        card_mod:
+                          style: |
+                            ha-card {
+                              background: rgb(239, 246, 255);
+                              border-radius: 12px;
+                              padding: 16px
+
+  - title: Rooms
+    path: rooms
+    type: panel
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 80px 1fr
+          grid-template-rows: 1fr
+          margin: 0
+          padding: 0
+          grid-gap: 0
+        cards:
+          # Left Menu
+          - type: custom:decluttering-card
+            template: side_menu
+            view_layout:
+              grid-column: 1
+          
+          # Right-side content: 3x2 grid
+
+          - type: grid
+            view_layout:
+              grid-column: 2
+            columns: 3
+            square: true
+            cards:
+              - type: custom:button-card
+                template: room_card
+                name: Front House
+                icon: mdi:home
+                entity: sensor.living_room_temp_temperature
+                variables:
+                  color: "#6366f1"
+                  indicator_colors: ["#22c55e", "#3b82f6", "#f59e0b"]
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: House Controls
+                      size: wide
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: House Controls
+                          # Scene Controls
+                          - type: horizontal-stack
+                            cards:
+                              - type: custom:button-card
+                                name: Relax
+                                icon: mdi:white-balance-sunny
+                                tap_action:
+                                  action: call-service
+                                  service: scene.turn_on
+                                  service_data:
+                                    entity_id: scene.front_house_relax
+                              - type: custom:button-card
+                                name: Energize
+                                icon: mdi:lightning-bolt
+                                tap_action:
+                                  action: call-service
+                                  service: scene.turn_on
+                                  service_data:
+                                    entity_id: scene.front_house_energize
+                              - type: custom:button-card
+                                name: Night
+                                icon: mdi:weather-night
+                                tap_action:
+                                  action: call-service
+                                  service: scene.turn_on
+                                  service_data:
+                                    entity_id: scene.front_house_nightlight
+                          # Front House Controls
+                          - type: custom:mushroom-light-card
+                            entity: light.front_house
+                            name: Front House Lights
+                            icon: mdi:home-lightbulb
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          # Bedrooms Control
+                          - type: custom:mushroom-light-card
+                            entity: light.bedrooms
+                            name: Bedroom Lights
+                            icon: mdi:bed-double
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          # Speakers Control
+                          - type: custom:mushroom-media-player-card
+                            entity: media_player.speakers
+                            name: House Speakers
+                            icon: mdi:speaker
+                            fill_container: true
+                            show_volume_level: true
+                            volume_controls:
+                              - volume_set
+                              - volume_buttons
+                              - volume_mute
+
+              # Add this to your views section for the rooms page
+              - type: custom:button-card
+                template: room_card
+                name: Living Room
+                icon: mdi:sofa
+                entity: sensor.living_room_temp_temperature
+                variables:
+                  color: "#ec4899"
+                  indicator_colors: ["#22c55e", "#3b82f6", "#f59e0b"]
+                  light_entity: light.living_room_color
+                  motion_entity: binary_sensor.living_room_motion
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Living Rooms Controls
+                      size: wide
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Living Room
+                            subtitle: "Current Temperature: {{ states('sensor.living_room_temp_temperature') }}°F"
+                          # Light Controls  
+                          - type: custom:mushroom-light-card
+                            entity: light.living_room_color
+                            name: Main Light
+                            icon: mdi:ceiling-light
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                            use_light_color: true
+                          # Temperature Display
+                          - type: custom:mushroom-template-card
+                            primary: Temperature
+                            secondary: "{{ states('sensor.living_room_temp_temperature') }}°F"
+                            icon: mdi:thermometer
+                            icon_color: blue
+
+
+              - type: custom:button-card
+                template: room_card
+                name: Kitchen
+                icon: mdi:countertop
+                entity: sensor.kitchen_temp_temperature
+                variables:
+                  color: "#14b8a6"
+                  indicator_colors: ["#22c55e", "#3b82f6", "#f59e0b"]
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Kitchen & Dining Controls
+                      size: wide
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Kitchen & Dining
+                          # All Kitchen/Dining Lights
+                          - type: custom:mushroom-light-card
+                            entity: light.dining_kitchen_zone
+                            name: All Kitchen & Dining Lights
+                            icon: mdi:lightbulb-group
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          # Dining Room
+                          - type: custom:mushroom-light-card
+                            entity: light.kitchen_table
+                            name: Dining Room
+                            icon: mdi:food-fork-drink
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          # Kitchen
+                          - type: custom:mushroom-light-card
+                            entity: light.kitchen
+                            name: Kitchen
+                            icon: mdi:stove
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          # Adding Roomba Section
+                          - type: custom:mushroom-template-card
+                            primary: Roomba McRoomba
+                            secondary: "Battery: {{ states('sensor.roomba_mcroomba_battery') }}% | Bin: {{ states('binary_sensor.roomba_mcroomba_bin_full') }}"
+                            icon: mdi:robot-vacuum
+                            icon_color: >-
+                              [[[
+                                if (states['vacuum.roomba_mcroomba'].state === 'cleaning') return 'green';
+                                if (states['vacuum.roomba_mcroomba'].state === 'docked') return 'blue';
+                                if (states['vacuum.roomba_mcroomba'].state === 'error') return 'red';
+                                return 'grey';
+                              ]]]
+                          # Roomba Controls
+                          - type: horizontal-stack
+                            cards:
+                              - type: custom:mushroom-template-card
+                                tap_action:
+                                  action: call-service
+                                  service: vacuum.start
+                                  target:
+                                    entity_id: vacuum.roomba_mcroomba
+                                icon: mdi:play
+                                primary: Start
+                              - type: custom:mushroom-template-card
+                                tap_action:
+                                  action: call-service
+                                  service: vacuum.return_to_base
+                                  target:
+                                    entity_id: vacuum.roomba_mcroomba
+                                icon: mdi:home
+                                primary: Dock
+                          # Roomba Stats
+                          - type: entities
+                            show_header_toggle: false
+                            entities:
+                              - entity: sensor.roomba_mcroomba_successful_missions
+                                name: Successful Cleans
+                              - entity: sensor.roomba_mcroomba_average_mission_time
+                                name: Average Clean Time
+                              - entity: sensor.roomba_mcroomba_total_cleaning_time
+                                name: Total Cleaning Time
+
+              - type: custom:button-card
+                template: room_card
+                name: Bedroom
+                icon: mdi:bed-queen-outline
+                entity: sensor.master_bedroom_temp_temperature
+                variables:
+                  color: "#8b5cf6"
+                  indicator_colors: ["#22c55e", "#3b82f6", "#f59e0b"]
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Master Bedroom Controls
+                      size: wide
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Master Bedroom
+                            subtitle: "Current Temperature: {{ states('sensor.bedroom_temp_humidity_temperature') }}°F"
+                          # Light Controls
+                          - type: custom:mushroom-light-card
+                            entity: light.master_bedroom
+                            name: Bedroom Light
+                            icon: mdi:ceiling-light
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          # Temperature Display
+                          - type: custom:mushroom-template-card
+                            primary: Temperature
+                            secondary: "{{ states('sensor.bedroom_temp_humidity_temperature') }}°F"
+                            icon: mdi:thermometer
+                            icon_color: blue
+
+              - type: custom:button-card
+                template: room_card
+                name: "Toby's Room"
+                icon: mdi:toy-brick-outline
+                entity: sensor.toby_s_room_temp_temperature_2
+                variables:
+                  color: "#f59e0b"
+                  indicator_colors: ["#22c55e", "#3b82f6", "#f59e0b"]
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Toby's Room Controls
+                      size: wide
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Toby's Room
+                            subtitle: "Current Temperature: {{ states('sensor.toby_s_room_temp_temperature_2') }}°F"
+                          # Light Controls
+                          - type: custom:mushroom-light-card
+                            entity: light.toby_s_room
+                            name: Room Light
+                            icon: mdi:ceiling-light
+                            show_brightness_control: true
+                            show_color_temp_control: true
+                          # Temperature Display
+                          - type: custom:mushroom-template-card
+                            primary: Temperature
+                            secondary: "{{ states('sensor.toby_s_room_temp_temperature_2') }}°F"
+                            icon: mdi:thermometer
+                            icon_color: blue
+
+              - type: custom:button-card
+                template: room_card
+                name: Outside
+                icon: mdi:tree
+                entity: sensor.home_realfeel_temperature
+                variables:
+                  color: "#84cc16"
+                  indicator_colors: ["#22c55e", "#3b82f6", "#f59e0b"]
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Outside Controls
+                      size: wide
+                      content:
+                        type: vertical-stack
+                        cards:
+                          - type: custom:mushroom-title-card
+                            title: Outside
+                            subtitle: "Current Temperature: {{ states('sensor.home_realfeel_temperature') }}°F"
+                          # Light Controls
+                          - type: custom:mushroom-light-card
+                            entity: light.outdoor_plug
+                            name: Outdoor Light
+                            icon: mdi:outdoor-lamp
+                            show_brightness_control: true
+                          # Camera
+                          - type: picture-entity
+                            entity: camera.front_yard_camera
+                            camera_view: live
+                          # Temperature Display
+                          - type: custom:mushroom-template-card
+                            primary: Temperature
+                            secondary: "{{ states('sensor.home_realfeel_temperature') }}°F"
+                            icon: mdi:thermometer
+                            icon_color: blue
+
+  - title: Devices
+    path: devices
+    type: panel
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: custom:decluttering-card
+            template: side_menu
+
+
+          - type: custom:vertical-stack-in-card
+            card_mod:
+              style: |
+                ha-card {
+                  background: none;
+                  margin: 0;
+                  padding: 16px;
+                  height: 100%;
+                }
+            cards:
+              - type: markdown
+                content: |
+                  ## Devices Page Content Here.
+
+  - title: People
+    path: people
+    type: panel
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: custom:decluttering-card
+            template: side_menu
+
+
+          - type: custom:vertical-stack-in-card
+            card_mod:
+              style: |
+                ha-card {
+                  background: none;
+                  margin: 0;
+                  padding: 16px;
+                  height: 100%;
+                }
+            cards:
+              - type: markdown
+                content: |
+                  ## People Page Content Here.

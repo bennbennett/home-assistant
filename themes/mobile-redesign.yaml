@@ -1,0 +1,150 @@
+##############################################################################
+#                     Mobile Redesign Theme                                 #
+#                  Tailwind CSS Inspired Color System                       #
+##############################################################################
+
+mobile-redesign:
+  # Primary colors based on Tailwind CSS design system
+  primary-color: "#3b82f6"                    # Blue-500
+  accent-color: "#6366f1"                     # Indigo-500
+  dark-primary-color: "#1e40af"               # Blue-700
+  light-primary-color: "#93c5fd"              # Blue-300
+
+  # Text colors
+  primary-text-color: "#111827"               # Gray-900
+  secondary-text-color: "#6b7280"             # Gray-500
+  text-primary-color: "#ffffff"               # White
+  disabled-text-color: "#d1d5db"              # Gray-300
+
+  # Background colors (Tailwind inspired)
+  primary-background-color: "#f9fafb"         # Gray-50 (main background)
+  secondary-background-color: "#ffffff"       # White (cards)
+
+  # Card styling
+  card-background-color: "#ffffff"            # White cards
+  paper-card-background-color: "#ffffff"      # White cards
+  
+  # Mobile-optimized card styling
+  ha-card-border-radius: "16px"               # Rounded corners like Tailwind
+  ha-card-box-shadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)"
+  ha-card-header-color: "#111827"             # Gray-900
+  
+  # State colors (semantic)
+  state-icon-color: "#6b7280"                 # Gray-500 (default)
+  state-icon-active-color: "#3b82f6"          # Blue-500 (active)
+  state-icon-unavailable-color: "#d1d5db"     # Gray-300 (unavailable)
+  
+  # Success/Error states
+  success-color: "#10b981"                    # Emerald-500
+  warning-color: "#f59e0b"                    # Amber-500
+  error-color: "#ef4444"                      # Red-500
+  info-color: "#3b82f6"                       # Blue-500
+
+  # Button styling
+  paper-button-ink-color: "#3b82f6"           # Blue-500
+  paper-button-color: "#3b82f6"               # Blue-500
+  
+  # Toggle and slider styling
+  paper-toggle-button-checked-button-color: "#3b82f6"      # Blue-500
+  paper-toggle-button-checked-bar-color: "#93c5fd"         # Blue-300
+  paper-toggle-button-unchecked-button-color: "#d1d5db"    # Gray-300
+  paper-toggle-button-unchecked-bar-color: "#f3f4f6"       # Gray-100
+  
+  paper-slider-knob-color: "#3b82f6"          # Blue-500
+  paper-slider-knob-start-color: "#3b82f6"    # Blue-500
+  paper-slider-pin-color: "#3b82f6"           # Blue-500
+  paper-slider-active-color: "#3b82f6"        # Blue-500
+  paper-slider-container-color: "#f3f4f6"     # Gray-100
+
+  # Mobile-specific optimizations
+  # Larger touch targets for mobile
+  mdc-theme-primary: "#3b82f6"                # Blue-500
+  mdc-theme-secondary: "#6366f1"              # Indigo-500
+  mdc-theme-surface: "#ffffff"                # White
+  mdc-theme-background: "#f9fafb"             # Gray-50
+  mdc-theme-on-primary: "#ffffff"             # White text on primary
+  mdc-theme-on-secondary: "#ffffff"           # White text on secondary
+  mdc-theme-on-surface: "#111827"             # Gray-900 text on surface
+  mdc-theme-on-background: "#111827"          # Gray-900 text on background
+
+  # Enhanced button sizing for mobile
+  paper-button-flat-keyboard-focus_-_font-weight: "500"
+  paper-button-raised-keyboard-focus_-_font-weight: "500"
+  
+  # Mobile-friendly font sizes
+  paper-font-headline_-_font-size: "28px"     # Larger headlines
+  paper-font-headline_-_font-weight: "700"    # Bold headlines
+  paper-font-title_-_font-size: "20px"        # Section titles
+  paper-font-title_-_font-weight: "600"       # Semibold titles
+  paper-font-subhead_-_font-size: "16px"      # Body text
+  paper-font-body1_-_font-size: "16px"        # Body text
+  paper-font-caption_-_font-size: "14px"      # Small text
+
+  # Navigation and sidebar
+  sidebar-icon-color: "#6b7280"               # Gray-500
+  sidebar-text-color: "#374151"               # Gray-700
+  sidebar-selected-icon-color: "#3b82f6"      # Blue-500
+  sidebar-selected-text-color: "#3b82f6"      # Blue-500
+  sidebar-background-color: "#ffffff"         # White
+
+  # Table and list styling
+  table-row-background-color: "#ffffff"       # White
+  table-row-alternative-background-color: "#f9fafb"  # Gray-50
+  
+  # Input field styling
+  paper-input-container-color: "#6b7280"      # Gray-500
+  paper-input-container-focus-color: "#3b82f6"  # Blue-500
+  paper-input-container-invalid-color: "#ef4444"  # Red-500
+  
+  # Border colors
+  divider-color: "#e5e7eb"                    # Gray-200
+  border-color: "#e5e7eb"                     # Gray-200
+
+  # Room-specific color variables (matching mobile dashboard)
+  # Used for room card backgrounds
+  room-front-house-bg: "#eef2ff"              # Blue-50
+  room-front-house-accent: "#6366f1"          # Indigo-500
+  room-living-room-bg: "#fdf2f8"              # Pink-50
+  room-living-room-accent: "#ec4899"          # Pink-500
+  room-kitchen-bg: "#f0fdfa"                  # Teal-50
+  room-kitchen-accent: "#14b8a6"              # Teal-500
+  room-bedroom-bg: "#faf5ff"                  # Purple-50
+  room-bedroom-accent: "#8b5cf6"              # Purple-500
+  room-toby-room-bg: "#fffbeb"                # Amber-50
+  room-toby-room-accent: "#f59e0b"            # Amber-500
+  room-outside-bg: "#f7fee7"                  # Lime-50
+  room-outside-accent: "#84cc16"              # Lime-500
+
+  # Status indicator colors
+  status-light-on: "#10b981"                  # Emerald-500 (light on)
+  status-light-off: "#6b7280"                 # Gray-500 (light off)
+  status-speaker-on: "#3b82f6"                # Blue-500 (speaker active)
+  status-speaker-off: "#6b7280"               # Gray-500 (speaker inactive)
+  status-temp-normal: "#3b82f6"               # Blue-500 (normal temp)
+  status-temp-warm: "#f59e0b"                 # Amber-500 (warm)
+  status-temp-hot: "#ef4444"                  # Red-500 (hot)
+
+  # Scene control pill colors
+  scene-pill-bg: "#f3f4f6"                    # Gray-100
+  scene-pill-active-bg: "#3b82f6"             # Blue-500
+  scene-pill-text: "#374151"                  # Gray-700
+  scene-pill-active-text: "#ffffff"           # White
+
+  # Navigation bar styling
+  nav-bar-bg: "rgba(255, 255, 255, 0.95)"     # Semi-transparent white
+  nav-bar-border: "rgba(0, 0, 0, 0.1)"        # Light border
+  nav-bar-active-bg: "#dbeafe"                # Blue-100
+  nav-bar-active-color: "#3b82f6"             # Blue-500
+  nav-bar-inactive-color: "#6b7280"           # Gray-500
+
+  # Additional mobile optimizations
+  # Ensure sufficient contrast ratios
+  contrast-ratio-primary: "4.5"               # WCAG AA compliance
+  
+  # Touch target minimum sizes (following iOS/Android guidelines)
+  min-touch-target-size: "44px"               # Minimum 44px for touch targets
+  
+  # Improved focus indicators for accessibility
+  focus-ring-color: "#93c5fd"                 # Blue-300
+  focus-ring-width: "2px"
+  focus-ring-style: "solid"

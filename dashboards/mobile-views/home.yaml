@@ -184,9 +184,9 @@ cards:
                       temp_entity: "sensor.outside_temperature_temperature"
                       light_entity: "light.outdoor_lights"
                   
-                  # Whole House
+                  # Front House
                   - type: custom:button-card
-                    name: Whole House
+                    name: Front House
                     icon: mdi:home
                     entity: sensor.living_room_temp_temperature
                     template: mobile_room_enhanced

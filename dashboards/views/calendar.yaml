@@ -35,7 +35,7 @@ cards:
               - type: custom:button-card
                 icon: mdi:view-week
                 name: Week
-                entity: input_boolean.calendar_week_view
+                entity: input_select.calendar_view_mode
                 tap_action:
                   action: call-service
                   service: script.toggle_week_view
@@ -46,7 +46,7 @@ cards:
                     - margin: 4px
                     - width: 140px
                     - background-color: >
-                        [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                        [[[ return states['input_select.calendar_view_mode'].state === 'week'
                             ? 'rgb(219, 234, 254)'
                             : 'rgba(219, 234, 254, 0.5)' ]]]
                   grid:
@@ -56,12 +56,12 @@ cards:
                     - width: 24px
                     - height: 24px
                     - color: >
-                        [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                        [[[ return states['input_select.calendar_view_mode'].state === 'week'
                             ? 'rgb(59, 130, 246)'
                             : 'rgba(59, 130, 246, 0.6)' ]]]
                   name:
                     - color: >
-                        [[[ return states['input_boolean.calendar_week_view'].state === 'on'
+                        [[[ return states['input_select.calendar_view_mode'].state === 'week'
                             ? 'rgb(59, 130, 246)'
                             : 'rgba(59, 130, 246, 0.6)' ]]]
                     - font-size: 14px
@@ -71,11 +71,10 @@ cards:
               - type: custom:button-card
                 icon: mdi:calendar-month
                 name: Month
-                entity: input_boolean.calendar_month_view
+                entity: input_select.calendar_view_mode
                 tap_action:
                   action: call-service
                   service: script.toggle_month_view
-                  service_data: {}
                 styles:
                   card:
                     - border-radius: 12px
@@ -83,7 +82,7 @@ cards:
                     - margin: 4px
                     - width: 140px
                     - background-color: >
-                        [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                        [[[ return states['input_select.calendar_view_mode'].state === 'month'
                             ? 'rgb(219, 234, 254)'
                             : 'rgba(219, 234, 254, 0.5)' ]]]
                   grid:
@@ -93,12 +92,12 @@ cards:
                     - width: 24px
                     - height: 24px
                     - color: >
-                        [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                        [[[ return states['input_select.calendar_view_mode'].state === 'month'
                             ? 'rgb(59, 130, 246)'
                             : 'rgba(59, 130, 246, 0.6)' ]]]
                   name:
                     - color: >
-                        [[[ return states['input_boolean.calendar_month_view'].state === 'on'
+                        [[[ return states['input_select.calendar_view_mode'].state === 'month'
                             ? 'rgb(59, 130, 246)'
                             : 'rgba(59, 130, 246, 0.6)' ]]]
                     - font-size: 14px
@@ -144,8 +143,8 @@ cards:
           # WEEK VIEW - Shows 7 days horizontally starting today
           - type: conditional
             conditions:
-              - entity: input_boolean.calendar_week_view
-                state: "on"
+              - entity: input_select.calendar_view_mode
+                state: "week"
             card:
               type: custom:week-planner-card
               calendars:
@@ -155,12 +154,18 @@ cards:
                 - entity: calendar.birthdays_anniversaries
                   color: "#9333EA"
                   name: Birthdays & Anniversaries
+              weather:
+                entity: weather.pirateweather
+                showCondition: true
+                showTemperature: false
+                showLowTemperature: false
               days: 7
-              startingDay: today
+              startingDay: monday
               startingDayOffset: 0
               compact: false
               showLegend: true
               legendToggle: true
+              showNavigation: true
               showLocation: false
               showDescription: false
               updateInterval: 60
@@ -175,6 +180,21 @@ cards:
                     border-radius: 12px;
                     --legend-spacing: 15px;
                     --legend-dot-size: 12px;
+                  }
+                  .navigation {
+                    margin-bottom: 12px;
+                  }
+                  .navigation .previous,
+                  .navigation .next {
+                    color: rgb(59, 130, 246);
+                    cursor: pointer;
+                    padding: 4px 8px;
+                    border-radius: 8px;
+                    transition: background-color 0.2s;
+                  }
+                  .navigation .previous:hover,
+                  .navigation .next:hover {
+                    background-color: rgb(219, 234, 254);
                   }
                   .container .day {
                     width: calc((100% - 6 * var(--days-spacing)) / 7) !important;
@@ -207,22 +227,21 @@ cards:
                     pointer-events: none;
                   }
 
-          # MONTH VIEW - Shows next 4 weeks starting Monday
+          # MONTH VIEW - Shows full calendar month starting Monday
           - type: conditional
             conditions:
-              - entity: input_boolean.calendar_month_view
-                state: "on"
+              - entity: input_select.calendar_view_mode
+                state: "month"
             card:
               type: custom:week-planner-card
-              title: "Next 4 Weeks"
-              days: 28
+              days: month
               startingDay: monday
-              startingDayOffset: 0
               maxDayEvents: 5
               updateInterval: 600
               noCardBackground: false
               showLegend: true
               legendToggle: true
+              showNavigation: true
               showLocation: false
               showDescription: false
               calendars:
@@ -240,6 +259,21 @@ cards:
                     background: #FAFAFA;
                     border-radius: 12px;
                     font-size: 12px !important;
+                  }
+                  .navigation {
+                    margin-bottom: 12px;
+                  }
+                  .navigation .previous,
+                  .navigation .next {
+                    color: rgb(59, 130, 246);
+                    cursor: pointer;
+                    padding: 4px 8px;
+                    border-radius: 8px;
+                    transition: background-color 0.2s;
+                  }
+                  .navigation .previous:hover,
+                  .navigation .next:hover {
+                    background-color: rgb(219, 234, 254);
                   }
                   .container .day {
                     width: calc((100% - 6 * var(--days-spacing)) / 7) !important;
