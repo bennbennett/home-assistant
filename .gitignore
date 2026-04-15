@@ -34,8 +34,23 @@ __pycache__/
 # Nest tokens and other auth files
 nest/
 
-# Custom components cache (optional - uncomment if you want to track)
-# custom_components/
+# HACS-managed integrations — re-installed by HACS, not source
+custom_components/
+
+# HACS-installed Lovelace frontend cards — also HACS-managed
+www/community/
+
+# HA brand/icon cache
+.cache/
+
+# Credentials / API tokens
+.mealie_token
+
+# Personal screenshot dump (not source)
+screenshots/
+
+# Project notes — track .md docs but not bulky screenshots
+mobile-dashboard-project/*.png
 
 # Lock files
 .HA_VERSION
