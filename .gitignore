@@ -55,3 +55,15 @@ mobile-dashboard-project/*.png
 # Lock files
 .HA_VERSION
 .ha_run.lock
+
+# Environment and credentials
+.env
+
+# gstack working files
+.gstack/
+
+# Empty placeholder directories
+ha_config/
+
+# Tab title (shell state)
+.tab-title
