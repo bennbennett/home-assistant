@@ -1,0 +1,49 @@
+##############################################################################
+#                            Family View                                      #
+#  Dual-layout (expanded/collapsed) with decluttered main content             #
+##############################################################################
+title: Family
+path: family
+type: panel
+
+cards:
+  - type: vertical-stack
+    cards:
+      - type: conditional
+        conditions:
+          - entity: input_boolean.sidebar_collapsed
+            state: "off"
+        card:
+          type: custom:layout-card
+          layout_type: custom:grid-layout
+          layout:
+            grid-template-columns: 232px 1fr
+            grid-template-rows: 1fr
+            margin: 0
+            padding: 0
+            grid-gap: 16px
+          cards:
+            - type: custom:decluttering-card
+              template: home_hub_sidebar_expanded
+            - type: custom:decluttering-card
+              template: home_hub_family_main
+
+      - type: conditional
+        conditions:
+          - entity: input_boolean.sidebar_collapsed
+            state: "on"
+        card:
+          type: custom:layout-card
+          layout_type: custom:grid-layout
+          layout:
+            grid-template-columns: 64px 1fr
+            grid-template-rows: 1fr
+            margin: 0
+            padding: 0
+            grid-gap: 16px
+          cards:
+            - type: custom:decluttering-card
+              template: home_hub_sidebar_collapsed
+            - type: custom:decluttering-card
+              template: home_hub_family_main
+
