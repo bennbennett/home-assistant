@@ -1,0 +1,242 @@
+##############################################################################
+#  The Countertop — Lights View (Stage 1)                                   #
+#  Back button + title + 3x2 room cards + scene bar                        #
+##############################################################################
+title: Lights
+path: lights
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 1fr
+      grid-template-rows: auto 1fr auto
+      height: 100vh
+      margin: 0
+      padding: 0
+    card_mod:
+      style: |
+        ha-card {
+          background: #fbfaf9 !important;
+        }
+    cards:
+      # ═══ ROW 1: Subview header (pinned top) ═══
+      - type: custom:button-card
+        view_layout:
+          grid-row: 1
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: navigate
+          navigation_path: /the-countertop/home
+        card_mod:
+          style: |
+            ha-card:active { opacity: 0.7; }
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - padding: 16px 24px 12px
+          grid:
+            - grid-template-areas: '"sv_hdr"'
+            - grid-template-columns: 1fr
+          custom_fields:
+            sv_hdr:
+              - display: flex
+              - align-items: center
+              - gap: 14px
+        custom_fields:
+          sv_hdr: |
+            [[[
+              return `<div style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              </div>
+              <div style="font-family: 'Fraunces', Georgia, serif; font-size: 26px; font-weight: 400; color: #1F2937;">Lights</div>`;
+            ]]]
+
+      # ═══ ROW 2: Room grid (vertically centered in remaining space) ═══
+      - type: grid
+        view_layout:
+          grid-row: 2
+          align-self: center
+        columns: 3
+        square: false
+        card_mod:
+          style: |
+            ha-card {
+              background: none !important;
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 24px !important;
+            }
+        cards:
+          # Front House
+          - type: custom:button-card
+            template: ct_room_card
+            entity: light.front_house
+            variables:
+              room_name: Front House
+              room_icon: home
+              room_color: '#C87456'
+              light_entity: light.front_house
+              temp_entity: sensor.living_room_temp_temperature
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: ""
+                  size: normal
+                  popup_styles:
+                    - style: all
+                      styles: |
+                        ha-dialog {
+                          --ha-dialog-border-radius: 24px;
+                        }
+                        ha-dialog-header {
+                          display: none;
+                        }
+                  content: !include /config/dashboards/popups/countertop_lights_front_house.yaml
+
+          # Living Room
+          - type: custom:button-card
+            template: ct_room_card
+            entity: light.living_room
+            variables:
+              room_name: Living Room
+              room_icon: sofa
+              room_color: '#4A7C59'
+              light_entity: light.living_room
+              temp_entity: sensor.living_room_temp_temperature
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: ""
+                  size: normal
+                  popup_styles:
+                    - style: all
+                      styles: |
+                        ha-dialog {
+                          --ha-dialog-border-radius: 24px;
+                        }
+                        ha-dialog-header {
+                          display: none;
+                        }
+                  content: !include /config/dashboards/popups/countertop_lights_living_room.yaml
+
+          # Kitchen
+          - type: custom:button-card
+            template: ct_room_card
+            entity: light.kitchen
+            variables:
+              room_name: Kitchen
+              room_icon: chef-hat
+              room_color: '#B89254'
+              light_entity: light.kitchen
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: ""
+                  size: normal
+                  popup_styles:
+                    - style: all
+                      styles: |
+                        ha-dialog {
+                          --ha-dialog-border-radius: 24px;
+                        }
+                        ha-dialog-header {
+                          display: none;
+                        }
+                  content: !include /config/dashboards/popups/countertop_lights_kitchen.yaml
+
+          # Master Bedroom
+          - type: custom:button-card
+            template: ct_room_card
+            entity: light.master_bedroom
+            variables:
+              room_name: Master Bedroom
+              room_icon: bed
+              room_color: '#8E7065'
+              light_entity: light.master_bedroom
+              temp_entity: sensor.bedroom_temp_humidity_temperature
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: ""
+                  size: normal
+                  popup_styles:
+                    - style: all
+                      styles: |
+                        ha-dialog {
+                          --ha-dialog-border-radius: 24px;
+                        }
+                        ha-dialog-header {
+                          display: none;
+                        }
+                  content: !include /config/dashboards/popups/countertop_lights_bedroom.yaml
+
+          # Toby's Room
+          - type: custom:button-card
+            template: ct_room_card
+            entity: light.toby_s_room
+            variables:
+              room_name: "Toby's Room"
+              room_icon: dice
+              room_color: '#9A6B47'
+              light_entity: light.toby_s_room
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: ""
+                  size: normal
+                  popup_styles:
+                    - style: all
+                      styles: |
+                        ha-dialog {
+                          --ha-dialog-border-radius: 24px;
+                        }
+                        ha-dialog-header {
+                          display: none;
+                        }
+                  content: !include /config/dashboards/popups/countertop_lights_toby.yaml
+
+          # Outside
+          - type: custom:button-card
+            template: ct_room_card
+            entity: light.outdoor_lights_dimmable
+            variables:
+              room_name: Outside
+              room_icon: cloud
+              room_color: '#6E8E4D'
+              light_entity: light.outdoor_lights_dimmable
+              sensor_entities: "Gate:binary_sensor.outside_door,Shed:binary_sensor.door_sensor_shed"
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: ""
+                  size: normal
+                  popup_styles:
+                    - style: all
+                      styles: |
+                        ha-dialog {
+                          --ha-dialog-border-radius: 24px;
+                        }
+                        ha-dialog-header {
+                          display: none;
+                        }
+                  content: !include /config/dashboards/popups/countertop_lights_outside.yaml
+
+      # ═══ ROW 3: Scene bar (pinned bottom) ═══
+      - !include ../scene_bar.yaml

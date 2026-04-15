@@ -1,0 +1,426 @@
+##############################################################################
+#                    The Countertop — Button Card Templates                 #
+#  Follows proven patterns from home-hub/button_card_templates.yaml        #
+##############################################################################
+
+# ═══════════════════════════════════════════════════════════
+# ct_scene_chip
+# Variables: chip_icon (string key), chip_label (string)
+# Based on: home_hub_scene_chip (lines 546-605)
+# ═══════════════════════════════════════════════════════════
+ct_scene_chip:
+  show_icon: false
+  show_name: false
+  show_state: false
+  triggers_update:
+    - input_select.countertop_active_scene
+  card_mod:
+    style: |
+      ha-card {
+        transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.2), background-color 0.15s ease, border-color 0.15s ease !important;
+      }
+      ha-card:active {
+        transform: scale(0.94);
+        background: #FCE9DE !important;
+        border-color: #C87456 !important;
+        transition: transform 0.06s ease !important;
+      }
+  styles:
+    card:
+      - border-radius: 21px
+      - height: 42px
+      - padding: 0 16px
+      - box-shadow: none
+      - display: flex
+      - align-items: center
+      - justify-content: center
+      - background: |
+          [[[
+            var active = states['input_select.countertop_active_scene'];
+            var isActive = active && active.state === variables.chip_label;
+            return isActive ? '#FFF6F1' : '#FFFFFF';
+          ]]]
+      - border: |
+          [[[
+            var active = states['input_select.countertop_active_scene'];
+            var isActive = active && active.state === variables.chip_label;
+            return '1px solid ' + (isActive ? '#C87456' : '#E5E7EB');
+          ]]]
+    grid:
+      - grid-template-areas: '"chip_content"'
+      - grid-template-columns: 1fr
+    custom_fields:
+      chip_content:
+        - display: flex
+        - align-items: center
+        - justify-content: center
+  custom_fields:
+    chip_content: |
+      [[[
+        const icons = {
+          'moon': '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+          'lightbulb-off': '<path d="M16.8 11.2c.8-.9 1.2-2 1.2-3.2a6 6 0 0 0-9.3-5"/><path d="m2 2 20 20"/><path d="M6.3 6.3a4.67 4.67 0 0 0 1.2 5.2c.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+          'sun': '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+          'sunrise': '<path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/>',
+          'moon-star': '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/><path d="M19 3v4"/><path d="M21 5h-4"/>'
+        };
+        var active = states['input_select.countertop_active_scene'];
+        var isActive = active && active.state === variables.chip_label;
+        const strokeColor = isActive ? '#C87456' : '#6B7280';
+        const textColor = isActive ? '#C87456' : '#374151';
+        const svgPath = icons[variables.chip_icon] || icons['moon'];
+        const label = variables.chip_label || '';
+        return `<div style="display: flex; align-items: center; gap: 7px; white-space: nowrap;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svgPath}</svg>
+          <span style="font-size: 14px; font-weight: ${isActive ? 600 : 500}; color: ${textColor};">${label}</span>
+        </div>`;
+      ]]]
+
+# ═══════════════════════════════════════════════════════════
+# ct_action_btn
+# Variables: btn_icon (string key), btn_label, btn_icon_bg, btn_icon_color
+# ═══════════════════════════════════════════════════════════
+ct_action_btn:
+  show_icon: false
+  show_name: false
+  show_state: false
+  card_mod:
+    style: |
+      ha-card {
+        transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+      }
+      ha-card:active {
+        transform: scale(0.97) !important;
+        box-shadow: none !important;
+      }
+  styles:
+    card:
+      - background: white
+      - border-radius: 16px
+      - border: '1px solid #E8E4DE'
+      - box-shadow: '0 1px 3px rgba(0,0,0,0.06)'
+      - cursor: pointer
+      - padding: 0
+    grid:
+      - grid-template-areas: '"btn_content"'
+      - grid-template-columns: 1fr
+    custom_fields:
+      btn_content:
+        - display: flex
+        - flex-direction: column
+        - align-items: center
+        - justify-content: center
+        - gap: 8px
+        - padding: 20px 8px
+        - min-height: 200px
+  custom_fields:
+    btn_content: |
+      [[[
+        const icons = {
+          'lightbulb': '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
+          'plus': '<path d="M12 5v14"/><path d="M5 12h14"/>',
+          'phone': '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>',
+          'timer': '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3l2 2"/><path d="M19 3l-2 2"/><path d="M12 5V3"/>',
+          'calendar': '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
+          'checkbox': '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'
+        };
+        const iconBg = variables.btn_icon_bg || '#E8F0EA';
+        const iconColor = variables.btn_icon_color || '#4A7C59';
+        const svgPath = icons[variables.btn_icon] || '';
+        const label = variables.btn_label || '';
+        return `<div style="width: 52px; height: 52px; border-radius: 13px; background: ${iconBg}; display: flex; align-items: center; justify-content: center;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${svgPath}</svg>
+        </div>
+        <div style="font-size: 15px; font-weight: 600; color: #374151; letter-spacing: -0.01em;">${label}</div>`;
+      ]]]
+
+# ═══════════════════════════════════════════════════════════
+# ct_room_card — ring-centered brightness card
+# Variables: room_name, room_icon (key), room_color, light_entity,
+#            temp_entity (optional), sensor_entities (optional, "Label:entity_id,...")
+# Entity: the light entity (for toggle + brightness ring)
+# ═══════════════════════════════════════════════════════════
+ct_room_card:
+  show_icon: false
+  show_name: false
+  show_state: false
+  tap_action:
+    action: none
+  card_mod:
+    style: |
+      ha-card {
+        transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.25s ease !important;
+      }
+      ha-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+      }
+      ha-card:active {
+        transform: scale(0.97);
+        transition: transform 0.08s ease !important;
+      }
+  styles:
+    card:
+      - background: white
+      - border-radius: 16px
+      - padding: 14px 16px
+      - box-shadow: '0 1px 3px rgba(0,0,0,0.06)'
+      - border: '1px solid #E8E4DE'
+      - height: 165px
+    grid:
+      - grid-template-areas: '"rm_head" "rm_ring" "rm_sensors"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: auto 1fr auto
+    custom_fields:
+      rm_head:
+        - display: flex
+        - align-items: baseline
+        - justify-content: space-between
+        - width: 100%
+      rm_ring:
+        - display: flex
+        - align-items: center
+        - justify-content: center
+        - width: 100%
+      rm_sensors:
+        - display: flex
+        - justify-content: flex-end
+        - align-items: center
+        - min-height: 14px
+        - width: 100%
+        - gap: 10px
+  custom_fields:
+    rm_head: |
+      [[[
+        const name = variables.room_name || 'Room';
+        var tempHtml = '';
+        if (variables.temp_entity) {
+          const ts = states[variables.temp_entity];
+          if (ts) {
+            const tv = parseFloat(ts.state);
+            if (!isNaN(tv) && ts.state !== 'unavailable' && ts.state !== 'unknown') {
+              tempHtml = '<span style="font-size:13px;color:#9CA3AF;font-variant-numeric:tabular-nums;">' + tv.toFixed(1) + '\u00B0F</span>';
+            }
+          }
+        }
+        return '<span style="font-family:Fraunces,Georgia,serif;font-size:15px;font-weight:450;color:#1F2937;">' + name + '</span>' + tempHtml;
+      ]]]
+    rm_ring: |
+      [[[
+        const roomColor = variables.room_color || '#4A7C59';
+        const hexVal = roomColor.replace('#', '');
+        const rc = parseInt(hexVal.substr(0,2), 16);
+        const gc = parseInt(hexVal.substr(2,2), 16);
+        const bc = parseInt(hexVal.substr(4,2), 16);
+        const tileBg = 'rgba(' + rc + ',' + gc + ',' + bc + ',0.14)';
+
+        const lucideIcons = {
+          'home': '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+          'sofa': '<path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/><path d="M4 18v2"/><path d="M20 18v2"/>',
+          'chef-hat': '<path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z"/><path d="M6 17h12"/>',
+          'bed': '<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>',
+          'dice': '<rect x="2" y="2" width="20" height="20" rx="3" fill="none"/><circle cx="8" cy="8" r="1.5" fill="' + roomColor + '" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="' + roomColor + '" stroke="none"/><circle cx="16" cy="16" r="1.5" fill="' + roomColor + '" stroke="none"/>',
+          'cloud': '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 0 9z"/>'
+        };
+
+        const svgPath = lucideIcons[variables.room_icon] || '';
+        const isOn = entity && entity.state === 'on';
+        var brightPct = 0;
+        if (isOn && entity.attributes && entity.attributes.brightness != null) {
+          brightPct = Math.round(entity.attributes.brightness / 255 * 100);
+        }
+        const circumference = 176;
+        const dashOffset = Math.round(circumference * (1 - brightPct / 100));
+        const ringStroke = isOn ? '#D97706' : 'transparent';
+        const iconOpacity = isOn ? '1' : '0.35';
+
+        var eid = entity ? entity.entity_id : '';
+        return '<div data-eid="' + eid + '" style="position:relative;width:64px;height:64px;cursor:pointer;pointer-events:auto;transition:opacity 0.15s ease;" '
+          + 'onclick="(function(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();var t=e.currentTarget;t.style.opacity=\'0.6\';setTimeout(function(){t.style.opacity=\'\';},150);var eid=t.getAttribute(\'data-eid\');var r=document.querySelector(\'home-assistant\');if(r&&r.hass)r.hass.callService(\'light\',\'toggle\',{entity_id:eid});})(event)" '
+          + 'onmousedown="(function(e){e.stopPropagation();})(event)" '
+          + 'ontouchstart="(function(e){e.stopPropagation();})(event)">'
+          + '<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">'
+          + '<circle cx="32" cy="32" r="28" fill="none" stroke="#E5E7EB" stroke-width="3"/>'
+          + '<circle cx="32" cy="32" r="28" fill="none" stroke="' + ringStroke + '" stroke-width="3" stroke-linecap="round" stroke-dasharray="' + circumference + '" stroke-dashoffset="' + dashOffset + '" transform="rotate(-90 32 32)" style="transition:stroke-dashoffset 0.6s ease,stroke 0.3s ease;"/>'
+          + '</svg>'
+          + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:9px;background:' + tileBg + ';display:flex;align-items:center;justify-content:center;opacity:' + iconOpacity + ';transition:opacity 0.3s ease;">'
+          + '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' + roomColor + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + svgPath + '</svg>'
+          + '</div></div>';
+      ]]]
+    rm_sensors: |
+      [[[
+        if (!variables.sensor_entities) return '';
+        const sensors = variables.sensor_entities.split(',');
+        var dots = '';
+        for (var i = 0; i < sensors.length; i++) {
+          var parts = sensors[i].trim().split(':');
+          if (parts.length < 2) continue;
+          var label = parts[0].trim();
+          var eid = parts[1].trim();
+          var st = states[eid];
+          if (!st) continue;
+          var isOpen = st.state === 'on';
+          var dotColor = isOpen ? '#ef4444' : '#22c55e';
+          dots += '<div style="display:inline-flex;align-items:center;gap:3px;color:' + dotColor + ';">'
+            + '<div style="width:6px;height:6px;border-radius:50%;background:currentColor;"></div>'
+            + '<span style="font-size:10px;font-weight:600;letter-spacing:0.3px;text-transform:uppercase;">' + label + '</span>'
+            + '</div>';
+        }
+        return dots;
+      ]]]
+
+# ═══════════════════════════════════════════════════════════
+# ct_checklist_card
+# Variables: checklist_name, checklist_icon (key), checklist_color,
+#            checklist_items (comma-separated entity IDs)
+# ═══════════════════════════════════════════════════════════
+ct_checklist_card:
+  show_icon: false
+  show_name: false
+  show_state: false
+  card_mod:
+    style: |
+      ha-card:active {
+        transform: scale(0.97) !important;
+      }
+  styles:
+    card:
+      - background: white
+      - border-radius: 16px
+      - border: '1px solid #E8E4DE'
+      - box-shadow: '0 1px 3px rgba(0,0,0,0.06)'
+      - padding: 24px 20px
+      - cursor: pointer
+      - text-align: center
+      - min-height: 160px
+    grid:
+      - grid-template-areas: '"cl_content"'
+      - grid-template-columns: 1fr
+    custom_fields:
+      cl_content:
+        - display: flex
+        - flex-direction: column
+        - align-items: center
+  custom_fields:
+    cl_content: |
+      [[[
+        const iconMap = {
+          'book': '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+          'waves': '<path d="M2 12c2-4 6-4 10 0s8 4 10 0"/><path d="M2 18c2-4 6-4 10 0s8 4 10 0"/>',
+          'hockey': '<circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/>'
+        };
+        const name = variables.checklist_name || 'Checklist';
+        const svgPath = iconMap[variables.checklist_icon] || '';
+        const color = variables.checklist_color || '#4A7C59';
+        const items = (variables.checklist_items || '').split(',').filter(function(s) { return s.trim(); });
+
+        const hex = color.replace('#', '');
+        const r = parseInt(hex.substr(0,2), 16);
+        const g = parseInt(hex.substr(2,2), 16);
+        const b = parseInt(hex.substr(4,2), 16);
+        const tileBg = 'rgba(' + r + ',' + g + ',' + b + ',0.14)';
+
+        const total = items.length;
+        var done = 0;
+        for (var i = 0; i < items.length; i++) {
+          var eid = items[i].trim();
+          if (states[eid] && states[eid].state === 'on') done++;
+        }
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+        return `<div style="width: 52px; height: 52px; border-radius: 13px; background: ${tileBg}; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${svgPath}</svg>
+        </div>
+        <div style="font-family: Fraunces, Georgia, serif; font-size: 16px; font-weight: 450; color: #1F2937; margin-bottom: 4px;">${name}</div>
+        <div style="font-size: 13px; color: #9CA3AF;">${done} of ${total}</div>
+        <div style="height: 4px; border-radius: 2px; background: #F3F4F6; margin-top: 8px; overflow: hidden; width: 100%;">
+          <div style="height: 100%; border-radius: 2px; background: ${color}; width: ${pct}%;"></div>
+        </div>`;
+      ]]]
+
+# ═══════════════════════════════════════════════════════════
+# ct_checklist_item
+# Variables: item_name (string), item_icon (key), item_color (hex)
+# Entity: the input_boolean for this checklist item
+# Renders: checkbox + icon tile + label, strikethrough when checked
+# ═══════════════════════════════════════════════════════════
+ct_checklist_item:
+  show_icon: false
+  show_name: false
+  show_state: false
+  tap_action:
+    action: toggle
+  card_mod:
+    style: |
+      ha-card:active {
+        background: #F9FAFB !important;
+      }
+  styles:
+    card:
+      - background: none
+      - box-shadow: none
+      - border: none
+      - border-radius: 0
+      - padding: 0
+      - margin: 0
+    grid:
+      - grid-template-areas: '"ci_row"'
+      - grid-template-columns: 1fr
+    custom_fields:
+      ci_row:
+        - display: flex
+        - align-items: center
+        - height: 54px
+        - padding: 0 10px
+        - border-bottom: 1px solid rgba(232, 228, 222, 0.78)
+  custom_fields:
+    ci_row: |
+      [[[
+        const isChecked = entity && entity.state === 'on';
+        const itemName = variables.item_name || 'Item';
+        const itemColor = variables.item_color || '#4A7C59';
+        const iconKey = variables.item_icon || '';
+
+        const iconMap = {
+          'apple': '<circle cx="12" cy="13" r="7"/><path d="M12 6c-1-3.3 4-3.3 4-1"/>',
+          'lunch': '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M3 12h18"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/>',
+          'water': '<path d="M12 2v6"/><path d="M6 12a6 6 0 0 0 12 0c0-4-6-10-6-10S6 8 6 12z"/>',
+          'jacket': '<path d="M15 2H9l-4 8 3 1v11h12V11l3-1-4-8z"/>',
+          'notebook': '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M8 10h8"/><path d="M8 14h4"/>',
+          'laptop': '<rect x="2" y="4" width="20" height="12" rx="2"/><path d="M2 16h20"/><path d="M6 20h12"/>',
+          'pencil': '<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+          'bag': '<rect x="6" y="8" width="12" height="14" rx="2"/><path d="M6 12h12"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+          'shirt': '<path d="M8 2l4 4 4-4"/><path d="M2 8l6-2v16h8V6l6 2"/>',
+          'swim': '<path d="M2 12c2-4 6-4 10 0s8 4 10 0"/><circle cx="12" cy="8" r="3"/>',
+          'goggles': '<circle cx="8" cy="12" r="4"/><circle cx="16" cy="12" r="4"/><path d="M12 12h0"/>',
+          'towel': '<rect x="5" y="4" width="14" height="16" rx="2"/><path d="M5 10h14"/><path d="M5 16h14"/>',
+          'sun': '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
+          'droplet': '<path d="M12 2s-6 6-6 10a6 6 0 0 0 12 0c0-4-6-10-6-10z"/>',
+          'shorts': '<path d="M4 6h16v4l-3 8H7L4 10V6z"/><path d="M12 6v12"/>',
+          'helmet': '<path d="M4 13a8 8 0 0 1 16 0v3H4z"/><path d="M8 16v2"/><path d="M16 16v2"/>',
+          'stick': '<path d="M4 4l6 6"/><path d="M13 9l7-7"/><path d="M6 18l4-4"/><circle cx="17" cy="17" r="2"/>',
+          'guard': '<path d="M9 3 7 10l3 11"/><path d="M15 3l2 7-3 11"/>',
+          'arm': '<path d="M7 7a5 5 0 0 1 10 0"/><path d="M6 12h12"/><path d="M8 12v6h8v-6"/>',
+          'skate': '<path d="M4 14h10l3-4h3"/><path d="M4 14v3h16"/><path d="M8 10v4"/>',
+          'chest': '<path d="M9 3l3 2 3-2 4 5-2 14H7L5 8z"/>'
+        };
+
+        const checkSvg = isChecked
+          ? '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" fill="' + itemColor + '"/><path d="M8 12l3 3 5-5" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+          : '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="#D1D5DB" stroke-width="1.5"/></svg>';
+
+        var iconHtml = '';
+        if (iconKey && iconMap[iconKey]) {
+          var hex = itemColor.replace('#', '');
+          var r = parseInt(hex.substr(0,2), 16);
+          var g = parseInt(hex.substr(2,2), 16);
+          var b = parseInt(hex.substr(4,2), 16);
+          var tileBg = 'rgba(' + r + ',' + g + ',' + b + ',' + (isChecked ? '0.06' : '0.12') + ')';
+          var iconStroke = isChecked ? '#C0C4CC' : itemColor;
+          iconHtml = '<div style="width:36px;height:36px;border-radius:9px;background:' + tileBg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + iconStroke + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + iconMap[iconKey] + '</svg></div>';
+        }
+
+        const textStyle = isChecked ? 'color:#9CA3AF;text-decoration:line-through' : 'color:#1F2937';
+
+        return '<div style="display:flex;align-items:center;gap:12px;width:100%;cursor:pointer">' + checkSvg + iconHtml + '<span style="font-size:15px;font-weight:500;' + textStyle + '">' + itemName + '</span></div>';
+      ]]]

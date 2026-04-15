@@ -1,0 +1,102 @@
+# Scene bar — 5 chips, included at bottom of every view
+type: custom:layout-card
+layout_type: custom:grid-layout
+layout:
+  grid-template-columns: 1fr repeat(5, auto) 1fr
+  grid-gap: 10px
+  justify-content: start
+  padding: 0 24px
+  margin: 0
+card_mod:
+  style: |
+    ha-card {
+      background: #F5F3F0 !important;
+      border-top: 1px solid #E5E0DA !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+cards:
+  # Left spacer (absorbs space to center chips)
+  - type: custom:button-card
+    tap_action:
+      action: none
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 0
+        - margin: 0
+        - height: 0
+        - min-height: 0
+        - overflow: hidden
+
+  - type: custom:button-card
+    template: ct_scene_chip
+    variables:
+      chip_icon: moon
+      chip_label: Relax
+    tap_action:
+      action: call-service
+      service: script.ct_activate_scene
+      service_data:
+        scene_name: Relax
+
+  - type: custom:button-card
+    template: ct_scene_chip
+    variables:
+      chip_icon: lightbulb-off
+      chip_label: All Off
+    tap_action:
+      action: call-service
+      service: script.ct_activate_scene
+      service_data:
+        scene_name: All Off
+
+  - type: custom:button-card
+    template: ct_scene_chip
+    variables:
+      chip_icon: sun
+      chip_label: Bright
+    tap_action:
+      action: call-service
+      service: script.ct_activate_scene
+      service_data:
+        scene_name: Bright
+
+  - type: custom:button-card
+    template: ct_scene_chip
+    variables:
+      chip_icon: sunrise
+      chip_label: Morning
+    tap_action:
+      action: call-service
+      service: script.ct_activate_scene
+      service_data:
+        scene_name: Morning
+
+  - type: custom:button-card
+    template: ct_scene_chip
+    variables:
+      chip_icon: moon-star
+      chip_label: Good Night
+    tap_action:
+      action: call-service
+      service: script.ct_activate_scene
+      service_data:
+        scene_name: Good Night
+
+  # Right spacer (absorbs space to center chips)
+  - type: custom:button-card
+    tap_action:
+      action: none
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 0
+        - margin: 0
+        - height: 0
+        - min-height: 0
+        - overflow: hidden

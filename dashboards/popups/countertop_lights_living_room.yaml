@@ -1,0 +1,109 @@
+type: vertical-stack
+card_mod:
+  style: |
+    ha-card {
+      border: none !important;
+      box-shadow: none !important;
+      background: none !important;
+    }
+cards:
+  # ── Header ──
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    triggers_update:
+      - light.living_room_color
+      - light.extended_color_light_1
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 0 0 14px
+        - border-bottom: 1px solid #F3F4F6
+      grid:
+        - grid-template-areas: '"hdr_icon hdr_info"'
+        - grid-template-columns: auto 1fr
+        - column-gap: 14px
+      custom_fields:
+        hdr_icon:
+          - align-self: center
+        hdr_info:
+          - align-self: center
+    custom_fields:
+      hdr_icon: |
+        [[[
+          return '<div style="width:44px;height:44px;border-radius:11px;background:rgba(74,124,89,0.14);display:flex;align-items:center;justify-content:center;">'
+            + '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/><path d="M4 18v2"/><path d="M20 18v2"/></svg>'
+            + '</div>';
+        ]]]
+      hdr_info: |
+        [[[
+          var ct = ['light.living_room_color','light.extended_color_light_1'];
+          var on = 0;
+          for (var i = 0; i < ct.length; i++) { if (states[ct[i]] && states[ct[i]].state === 'on') on++; }
+          var sub = on === 0 ? 'All off' : on + ' of ' + ct.length + ' on';
+          return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937;">Living Room</div>'
+            + '<div style="font-size:13px;color:#9CA3AF;margin-top:1px;">' + sub + '</div>';
+        ]]]
+
+  # ── Lights ──
+  - type: custom:mushroom-light-card
+    entity: light.living_room_color
+    name: Main Light
+    show_brightness_control: true
+    use_light_color: false
+    layout: horizontal
+    card_mod:
+      style: |
+        ha-card {
+          --mushroom-accent-color: #D97706;
+          background: none; border: none; box-shadow: none;
+          border-bottom: 1px solid #F3F4F6; border-radius: 0;
+        }
+
+  - type: custom:mushroom-light-card
+    entity: light.extended_color_light_1
+    name: LED Strip
+    show_brightness_control: true
+    use_light_color: false
+    layout: horizontal
+    card_mod:
+      style: |
+        ha-card {
+          --mushroom-accent-color: #D97706;
+          background: none; border: none; box-shadow: none;
+          border-radius: 0;
+        }
+
+  # ── Info ──
+  - type: custom:button-card
+    entity: sensor.living_room_temp_temperature
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 4px 0 0
+      grid:
+        - grid-template-areas: '"info_row"'
+        - grid-template-columns: 1fr
+    custom_fields:
+      info_row: |
+        [[[
+          var ts = states['sensor.living_room_temp_temperature'];
+          var temp = ts && ts.state !== 'unavailable' ? parseFloat(ts.state).toFixed(1) : '--';
+          return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;">'
+            + '<div style="width:8px;height:8px;border-radius:50%;background:#9CA3AF;flex-shrink:0;"></div>'
+            + '<span style="font-size:14px;color:#6B7280;flex:1;">Temperature</span>'
+            + '<span style="font-size:14px;font-weight:600;color:#1F2937;font-variant-numeric:tabular-nums;">' + temp + '\u00B0F</span>'
+            + '</div>';
+        ]]]

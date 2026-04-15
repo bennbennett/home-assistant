@@ -1,0 +1,813 @@
+##############################################################################
+#  The Countertop — Toby's Corner (Stage 4)                                 #
+#  Checklist cards (School, Swimming) + I'm Bored randomizer               #
+##############################################################################
+title: "Toby's Corner"
+path: toby
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 1fr
+      grid-template-rows: auto 1fr auto
+      height: 100vh
+      margin: 0
+      padding: 0
+    card_mod:
+      style: |
+        ha-card {
+          background: #fbfaf9 !important;
+        }
+    cards:
+      # ═══ ROW 1: Subview header (pinned top) ═══
+      - type: custom:button-card
+        view_layout:
+          grid-row: 1
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: navigate
+          navigation_path: /the-countertop/home
+        card_mod:
+          style: |
+            ha-card:active { opacity: 0.7; }
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - padding: 16px 24px 12px
+          grid:
+            - grid-template-areas: '"sv_hdr"'
+            - grid-template-columns: 1fr
+          custom_fields:
+            sv_hdr:
+              - display: flex
+              - align-items: center
+              - gap: 14px
+        custom_fields:
+          sv_hdr: |
+            [[[
+              return `<div style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              </div>
+              <div style="font-family: 'Fraunces', Georgia, serif; font-size: 26px; font-weight: 400; color: #1F2937;">Toby's Corner</div>`;
+            ]]]
+
+      # ═══ ROW 2: Content (vertically centered in remaining space) ═══
+      - type: vertical-stack
+        view_layout:
+          grid-row: 2
+        cards:
+
+          # ── CHECKLISTS label + MANAGE button (same line) ──
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: ""
+                  size: narrow
+                  popup_styles:
+                    - style: all
+                      styles: |
+                        ha-dialog {
+                          --ha-dialog-border-radius: 24px;
+                        }
+                        ha-dialog-header {
+                          display: none;
+                        }
+                  content:
+                    type: vertical-stack
+                    card_mod:
+                      style: |
+                        ha-card {
+                          border: none !important;
+                          box-shadow: none !important;
+                          background: none !important;
+                        }
+                    cards:
+                      - type: custom:button-card
+                        show_icon: false
+                        show_name: false
+                        show_state: false
+                        tap_action:
+                          action: none
+                        styles:
+                          card:
+                            - background: none
+                            - border: none
+                            - box-shadow: none
+                            - padding: 4px 0 10px
+                          grid:
+                            - grid-template-areas: '"title close"'
+                            - grid-template-columns: 1fr auto
+                          custom_fields:
+                            title:
+                              - text-align: left
+                              - align-self: center
+                            close:
+                              - justify-self: end
+                              - align-self: center
+                        custom_fields:
+                          title: |
+                            [[[
+                              return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937;">Manage Checklists</div>';
+                            ]]]
+                          close: |
+                            [[[
+                              return '<div onclick="(function(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();function f(n){for(var c of n.children||[]){if(c.tagName===\'WA-DIALOG\')return c;var r=f(c)||(c.shadowRoot&&f(c.shadowRoot));if(r)return r;}return null;}var d=f(document);if(d&&d.requestClose)d.requestClose(\'close\');})(event)" '
+                                + 'onmousedown="(function(e){e.stopPropagation();})(event)" '
+                                + 'ontouchstart="(function(e){e.stopPropagation();})(event)" '
+                                + 'style="width:30px;height:30px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#6B7280;pointer-events:auto;">'
+                                + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>'
+                                + '</div>';
+                            ]]]
+                      - type: entities
+                        entities:
+                          - entity: input_boolean.season_school
+                            name: School
+                            icon: mdi:book-open-variant
+                          - entity: input_boolean.season_swimming
+                            name: Swimming
+                            icon: mdi:swim
+                          - entity: input_boolean.season_hockey
+                            name: Hockey
+                            icon: mdi:hockey-sticks
+                        card_mod:
+                          style: |
+                            ha-card {
+                              border: none !important;
+                              box-shadow: none !important;
+                              background: white !important;
+                              border-radius: 18px !important;
+                            }
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 0 24px 8px
+              grid:
+                - grid-template-areas: '"cl_hdr"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                cl_hdr:
+                  - display: flex
+                  - align-items: center
+                  - gap: 12px
+            custom_fields:
+              cl_hdr: |
+                [[[
+                  return '<span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#9CA3AF">Checklists</span><span style="font-size:12px;font-weight:600;color:#4A7C59;cursor:pointer">Manage</span>';
+                ]]]
+
+          # ── Checklist Cards ──
+          - type: custom:layout-card
+            layout_type: custom:grid-layout
+            layout:
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))
+              grid-gap: 16px
+              padding: 0 24px
+              margin: 0
+            cards:
+              # School
+              - type: conditional
+                conditions:
+                  - entity: input_boolean.season_school
+                    state: "on"
+                card:
+                  type: custom:button-card
+                  template: ct_checklist_card
+                  variables:
+                    checklist_name: School
+                    checklist_icon: book
+                    checklist_color: '#4A7C59'
+                    checklist_items: "input_boolean.school_snack,input_boolean.school_lunch,input_boolean.school_water,input_boolean.school_jacket,input_boolean.school_binder,input_boolean.school_chromebook,input_boolean.school_homework"
+                  tap_action:
+                    action: fire-dom-event
+                    browser_mod:
+                      service: browser_mod.popup
+                      data:
+                        title: ""
+                        size: narrow
+                        popup_styles:
+                          - style: all
+                            styles: |
+                              ha-dialog {
+                                --ha-dialog-border-radius: 24px;
+                              }
+                              ha-dialog-header {
+                                display: none;
+                              }
+                        content:
+                          type: vertical-stack
+                          card_mod:
+                            style: |
+                              ha-card { border: none !important; box-shadow: none !important; background: none !important; }
+                          cards:
+                            - type: custom:button-card
+                              show_icon: false
+                              show_name: false
+                              show_state: false
+                              tap_action:
+                                action: none
+                              styles:
+                                card:
+                                  - background: none
+                                  - border: none
+                                  - box-shadow: none
+                                  - padding: 4px 0 4px
+                                grid:
+                                  - grid-template-areas: '"t close"'
+                                  - grid-template-columns: 1fr auto
+                                custom_fields:
+                                  t:
+                                    - text-align: left
+                                    - align-self: center
+                                  close:
+                                    - justify-self: end
+                                    - align-self: center
+                              custom_fields:
+                                t: |
+                                  [[[
+                                    return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937">School Checklist</div>';
+                                  ]]]
+                                close: |
+                                  [[[
+                                    return '<div onclick="(function(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();function f(n){for(var c of n.children||[]){if(c.tagName===\'WA-DIALOG\')return c;var r=f(c)||(c.shadowRoot&&f(c.shadowRoot));if(r)return r;}return null;}var d=f(document);if(d&&d.requestClose)d.requestClose(\'close\');})(event)" '
+                                      + 'onmousedown="(function(e){e.stopPropagation();})(event)" '
+                                      + 'ontouchstart="(function(e){e.stopPropagation();})(event)" '
+                                      + 'style="width:30px;height:30px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#6B7280;pointer-events:auto;">'
+                                      + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>'
+                                      + '</div>';
+                                  ]]]
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.school_snack
+                              variables:
+                                item_name: Snack
+                                item_icon: apple
+                                item_color: '#4A7C59'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.school_lunch
+                              variables:
+                                item_name: Lunch
+                                item_icon: lunch
+                                item_color: '#4A7C59'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.school_water
+                              variables:
+                                item_name: Water bottle
+                                item_icon: water
+                                item_color: '#4A7C59'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.school_jacket
+                              variables:
+                                item_name: Jacket
+                                item_icon: jacket
+                                item_color: '#4A7C59'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.school_binder
+                              variables:
+                                item_name: Binder
+                                item_icon: notebook
+                                item_color: '#4A7C59'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.school_chromebook
+                              variables:
+                                item_name: Chromebook
+                                item_icon: laptop
+                                item_color: '#4A7C59'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.school_homework
+                              variables:
+                                item_name: Homework
+                                item_icon: pencil
+                                item_color: '#4A7C59'
+
+              # Swimming
+              - type: conditional
+                conditions:
+                  - entity: input_boolean.season_swimming
+                    state: "on"
+                card:
+                  type: custom:button-card
+                  template: ct_checklist_card
+                  variables:
+                    checklist_name: Swimming
+                    checklist_icon: waves
+                    checklist_color: '#3B82F6'
+                    checklist_items: "input_boolean.swimming_bag,input_boolean.swimming_shirt,input_boolean.swimming_trunks,input_boolean.swimming_goggles,input_boolean.swimming_towel,input_boolean.swimming_sunscreen,input_boolean.swimming_wet_bag,input_boolean.swimming_underwear,input_boolean.swimming_shirt_change,input_boolean.swimming_shorts,input_boolean.swimming_water,input_boolean.swimming_snack"
+                  tap_action:
+                    action: fire-dom-event
+                    browser_mod:
+                      service: browser_mod.popup
+                      data:
+                        title: ""
+                        size: narrow
+                        popup_styles:
+                          - style: all
+                            styles: |
+                              ha-dialog {
+                                --ha-dialog-border-radius: 24px;
+                              }
+                              ha-dialog-header {
+                                display: none;
+                              }
+                        content:
+                          type: vertical-stack
+                          card_mod:
+                            style: |
+                              ha-card { border: none !important; box-shadow: none !important; background: none !important; }
+                          cards:
+                            - type: custom:button-card
+                              show_icon: false
+                              show_name: false
+                              show_state: false
+                              tap_action:
+                                action: none
+                              styles:
+                                card:
+                                  - background: none
+                                  - border: none
+                                  - box-shadow: none
+                                  - padding: 4px 0 4px
+                                grid:
+                                  - grid-template-areas: '"t close"'
+                                  - grid-template-columns: 1fr auto
+                                custom_fields:
+                                  t:
+                                    - text-align: left
+                                    - align-self: center
+                                  close:
+                                    - justify-self: end
+                                    - align-self: center
+                              custom_fields:
+                                t: |
+                                  [[[
+                                    return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937">Swimming Checklist</div>';
+                                  ]]]
+                                close: |
+                                  [[[
+                                    return '<div onclick="(function(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();function f(n){for(var c of n.children||[]){if(c.tagName===\'WA-DIALOG\')return c;var r=f(c)||(c.shadowRoot&&f(c.shadowRoot));if(r)return r;}return null;}var d=f(document);if(d&&d.requestClose)d.requestClose(\'close\');})(event)" '
+                                      + 'onmousedown="(function(e){e.stopPropagation();})(event)" '
+                                      + 'ontouchstart="(function(e){e.stopPropagation();})(event)" '
+                                      + 'style="width:30px;height:30px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#6B7280;pointer-events:auto;">'
+                                      + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>'
+                                      + '</div>';
+                                  ]]]
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.swimming_bag
+                              variables:
+                                item_name: Swim bag
+                                item_icon: bag
+                                item_color: '#3B82F6'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.swimming_shirt
+                              variables:
+                                item_name: Swim shirt
+                                item_icon: shirt
+                                item_color: '#3B82F6'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.swimming_trunks
+                              variables:
+                                item_name: Swim trunks
+                                item_icon: swim
+                                item_color: '#3B82F6'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.swimming_goggles
+                              variables:
+                                item_name: Goggles
+                                item_icon: goggles
+                                item_color: '#3B82F6'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.swimming_towel
+                              variables:
+                                item_name: Towel
+                                item_icon: towel
+                                item_color: '#3B82F6'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.swimming_sunscreen
+                              variables:
+                                item_name: Sunscreen
+                                item_icon: sun
+                                item_color: '#3B82F6'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.swimming_wet_bag
+                              variables:
+                                item_name: Wet clothes bag
+                                item_icon: droplet
+                                item_color: '#3B82F6'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.swimming_underwear
+                              variables:
+                                item_name: Underwear
+                                item_icon: shirt
+                                item_color: '#3B82F6'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.swimming_shirt_change
+                              variables:
+                                item_name: Shirt (change)
+                                item_icon: shirt
+                                item_color: '#3B82F6'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.swimming_shorts
+                              variables:
+                                item_name: Shorts
+                                item_icon: shorts
+                                item_color: '#3B82F6'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.swimming_water
+                              variables:
+                                item_name: Water bottle
+                                item_icon: water
+                                item_color: '#3B82F6'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.swimming_snack
+                              variables:
+                                item_name: Snack
+                                item_icon: apple
+                                item_color: '#3B82F6'
+
+              # Hockey
+              - type: conditional
+                conditions:
+                  - entity: input_boolean.season_hockey
+                    state: "on"
+                card:
+                  type: custom:button-card
+                  template: ct_checklist_card
+                  variables:
+                    checklist_name: Hockey
+                    checklist_icon: hockey
+                    checklist_color: '#4F46E5'
+                    checklist_items: "input_boolean.hockey_1,input_boolean.hockey_2,input_boolean.hockey_3,input_boolean.hockey_4,input_boolean.hockey_5,input_boolean.hockey_6,input_boolean.hockey_jersey,input_boolean.hockey_7,input_boolean.hockey_8"
+                  tap_action:
+                    action: fire-dom-event
+                    browser_mod:
+                      service: browser_mod.popup
+                      data:
+                        title: ""
+                        size: narrow
+                        popup_styles:
+                          - style: all
+                            styles: |
+                              ha-dialog {
+                                --ha-dialog-border-radius: 24px;
+                              }
+                              ha-dialog-header {
+                                display: none;
+                              }
+                        content:
+                          type: vertical-stack
+                          card_mod:
+                            style: |
+                              ha-card { border: none !important; box-shadow: none !important; background: none !important; }
+                          cards:
+                            - type: custom:button-card
+                              show_icon: false
+                              show_name: false
+                              show_state: false
+                              tap_action:
+                                action: none
+                              styles:
+                                card:
+                                  - background: none
+                                  - border: none
+                                  - box-shadow: none
+                                  - padding: 4px 0 4px
+                                grid:
+                                  - grid-template-areas: '"t close"'
+                                  - grid-template-columns: 1fr auto
+                                custom_fields:
+                                  t:
+                                    - text-align: left
+                                    - align-self: center
+                                  close:
+                                    - justify-self: end
+                                    - align-self: center
+                              custom_fields:
+                                t: |
+                                  [[[
+                                    return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937">Hockey Checklist</div>';
+                                  ]]]
+                                close: |
+                                  [[[
+                                    return '<div onclick="(function(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();function f(n){for(var c of n.children||[]){if(c.tagName===\'WA-DIALOG\')return c;var r=f(c)||(c.shadowRoot&&f(c.shadowRoot));if(r)return r;}return null;}var d=f(document);if(d&&d.requestClose)d.requestClose(\'close\');})(event)" '
+                                      + 'onmousedown="(function(e){e.stopPropagation();})(event)" '
+                                      + 'ontouchstart="(function(e){e.stopPropagation();})(event)" '
+                                      + 'style="width:30px;height:30px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#6B7280;pointer-events:auto;">'
+                                      + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>'
+                                      + '</div>';
+                                  ]]]
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.hockey_1
+                              variables:
+                                item_name: Helmet
+                                item_icon: helmet
+                                item_color: '#4F46E5'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.hockey_2
+                              variables:
+                                item_name: Stick
+                                item_icon: stick
+                                item_color: '#4F46E5'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.hockey_3
+                              variables:
+                                item_name: Shinguards
+                                item_icon: guard
+                                item_color: '#4F46E5'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.hockey_4
+                              variables:
+                                item_name: Elbow Pads
+                                item_icon: arm
+                                item_color: '#4F46E5'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.hockey_5
+                              variables:
+                                item_name: Skates
+                                item_icon: skate
+                                item_color: '#4F46E5'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.hockey_6
+                              variables:
+                                item_name: Chestplate
+                                item_icon: chest
+                                item_color: '#4F46E5'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.hockey_jersey
+                              variables:
+                                item_name: Jersey
+                                item_icon: shirt
+                                item_color: '#4F46E5'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.hockey_7
+                              variables:
+                                item_name: Water
+                                item_icon: water
+                                item_color: '#4F46E5'
+                            - type: custom:button-card
+                              template: ct_checklist_item
+                              entity: input_boolean.hockey_8
+                              variables:
+                                item_name: Snack
+                                item_icon: apple
+                                item_color: '#4F46E5'
+
+              - type: conditional
+                conditions:
+                  - entity: input_boolean.season_school
+                    state: "off"
+                  - entity: input_boolean.season_swimming
+                    state: "off"
+                  - entity: input_boolean.season_hockey
+                    state: "off"
+                card:
+                  type: custom:button-card
+                  show_icon: false
+                  show_name: false
+                  show_state: false
+                  tap_action:
+                    action: none
+                  styles:
+                    card:
+                      - background: white
+                      - border-radius: 18px
+                      - border: '1px solid #E8E4DE'
+                      - box-shadow: '0 1px 3px rgba(0,0,0,0.06)'
+                      - padding: 28px 22px
+                    grid:
+                      - grid-template-areas: '"empty"'
+                    custom_fields:
+                      empty:
+                        - width: 100%
+                  custom_fields:
+                    empty: |
+                      [[[
+                        return '<div style="text-align:center;"><div style="font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:400;color:#1F2937;margin-bottom:8px;">Nothing to pack right now</div><div style="font-size:15px;line-height:1.45;color:#6B7280;">Use Manage to turn on School, Swimming, or Hockey when Toby needs a checklist.</div></div>';
+                      ]]]
+
+          # ── I'M BORED label ──
+          - type: custom:button-card
+            show_icon: false
+            show_name: true
+            show_state: false
+            name: "I'M BORED"
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 16px 24px 8px
+              name:
+                - font-size: 12px
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.8px
+                - color: '#9CA3AF'
+                - justify-self: start
+
+          # ── I'm Bored: single unified card ──
+          - type: custom:vertical-stack-in-card
+            card_mod:
+              style: |
+                ha-card {
+                  background: white !important;
+                  border-radius: 16px !important;
+                  border: 1px solid #E8E4DE !important;
+                  box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+                  margin: 0 24px !important;
+                  overflow: hidden !important;
+                }
+            cards:
+              # Pick Something! button + result
+              - type: custom:button-card
+                entity: input_text.toby_activity_result
+                triggers_update:
+                  - input_text.toby_activity_result
+                  - input_select.toby_activity_selector
+                show_icon: false
+                show_name: false
+                show_state: false
+                tap_action:
+                  action: call-service
+                  service: script.toby_random_activity
+                card_mod:
+                  style: |
+                    ha-card:active { transform: scale(0.98) !important; }
+                styles:
+                  card:
+                    - background: none
+                    - border: none
+                    - box-shadow: none
+                    - padding: 28px 28px 16px
+                    - text-align: center
+                    - cursor: pointer
+                  grid:
+                    - grid-template-areas: '"bored"'
+                    - grid-template-columns: 1fr
+                  custom_fields:
+                    bored:
+                      - width: 100%
+                custom_fields:
+                  bored: |
+                    [[[
+                      const result = entity.state || '';
+                      const hasResult = result && result !== 'Click the button to pick an activity!';
+
+                      var resultHtml = '';
+                      if (hasResult) {
+                        resultHtml = '<div style="font-family: Fraunces, Georgia, serif; font-size: 26px; font-weight: 400; color: #1F2937; margin-bottom: 16px;">' + result + '</div>';
+                      }
+
+                      const spinSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"/><path d="M2.5 22v-6h6"/><path d="M2 11.5a10 10 0 0 1 18.8-4.3"/><path d="M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>';
+
+                      return resultHtml +
+                        '<div style="display:inline-flex;align-items:center;gap:10px;padding:12px 28px;border-radius:14px;background:#C87456;color:white;font-family:Fraunces,Georgia,serif;font-size:18px;font-weight:500">' + spinSvg + ' Pick Something!</div>';
+                    ]]]
+
+              # Add Activity Row (input + Add)
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: minmax(0, 1fr) auto
+                  grid-gap: 10px
+                  padding: 0 16px 12px
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: none !important;
+                      border: none !important;
+                      box-shadow: none !important;
+                    }
+                cards:
+                  - type: entities
+                    show_header_toggle: false
+                    entities:
+                      - entity: input_text.toby_new_activity
+                        name: ""
+                    card_mod:
+                      style:
+                        .: |
+                          ha-card {
+                            background: none !important;
+                            border: none !important;
+                            box-shadow: none !important;
+                            --mdc-text-field-fill-color: white;
+                            --mdc-text-field-idle-line-color: transparent;
+                            --mdc-text-field-hover-line-color: transparent;
+                            --mdc-shape-small: 12px;
+                            --mdc-text-field-outlined-idle-border-color: #E8E4DE;
+                            --mdc-text-field-outlined-hover-border-color: #C87456;
+                            --mdc-text-field-focused-outline-color: #C87456;
+                            --mdc-text-field-ink-color: #1F2937;
+                            --mdc-text-field-label-ink-color: transparent;
+                            --mdc-typography-subtitle1-font-size: 15px;
+                          }
+                          #states {
+                            padding: 0 !important;
+                            border: none !important;
+                          }
+                          #states > * {
+                            border-bottom: none !important;
+                            box-shadow: none !important;
+                          }
+                        hui-input-text-entity-row:
+                          $:
+                            hui-generic-entity-row:
+                              $: |
+                                state-badge { display: none !important; }
+                                .info.pointer { display: none !important; }
+                                .row { grid-template-columns: 0 0 1fr !important; gap: 0 !important; }
+
+                  - type: custom:button-card
+                    name: Add
+                    show_icon: false
+                    tap_action:
+                      action: call-service
+                      service: script.toby_add_activity
+                    styles:
+                      card:
+                        - height: 42px
+                        - padding: 0 20px
+                        - border: none
+                        - border-radius: 12px
+                        - background: '#4A7C59'
+                        - box-shadow: none
+                      name:
+                        - color: white
+                        - font-size: 15px
+                        - font-weight: 600
+
+              # Activity pills
+              - type: custom:button-card
+                show_icon: false
+                show_name: false
+                show_state: false
+                tap_action:
+                  action: none
+                triggers_update:
+                  - input_select.toby_activity_selector
+                styles:
+                  card:
+                    - background: none
+                    - border: none
+                    - box-shadow: none
+                    - padding: 4px 28px 20px
+                    - text-align: center
+                  grid:
+                    - grid-template-areas: '"pills"'
+                  custom_fields:
+                    pills:
+                      - width: 100%
+                custom_fields:
+                  pills: |
+                    [[[
+                      const actSensor = states['input_select.toby_activity_selector'];
+                      const activities = actSensor && actSensor.attributes && actSensor.attributes.options ? actSensor.attributes.options : ['RC Cars', 'Read a Book', 'Build Lego', 'Board Games', 'Make a Movie', 'Marbles', 'Toy Cars', 'Draw'];
+                      var tags = '';
+                      for (var i = 0; i < activities.length; i++) {
+                        tags += '<span style="font-size:13px;color:#6B7280;background:#F9FAFB;padding:4px 10px;border-radius:8px;border:1px solid #F3F4F6">' + activities[i] + '</span>';
+                      }
+                      return '<div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center">' + tags + '</div>';
+                    ]]]
+
+      # ═══ ROW 3: Scene bar (pinned bottom) ═══
+      - !include ../scene_bar.yaml

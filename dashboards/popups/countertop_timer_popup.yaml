@@ -1,0 +1,309 @@
+type: vertical-stack
+card_mod:
+  style: |
+    ha-card {
+      border: none !important;
+      box-shadow: none !important;
+      background: none !important;
+    }
+cards:
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 4px 0 6px
+      grid:
+        - grid-template-areas: '"title"'
+      custom_fields:
+        title:
+          - text-align: left
+    custom_fields:
+      title: |
+        [[[
+          return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937;">Timer</div>';
+        ]]]
+
+  - type: custom:simple-timer-card
+    layout: vertical
+    style: circle
+    progress_mode: drain
+    show_timer_presets: false
+    show_active_header: false
+    time_format: hms
+    entities:
+      - entity: timer.kitchen_timer
+        mode: timer
+        keep_timer_visible_when_idle: true
+        hide_timer_actions: true
+        color: '#C87456'
+    card_mod:
+      style: |
+        ha-card {
+          background: none !important;
+          border: none !important;
+          box-shadow: none !important;
+          padding: 10px 0 8px !important;
+        }
+        .vtile {
+          min-height: 220px !important;
+          padding: 0 !important;
+        }
+        .vcol {
+          position: relative !important;
+          min-height: 200px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        .vcircle-wrap {
+          position: relative !important;
+          width: 180px !important;
+          height: 180px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          z-index: 0 !important;
+        }
+        /* Keep SVG at its intrinsic 64x64 coords — scale visually via transform
+           so the card's JS-computed stroke-dasharray (calibrated to r=28) still
+           matches the actual rendered circumference. */
+        .vcircle-wrap svg {
+          width: 64px !important;
+          height: 64px !important;
+          zoom: 2.8 !important;
+        }
+        .vcircle-wrap svg circle.vc-track {
+          stroke: #F3DDD0 !important;
+          stroke-opacity: 1 !important;
+          stroke-width: 1.4 !important;
+        }
+        .vcircle-wrap svg circle.vc-prog {
+          stroke: #C87456 !important;
+          stroke-opacity: 1 !important;
+          stroke-width: 1.4 !important;
+        }
+        .vtitle, .icon-wrap, .icon-wrap.xl {
+          display: none !important;
+        }
+        .vstatus {
+          position: absolute !important;
+          top: 50% !important;
+          left: 50% !important;
+          transform: translate(-50%, -50%) !important;
+          font-family: Fraunces, Georgia, serif !important;
+          font-size: 34px !important;
+          font-weight: 500 !important;
+          color: #1F2937 !important;
+          letter-spacing: normal !important;
+          text-transform: none !important;
+          line-height: 1 !important;
+          margin: 0 !important;
+          z-index: 1 !important;
+          font-variant-numeric: tabular-nums !important;
+          white-space: nowrap !important;
+        }
+
+  # ── Preset row 1: 5m 10m 15m 20m 30m ──
+  - type: grid
+    columns: 5
+    square: false
+    card_mod:
+      style: |
+        ha-card {
+          background: none !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+    cards:
+      - type: custom:button-card
+        name: "5m"
+        show_icon: false
+        tap_action:
+          action: call-service
+          service: timer.start
+          service_data:
+            entity_id: timer.kitchen_timer
+            duration: "00:05:00"
+        styles:
+          card:
+            - height: 40px
+            - border-radius: 10px
+            - border: 1px solid #E5E7EB
+            - background: white
+            - box-shadow: none
+            - padding: 0
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#374151'
+      - type: custom:button-card
+        name: "10m"
+        show_icon: false
+        tap_action:
+          action: call-service
+          service: timer.start
+          service_data:
+            entity_id: timer.kitchen_timer
+            duration: "00:10:00"
+        styles:
+          card:
+            - height: 40px
+            - border-radius: 10px
+            - border: 1px solid #E5E7EB
+            - background: white
+            - box-shadow: none
+            - padding: 0
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#374151'
+      - type: custom:button-card
+        name: "15m"
+        show_icon: false
+        tap_action:
+          action: call-service
+          service: timer.start
+          service_data:
+            entity_id: timer.kitchen_timer
+            duration: "00:15:00"
+        styles:
+          card:
+            - height: 40px
+            - border-radius: 10px
+            - border: 1px solid #E5E7EB
+            - background: white
+            - box-shadow: none
+            - padding: 0
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#374151'
+      - type: custom:button-card
+        name: "20m"
+        show_icon: false
+        tap_action:
+          action: call-service
+          service: timer.start
+          service_data:
+            entity_id: timer.kitchen_timer
+            duration: "00:20:00"
+        styles:
+          card:
+            - height: 40px
+            - border-radius: 10px
+            - border: 1px solid #E5E7EB
+            - background: white
+            - box-shadow: none
+            - padding: 0
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#374151'
+      - type: custom:button-card
+        name: "30m"
+        show_icon: false
+        tap_action:
+          action: call-service
+          service: timer.start
+          service_data:
+            entity_id: timer.kitchen_timer
+            duration: "00:30:00"
+        styles:
+          card:
+            - height: 40px
+            - border-radius: 10px
+            - border: 1px solid #E5E7EB
+            - background: white
+            - box-shadow: none
+            - padding: 0
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#374151'
+
+  # ── Preset row 2: 45m centered ──
+  - type: custom:button-card
+    name: "45m"
+    show_icon: false
+    tap_action:
+      action: call-service
+      service: timer.start
+      service_data:
+        entity_id: timer.kitchen_timer
+        duration: "00:45:00"
+    styles:
+      card:
+        - height: 40px
+        - border-radius: 10px
+        - border: 1px solid #E5E7EB
+        - background: white
+        - box-shadow: none
+        - padding: 0
+        - max-width: 64px
+        - margin: 4px auto 0
+      name:
+        - font-size: 14px
+        - font-weight: 600
+        - color: '#374151'
+
+  - type: conditional
+    conditions:
+      - entity: timer.kitchen_timer
+        state_not: idle
+    card:
+      type: horizontal-stack
+      cards:
+        - type: custom:button-card
+          entity: timer.kitchen_timer
+          show_icon: false
+          name: |
+            [[[
+              return entity && entity.state === 'paused' ? 'Resume' : 'Pause';
+            ]]]
+          tap_action:
+            action: call-service
+            service: |
+              [[[
+                return entity && entity.state === 'paused' ? 'timer.start' : 'timer.pause';
+              ]]]
+            service_data:
+              entity_id: timer.kitchen_timer
+          styles:
+            card:
+              - height: 44px
+              - border-radius: 11px
+              - background: '#F3F4F6'
+              - border: none
+              - box-shadow: none
+              - margin-top: 12px
+            name:
+              - font-size: 15px
+              - font-weight: 600
+              - color: '#374151'
+        - type: custom:button-card
+          name: Cancel
+          show_icon: false
+          tap_action:
+            action: call-service
+            service: timer.cancel
+            service_data:
+              entity_id: timer.kitchen_timer
+          styles:
+            card:
+              - height: 44px
+              - border-radius: 11px
+              - background: '#FFF6F1'
+              - border: none
+              - box-shadow: none
+              - margin-top: 12px
+            name:
+              - font-size: 15px
+              - font-weight: 600
+              - color: '#C87456'

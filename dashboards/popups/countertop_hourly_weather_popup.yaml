@@ -1,0 +1,65 @@
+type: vertical-stack
+card_mod:
+  style: |
+    ha-card {
+      border: none !important;
+      box-shadow: none !important;
+      background: none !important;
+    }
+cards:
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 2px 0 10px
+      grid:
+        - grid-template-areas: '"title"'
+      custom_fields:
+        title:
+          - text-align: left
+    custom_fields:
+      title: |
+        [[[
+          return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937;">Hourly Forecast</div>';
+        ]]]
+
+  - type: custom:hourly-weather
+    entity: weather.pirateweather
+    name: ""
+    num_segments: 12
+    icons: true
+    show_date: false
+    show_wind: false
+    show_precipitation_amounts: false
+    show_precipitation_probability: true
+    card_mod:
+      style: |
+        ha-card {
+          background: white;
+          border-radius: 18px;
+          border: 1px solid #F3F4F6;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          padding: 12px 20px 16px 20px;
+        }
+        weather-bar {
+          --color-clear-night: #3D3654 !important;
+          --color-cloudy: #B6B0A2 !important;
+          --color-partlycloudy: #C6D8E8 !important;
+          --color-sunny: #F5C57F !important;
+          --color-clear-night-foreground: #FBFAF9 !important;
+          --color-cloudy-foreground: #1F2937 !important;
+          --color-partlycloudy-foreground: #1F2937 !important;
+          --color-sunny-foreground: #1F2937 !important;
+        }
+        .card-header,
+        ha-card > .card-header,
+        ha-card > h1 {
+          display: none !important;
+        }

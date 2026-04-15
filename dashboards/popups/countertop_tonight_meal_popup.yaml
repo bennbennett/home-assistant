@@ -1,0 +1,363 @@
+type: vertical-stack
+card_mod:
+  style: |
+    ha-card {
+      border: none !important;
+      box-shadow: none !important;
+      background: none !important;
+    }
+cards:
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 4px 4px 0 4px
+      grid:
+        - grid-template-areas: '"title"'
+      custom_fields:
+        title:
+          - text-align: left
+    custom_fields:
+      title: |
+        [[[
+          return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937;line-height:1.15;">What&#39;s for dinner?</div>';
+        ]]]
+
+  - type: custom:button-card
+    entity: sensor.mealie_weekly_meal_plan
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    triggers_update:
+      - sensor.mealie_weekly_meal_plan
+    styles:
+      card:
+        - background: white
+        - border-radius: 18px
+        - border: |
+            [[[
+              const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
+              const todayIso = new Date().toISOString().split('T')[0];
+              const tonight = meals.find((meal) => meal && meal.date === todayIso && meal.recipe_name && meal.recipe_name !== '__HA_CLEARED__');
+              return tonight ? '1px solid #F3C8B4' : '1px solid #E8E4DE';
+            ]]]
+        - box-shadow: none
+        - padding: 16px 18px
+        - margin: 10px 4px 0 4px
+      grid:
+        - grid-template-areas: '"summary"'
+      custom_fields:
+        summary:
+          - text-align: left
+    custom_fields:
+      summary: |
+        [[[
+          const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
+          const todayIso = new Date().toISOString().split('T')[0];
+          const tonight = meals.find((meal) => meal && meal.date === todayIso && meal.recipe_name && meal.recipe_name !== '__HA_CLEARED__');
+          if (tonight) {
+            return '<div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#C87456;margin-bottom:6px;">Tonight</div><div style="font-family:Fraunces,Georgia,serif;font-size:24px;font-weight:400;color:#1F2937;line-height:1.2;">' + tonight.recipe_name + '</div>';
+          }
+          return '<div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:6px;">Tonight</div><div style="font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:400;color:#9CA3AF;line-height:1.2;font-style:italic;">No dinner planned</div>';
+        ]]]
+
+  # ── Recipe pick grid (Fix 2026-04-11) ──
+  # Replaces the old input_select dropdown + standalone "Assign To Tonight" button
+  # which couldn't pass the picked recipe through to the script reliably.
+  # Each card here calls script.countertop_assign_meal_to_tonight with its
+  # specific recipe name baked into service_data via button-card JS templating.
+  # No state round-trip, no race condition, single-tap commit.
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 1fr 1fr
+      grid-gap: 10px
+      margin: 12px 4px 0 4px
+    cards:
+      # Recipe slot 0
+      - type: custom:button-card
+        entity: sensor.mealie_recipe_browser
+        triggers_update:
+          - sensor.mealie_recipe_browser
+        show_icon: false
+        show_state: false
+        name: |
+          [[[
+            const sensor = states['sensor.mealie_recipe_browser'];
+            const items = (sensor && sensor.attributes && sensor.attributes.items) || [];
+            return items[0] ? items[0].name : '—';
+          ]]]
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.countertop_assign_recipe_by_index
+                  data:
+                    index: 0
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px
+            - height: 64px
+            - box-shadow: none
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#1F2937'
+            - white-space: normal
+            - line-height: 1.2
+            - text-align: center
+
+      # Recipe slot 1
+      - type: custom:button-card
+        entity: sensor.mealie_recipe_browser
+        triggers_update:
+          - sensor.mealie_recipe_browser
+        show_icon: false
+        show_state: false
+        name: |
+          [[[
+            const sensor = states['sensor.mealie_recipe_browser'];
+            const items = (sensor && sensor.attributes && sensor.attributes.items) || [];
+            return items[1] ? items[1].name : '—';
+          ]]]
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.countertop_assign_recipe_by_index
+                  data:
+                    index: 1
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px
+            - height: 64px
+            - box-shadow: none
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#1F2937'
+            - white-space: normal
+            - line-height: 1.2
+            - text-align: center
+
+      # Recipe slot 2
+      - type: custom:button-card
+        entity: sensor.mealie_recipe_browser
+        triggers_update:
+          - sensor.mealie_recipe_browser
+        show_icon: false
+        show_state: false
+        name: |
+          [[[
+            const sensor = states['sensor.mealie_recipe_browser'];
+            const items = (sensor && sensor.attributes && sensor.attributes.items) || [];
+            return items[2] ? items[2].name : '—';
+          ]]]
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.countertop_assign_recipe_by_index
+                  data:
+                    index: 2
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px
+            - height: 64px
+            - box-shadow: none
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#1F2937'
+            - white-space: normal
+            - line-height: 1.2
+            - text-align: center
+
+      # Recipe slot 3
+      - type: custom:button-card
+        entity: sensor.mealie_recipe_browser
+        triggers_update:
+          - sensor.mealie_recipe_browser
+        show_icon: false
+        show_state: false
+        name: |
+          [[[
+            const sensor = states['sensor.mealie_recipe_browser'];
+            const items = (sensor && sensor.attributes && sensor.attributes.items) || [];
+            return items[3] ? items[3].name : '—';
+          ]]]
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.countertop_assign_recipe_by_index
+                  data:
+                    index: 3
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px
+            - height: 64px
+            - box-shadow: none
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#1F2937'
+            - white-space: normal
+            - line-height: 1.2
+            - text-align: center
+
+      # Recipe slot 4
+      - type: custom:button-card
+        entity: sensor.mealie_recipe_browser
+        triggers_update:
+          - sensor.mealie_recipe_browser
+        show_icon: false
+        show_state: false
+        name: |
+          [[[
+            const sensor = states['sensor.mealie_recipe_browser'];
+            const items = (sensor && sensor.attributes && sensor.attributes.items) || [];
+            return items[4] ? items[4].name : '—';
+          ]]]
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.countertop_assign_recipe_by_index
+                  data:
+                    index: 4
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px
+            - height: 64px
+            - box-shadow: none
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#1F2937'
+            - white-space: normal
+            - line-height: 1.2
+            - text-align: center
+
+      # Recipe slot 5
+      - type: custom:button-card
+        entity: sensor.mealie_recipe_browser
+        triggers_update:
+          - sensor.mealie_recipe_browser
+        show_icon: false
+        show_state: false
+        name: |
+          [[[
+            const sensor = states['sensor.mealie_recipe_browser'];
+            const items = (sensor && sensor.attributes && sensor.attributes.items) || [];
+            return items[5] ? items[5].name : '—';
+          ]]]
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.countertop_assign_recipe_by_index
+                  data:
+                    index: 5
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px
+            - height: 64px
+            - box-shadow: none
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#1F2937'
+            - white-space: normal
+            - line-height: 1.2
+            - text-align: center
+
+  - type: custom:button-card
+    entity: sensor.mealie_weekly_meal_plan
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    triggers_update:
+      - sensor.mealie_weekly_meal_plan
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 14px 4px 0 4px
+        - display: |
+            [[[
+              const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
+              const todayIso = new Date().toISOString().split('T')[0];
+              const past = [];
+              meals.forEach((meal) => {
+                if (!meal || !meal.date || !meal.recipe_name || meal.recipe_name === '__HA_CLEARED__') return;
+                if (meal.date < todayIso && past.indexOf(meal.recipe_name) === -1) past.push(meal.recipe_name);
+              });
+              return past.length ? 'block' : 'none';
+            ]]]
+      grid:
+        - grid-template-areas: '"done"'
+      custom_fields:
+        done:
+          - text-align: left
+    custom_fields:
+      done: |
+        [[[
+          const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
+          const todayIso = new Date().toISOString().split('T')[0];
+          const past = [];
+          meals.forEach((meal) => {
+            if (!meal || !meal.date || !meal.recipe_name || meal.recipe_name === '__HA_CLEARED__') return;
+            if (meal.date < todayIso && past.indexOf(meal.recipe_name) === -1) past.push(meal.recipe_name);
+          });
+          const done = past.slice(-4).reverse();
+          return '<div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:8px;">Done this week</div><div style="display:flex;flex-wrap:wrap;gap:8px;">' + done.map((meal) => '<span style="font-size:14px;color:#9CA3AF;text-decoration:line-through;text-decoration-thickness:1.5px;">' + meal + '</span>').join('') + '</div>';
+        ]]]

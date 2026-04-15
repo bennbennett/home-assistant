@@ -1,0 +1,638 @@
+##############################################################################
+#  The Countertop — Home View (Stage 2)                                     #
+#  Header + [action grid + secondary nav | agenda + dinner pool] + scene   #
+##############################################################################
+title: Home
+path: home
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 1fr
+      grid-template-rows: 1fr auto
+      height: 100vh
+      margin: 0
+      padding: 0
+    card_mod:
+      style: |
+        ha-card {
+          background: #fbfaf9 !important;
+        }
+    cards:
+      # ═══ ROW 1: Main content ═══
+      - type: vertical-stack
+        view_layout:
+          grid-row: 1
+        cards:
+          # ── Header: clock + date ──
+          - type: custom:button-card
+            entity: sensor.live_time
+            show_icon: false
+            show_name: false
+            show_state: false
+            tap_action:
+              action: fire-dom-event
+              browser_mod:
+                service: browser_mod.popup
+                data:
+                  title: ""
+                  size: normal
+                  popup_styles:
+                    - style: all
+                      styles: |
+                        ha-dialog {
+                          --ha-dialog-border-radius: 26px;
+                        }
+                        ha-dialog-header {
+                          display: none;
+                        }
+                  content: !include /config/dashboards/popups/countertop_hourly_weather_popup.yaml
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 16px 24px 0
+                - cursor: pointer
+              grid:
+                - grid-template-areas: '"ct_hdr"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                ct_hdr:
+                  - width: 100%
+            custom_fields:
+              ct_hdr: |
+                [[[
+                  const time = entity.state || '12:00';
+                  const ampm = entity.attributes.ampm || 'PM';
+                  const greeting = states['sensor.live_greeting'] ? states['sensor.live_greeting'].state : 'Hello';
+                  const dateStr = states['sensor.live_date_long'] ? states['sensor.live_date_long'].state : '';
+
+                  const weather = states['weather.pirateweather'];
+                  var weatherTemp = '';
+                  if (weather) {
+                    weatherTemp = Math.round(weather.attributes.temperature || 0) + '°';
+                  }
+                  const hi = states['sensor.today_high_temp'];
+                  const lo = states['sensor.today_low_temp'];
+                  var hilo = '';
+                  if (hi && lo && !['unknown','unavailable'].includes(hi.state) && !['unknown','unavailable'].includes(lo.state)) {
+                    hilo = `<span style="font-size: 13px; font-weight: 500; color: #9CA3AF; margin-left: 8px;">H:${hi.state}° L:${lo.state}°</span>`;
+                  }
+
+                  return `<div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                      <div style="font-family: 'Fraunces', Georgia, serif; font-size: 46px; font-weight: 350; letter-spacing: -1px; color: #1F2937; line-height: 1;">
+                        ${time} <span style="font-size: 20px; font-weight: 400; margin-left: 4px; color: #6B7280;">${ampm}</span>
+                      </div>
+                      <div style="font-family: 'Fraunces', Georgia, serif; font-style: italic; font-size: 16px; font-weight: 350; color: #6B7280; margin-top: 1px;">${greeting}, Bennetts.</div>
+                    </div>
+                    <div style="text-align: right; padding: 4px 0 4px 12px; border-radius: 14px;">
+                      <div style="font-size: 15px; font-weight: 500; color: #374151;">${dateStr}</div>
+                      <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px; justify-content: flex-end;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 0 9z"/></svg>
+                        <span style="font-size: 18px; font-weight: 600; color: #374151;">${weatherTemp}</span>${hilo}
+                      </div>
+                    </div>
+                  </div>`;
+                ]]]
+
+          # ── Two-column main: left (actions) + right (agenda/dinner) ──
+          - type: custom:layout-card
+            layout_type: custom:grid-layout
+            layout:
+              grid-template-columns: 1fr 300px
+              grid-gap: 16px
+              padding: 10px 24px 0
+              margin: 0
+            cards:
+              # ── LEFT COLUMN: action grid + secondary nav ──
+              - type: vertical-stack
+                view_layout:
+                  grid-column: 1
+                cards:
+                  # 3x2 Action Grid
+                  - type: grid
+                    columns: 3
+                    square: false
+                    card_mod:
+                      style: |
+                        ha-card {
+                          background: none !important;
+                          border: none !important;
+                          box-shadow: none !important;
+                        }
+                    cards:
+                      # Lights
+                      - type: custom:button-card
+                        template: ct_action_btn
+                        variables:
+                          btn_icon: lightbulb
+                          btn_label: Lights
+                          btn_icon_bg: '#FEF3C7'
+                          btn_icon_color: '#D97706'
+                        tap_action:
+                          action: navigate
+                          navigation_path: /the-countertop/lights
+
+                      # Add to List
+                      - type: custom:button-card
+                        template: ct_action_btn
+                        variables:
+                          btn_icon: plus
+                          btn_label: Add to List
+                          btn_icon_bg: '#E8F0EA'
+                          btn_icon_color: '#4A7C59'
+                        tap_action:
+                          action: fire-dom-event
+                          browser_mod:
+                            service: browser_mod.popup
+                            data:
+                              title: ""
+                              size: narrow
+                              popup_styles:
+                                - style: all
+                                  styles: |
+                                    ha-dialog {
+                                      --ha-dialog-border-radius: 24px;
+                                    }
+                                    ha-dialog-header {
+                                      display: none;
+                                    }
+                              content: !include /config/dashboards/popups/countertop_shopping_popup.yaml
+
+                      # Find Phone
+                      - type: custom:button-card
+                        template: ct_action_btn
+                        variables:
+                          btn_icon: phone
+                          btn_label: Find Phone
+                          btn_icon_bg: '#FCE9DE'
+                          btn_icon_color: '#C87456'
+                        tap_action:
+                          action: fire-dom-event
+                          browser_mod:
+                            service: browser_mod.sequence
+                            data:
+                              sequence:
+                                - service: script.ring_iphone
+                                - service: browser_mod.popup
+                                  data:
+                                    title: ""
+                                    size: narrow
+                                    popup_styles:
+                                      - style: all
+                                        styles: |
+                                          ha-dialog {
+                                            --ha-dialog-border-radius: 14px;
+                                            --mdc-dialog-scrim-color: transparent;
+                                          }
+                                          ha-dialog-header {
+                                            display: none;
+                                          }
+                                          .content {
+                                            padding: 0 !important;
+                                          }
+                                    content:
+                                      type: custom:button-card
+                                      show_icon: false
+                                      show_name: false
+                                      show_state: false
+                                      tap_action:
+                                        action: fire-dom-event
+                                        browser_mod:
+                                          service: browser_mod.close_popup
+                                      styles:
+                                        card:
+                                          - background: '#C87456'
+                                          - border: none
+                                          - box-shadow: '0 10px 26px rgba(200,116,86,0.26)'
+                                          - padding: 14px 24px
+                                          - border-radius: 14px
+                                        grid:
+                                          - grid-template-areas: '"msg"'
+                                        custom_fields:
+                                          msg:
+                                            - color: white
+                                            - font-size: 16px
+                                            - font-weight: 600
+                                            - text-align: center
+                                      custom_fields:
+                                        msg: "Ringing Petra's phone..."
+
+                      # Timer
+                      - type: custom:button-card
+                        template: ct_action_btn
+                        entity: timer.kitchen_timer
+                        update_timer: 1000
+                        variables:
+                          btn_icon: timer
+                          btn_label: Timer
+                          btn_icon_bg: '#E0E7FF'
+                          btn_icon_color: '#4F46E5'
+                        styles:
+                          card:
+                            - background: |
+                                [[[
+                                  return entity && (entity.state === 'active' || entity.state === 'paused')
+                                    ? '#F7F7FF'
+                                    : 'white';
+                                ]]]
+                            - border: |
+                                [[[
+                                  return entity && (entity.state === 'active' || entity.state === 'paused')
+                                    ? '1px solid #D8DBFF'
+                                    : '1px solid #E8E4DE';
+                                ]]]
+                        tap_action:
+                          action: fire-dom-event
+                          browser_mod:
+                            service: browser_mod.popup
+                            data:
+                              title: ""
+                              size: narrow
+                              popup_styles:
+                                - style: all
+                                  styles: |
+                                    ha-dialog {
+                                      --ha-dialog-border-radius: 24px;
+                                    }
+                                    ha-dialog-header {
+                                      display: none;
+                                    }
+                              content: !include /config/dashboards/popups/countertop_timer_popup.yaml
+                        # Override template content: show countdown when timer active
+                        custom_fields:
+                          btn_content: |
+                            [[[
+                              if (entity && (entity.state === 'active' || entity.state === 'paused')) {
+                                var parseTime = function(value) {
+                                  if (!value) return 0;
+                                  var parts = String(value).split(':').map(function(part) {
+                                    return parseInt(part, 10) || 0;
+                                  });
+                                  if (parts.length === 3) return (parts[0] * 3600) + (parts[1] * 60) + parts[2];
+                                  if (parts.length === 2) return (parts[0] * 60) + parts[1];
+                                  return parseInt(value, 10) || 0;
+                                };
+                                var formatTime = function(totalSeconds) {
+                                  var secs = Math.max(0, totalSeconds || 0);
+                                  var hours = Math.floor(secs / 3600);
+                                  var minutes = Math.floor((secs % 3600) / 60);
+                                  var seconds = secs % 60;
+                                  if (hours > 0) {
+                                    return hours + ':' + (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                                  }
+                                  return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                                };
+                                var remainingSec = 0;
+                                if (entity.state === 'active' && entity.attributes && entity.attributes.finishes_at) {
+                                  remainingSec = Math.max(0, Math.round((new Date(entity.attributes.finishes_at).getTime() - Date.now()) / 1000));
+                                }
+                                if (!remainingSec) {
+                                  remainingSec = parseTime(entity.attributes ? entity.attributes.remaining : 0);
+                                }
+                                var timeStr = formatTime(remainingSec);
+                                var label = entity.state === 'paused' ? 'Paused' : 'Running';
+                                return '<div style="font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:#1F2937;letter-spacing:-0.5px">' + timeStr + '</div><div style="font-size:12px;font-weight:500;color:#6366F1;text-transform:uppercase;letter-spacing:0.5px">' + label + '</div>';
+                              }
+                              var icons = {
+                                'timer': '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3l2 2"/><path d="M19 3l-2 2"/><path d="M12 5V3"/>'
+                              };
+                              var iconBg = variables.btn_icon_bg || '#E0E7FF';
+                              var iconColor = variables.btn_icon_color || '#4F46E5';
+                              return '<div style="width:52px;height:52px;border-radius:13px;background:' + iconBg + ';display:flex;align-items:center;justify-content:center"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="' + iconColor + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + icons['timer'] + '</svg></div><div style="font-size:15px;font-weight:600;color:#374151">Timer</div>';
+                            ]]]
+
+                      # Calendar
+                      - type: custom:button-card
+                        template: ct_action_btn
+                        variables:
+                          btn_icon: calendar
+                          btn_label: Calendar
+                          btn_icon_bg: '#E8F0EA'
+                          btn_icon_color: '#4A7C59'
+                        tap_action:
+                          action: navigate
+                          navigation_path: /the-countertop/calendar
+
+                      # Toby
+                      - type: custom:button-card
+                        template: ct_action_btn
+                        variables:
+                          btn_icon: checkbox
+                          btn_label: Toby
+                          btn_icon_bg: '#FEF3C7'
+                          btn_icon_color: '#B45309'
+                        tap_action:
+                          action: navigate
+                          navigation_path: /the-countertop/toby
+
+                  # Secondary Nav Row
+                  - type: custom:layout-card
+                    layout_type: custom:grid-layout
+                    layout:
+                      grid-template-columns: 1fr repeat(3, auto) 1fr
+                      grid-gap: 8px
+                      padding: 8px 0 0
+                      margin: 0
+                    card_mod:
+                      style: |
+                        ha-card { background: none !important; box-shadow: none !important; border: none !important; }
+                    cards:
+                      # Left spacer
+                      - type: custom:button-card
+                        tap_action:
+                          action: none
+                        styles:
+                          card:
+                            - background: none
+                            - border: none
+                            - box-shadow: none
+                            - padding: 0
+                            - margin: 0
+                            - height: 0
+                            - min-height: 0
+                            - overflow: hidden
+                      # Meals
+                      - type: custom:button-card
+                        show_icon: false
+                        show_name: false
+                        show_state: false
+                        tap_action:
+                          action: navigate
+                          navigation_path: /the-countertop/meals
+                        card_mod:
+                          style: |
+                            ha-card:active { background: #F3F4F6 !important; }
+                        styles:
+                          card:
+                            - background: none
+                            - box-shadow: none
+                            - border: none
+                            - padding: 7px 14px
+                            - border-radius: 10px
+                            - cursor: pointer
+                          grid:
+                            - grid-template-areas: '"sn_c"'
+                            - grid-template-columns: 1fr
+                          custom_fields:
+                            sn_c:
+                              - display: flex
+                              - align-items: center
+                              - gap: 6px
+                        custom_fields:
+                          sn_c: |
+                            [[[
+                              return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg><span style="font-size:14px;font-weight:500;color:#9CA3AF">Meals</span>';
+                            ]]]
+                      # Ben
+                      - type: custom:button-card
+                        show_icon: false
+                        show_name: false
+                        show_state: false
+                        tap_action:
+                          action: navigate
+                          navigation_path: /home-hub/ben
+                        card_mod:
+                          style: |
+                            ha-card:active { background: #F3F4F6 !important; }
+                        styles:
+                          card:
+                            - background: none
+                            - box-shadow: none
+                            - border: none
+                            - padding: 7px 14px
+                            - border-radius: 10px
+                            - cursor: pointer
+                          grid:
+                            - grid-template-areas: '"sn_c"'
+                            - grid-template-columns: 1fr
+                          custom_fields:
+                            sn_c:
+                              - display: flex
+                              - align-items: center
+                              - gap: 6px
+                        custom_fields:
+                          sn_c: |
+                            [[[
+                              return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg><span style="font-size:14px;font-weight:500;color:#9CA3AF">Ben</span>';
+                            ]]]
+                      # Petra
+                      - type: custom:button-card
+                        show_icon: false
+                        show_name: false
+                        show_state: false
+                        tap_action:
+                          action: navigate
+                          navigation_path: /home-hub/petra
+                        card_mod:
+                          style: |
+                            ha-card:active { background: #F3F4F6 !important; }
+                        styles:
+                          card:
+                            - background: none
+                            - box-shadow: none
+                            - border: none
+                            - padding: 7px 14px
+                            - border-radius: 10px
+                            - cursor: pointer
+                          grid:
+                            - grid-template-areas: '"sn_c"'
+                            - grid-template-columns: 1fr
+                          custom_fields:
+                            sn_c:
+                              - display: flex
+                              - align-items: center
+                              - gap: 6px
+                        custom_fields:
+                          sn_c: |
+                            [[[
+                              return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg><span style="font-size:14px;font-weight:500;color:#9CA3AF">Petra</span>';
+                            ]]]
+                      # Right spacer
+                      - type: custom:button-card
+                        tap_action:
+                          action: none
+                        styles:
+                          card:
+                            - background: none
+                            - border: none
+                            - box-shadow: none
+                            - padding: 0
+                            - margin: 0
+                            - height: 0
+                            - min-height: 0
+                            - overflow: hidden
+
+              # ── RIGHT COLUMN: agenda + dinner pool ──
+              - type: vertical-stack
+                view_layout:
+                  grid-column: 2
+                cards:
+                  # Agenda Card
+                  - type: custom:button-card
+                    entity: sensor.home_hub_upcoming_events
+                    show_icon: false
+                    show_name: false
+                    show_state: false
+                    tap_action:
+                      action: navigate
+                      navigation_path: /the-countertop/calendar
+                    card_mod:
+                      style: |
+                        ha-card:active { transform: scale(0.98); }
+                    styles:
+                      card:
+                        - background: white
+                        - border-radius: 16px
+                        - border: '1px solid #E8E4DE'
+                        - box-shadow: '0 1px 3px rgba(0,0,0,0.06)'
+                        - padding: 16px 18px
+                        - cursor: pointer
+                      grid:
+                        - grid-template-areas: '"agenda"'
+                        - grid-template-columns: 1fr
+                      custom_fields:
+                        agenda:
+                          - width: 100%
+                    custom_fields:
+                      agenda: |
+                        [[[
+                          const events = entity && entity.attributes && entity.attributes.events ? entity.attributes.events : [];
+                          const calColors = {
+                            'home_calendar': '#4A7C59',
+                            'ben_personal': '#6E8E4D',
+                            'work_calendar': '#8E7065',
+                            'birthdays_anniversaries': '#C87456'
+                          };
+
+                          const today = new Date();
+                          const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+                          const tomorrow = new Date(today);
+                          tomorrow.setDate(tomorrow.getDate() + 1);
+                          const tomorrowStr = tomorrow.getFullYear() + '-' + String(tomorrow.getMonth()+1).padStart(2,'0') + '-' + String(tomorrow.getDate()).padStart(2,'0');
+
+                          var result = '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#C87456;display:flex;align-items:center;gap:6px;margin-bottom:10px"><span style="width:6px;height:6px;border-radius:50%;background:#C87456"></span> Today</div>';
+
+                          var lastGroup = 'today';
+                          var count = 0;
+
+                          for (var i = 0; i < events.length; i++) {
+                            if (count >= 6) break;
+                            var ev = events[i];
+                            var evDate = (ev.start || '').split('T')[0];
+                            var group = 'later';
+                            if (evDate === todayStr) group = 'today';
+                            else if (evDate === tomorrowStr) group = 'tomorrow';
+                            if (group === 'later') continue;
+
+                            if (group !== lastGroup) {
+                              if (group === 'tomorrow') {
+                                result += '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#9CA3AF;margin-top:10px;margin-bottom:3px">Tomorrow</div>';
+                              }
+                              lastGroup = group;
+                            }
+
+                            var cal = ev.calendar || 'home_calendar';
+                            var dotColor = calColors[cal] || '#4A7C59';
+                            var timeStr = 'All day';
+                            if (!ev.all_day && ev.start && ev.start.indexOf('T') > -1) {
+                              var d = new Date(ev.start);
+                              var h = d.getHours();
+                              var m = d.getMinutes();
+                              var ap = h >= 12 ? 'PM' : 'AM';
+                              h = h === 0 ? 12 : h > 12 ? h - 12 : h;
+                              timeStr = h + ':' + (m < 10 ? '0' : '') + m + ' ' + ap;
+                            }
+                            var title = (ev.summary || ev.title || '').replace(/-\s*[^-]*[•].*$/, '').trim();
+
+                            result += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0"><div style="width:6px;height:6px;border-radius:50%;background:' + dotColor + ';flex-shrink:0"></div><div style="font-size:13px;font-weight:500;color:#9CA3AF;min-width:54px;font-variant-numeric:tabular-nums">' + timeStr + '</div><div style="font-size:14px;font-weight:500;color:#1F2937;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + title + '</div></div>';
+                            count++;
+                          }
+
+                          if (count === 0) {
+                            result += '<div style="font-size:14px;color:#9CA3AF;padding:10px 0">A quiet day ahead.</div>';
+                          }
+
+                          return result;
+                        ]]]
+
+                  # Dinner Pool Card
+                  - type: custom:button-card
+                    entity: sensor.mealie_weekly_meal_plan
+                    show_icon: false
+                    show_name: false
+                    show_state: false
+                    tap_action:
+                      action: fire-dom-event
+                      browser_mod:
+                        service: browser_mod.popup
+                        data:
+                          title: ""
+                          size: normal
+                          popup_styles:
+                            - style: all
+                              styles: |
+                                ha-dialog {
+                                  --ha-dialog-border-radius: 26px;
+                                }
+                                ha-dialog-header {
+                                  display: none;
+                                }
+                          content: !include /config/dashboards/popups/countertop_tonight_meal_popup.yaml
+                    card_mod:
+                      style: |
+                        ha-card:active { transform: scale(0.98); }
+                    styles:
+                      card:
+                        - background: white
+                        - border-radius: 16px
+                        - border: '1px solid #E8E4DE'
+                        - box-shadow: '0 1px 3px rgba(0,0,0,0.06)'
+                        - padding: 14px 18px
+                        - cursor: pointer
+                      grid:
+                        - grid-template-areas: '"dinner"'
+                        - grid-template-columns: 1fr
+                      custom_fields:
+                        dinner:
+                          - width: 100%
+                    custom_fields:
+                      dinner: |
+                        [[[
+                          const meals = entity && entity.attributes && entity.attributes.meals ? entity.attributes.meals : [];
+                          const todayStr = new Date().toISOString().split('T')[0];
+
+                          // Dedup: last entry per date wins
+                          var mealByDate = {};
+                          for (var i = 0; i < meals.length; i++) {
+                            var m = meals[i];
+                            if (m.date) mealByDate[m.date] = m.recipe_name || '';
+                          }
+
+                          var entries = Object.entries(mealByDate);
+                          var assigned = entries.filter(function(e) { return e[1] && e[1] !== '__HA_CLEARED__'; });
+                          var remaining = 7 - assigned.length;
+
+                          var chips = '';
+                          for (var j = 0; j < entries.length; j++) {
+                            var date = entries[j][0];
+                            var name = entries[j][1];
+                            if (!name || name === '__HA_CLEARED__') continue;
+                            var isTonight = date === todayStr;
+                            if (isTonight) {
+                              chips += '<span style="font-size:13px;font-weight:600;color:#C87456;background:#FFF6F1;padding:4px 10px;border-radius:6px;border:1px solid #FCE9DE">' + name + '</span>';
+                            } else if (date < todayStr) {
+                              chips += '<span style="font-size:13px;font-weight:500;color:#9CA3AF;text-decoration:line-through;padding:4px 10px">' + name + '</span>';
+                            } else {
+                              chips += '<span style="font-size:13px;font-weight:500;color:#374151;background:#F9FAFB;padding:4px 10px;border-radius:6px;border:1px solid #F3F4F6">' + name + '</span>';
+                            }
+                          }
+
+                          return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#6B7280">This Week\'s Meals</div><div style="font-size:12px;font-weight:600;color:#4A7C59;background:#E8F0EA;padding:2px 8px;border-radius:8px">' + remaining + ' left</div></div><div style="display:flex;gap:6px;flex-wrap:wrap">' + (chips || '<span style="font-size:13px;color:#9CA3AF">No meals planned yet</span>') + '</div>';
+                        ]]]
+
+      # ═══ ROW 2: Scene bar ═══
+      - !include ../scene_bar.yaml

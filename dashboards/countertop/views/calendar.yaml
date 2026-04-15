@@ -1,0 +1,440 @@
+##############################################################################
+#  The Countertop — Calendar View (Stage 3)                                 #
+#  Week/month toggle + week-planner-card + scene bar                       #
+#  Config copied from home-hub decluttering_templates.yaml (lines 1163+)   #
+##############################################################################
+title: Calendar
+path: calendar
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 1fr
+      grid-template-rows: 1fr auto
+      height: 100vh
+      margin: 0
+      padding: 0
+    card_mod:
+      style: |
+        ha-card {
+          background: #fbfaf9 !important;
+        }
+    cards:
+      # ═══ ROW 1: Main content ═══
+      - type: vertical-stack
+        view_layout:
+          grid-row: 1
+        cards:
+          # ── Subview Header ──
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /the-countertop/home
+            card_mod:
+              style: |
+                ha-card:active { opacity: 0.7; }
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 16px 24px 12px
+              grid:
+                - grid-template-areas: '"sv_hdr"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                sv_hdr:
+                  - display: flex
+                  - align-items: center
+                  - gap: 14px
+            custom_fields:
+              sv_hdr: |
+                [[[
+                  return `<div style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  </div>
+                  <div style="font-family: 'Fraunces', Georgia, serif; font-size: 26px; font-weight: 400; color: #1F2937;">Calendar</div>`;
+                ]]]
+
+          # ── Controls: Week/Month toggle + Plan Meals + Add Event ──
+          - type: custom:layout-card
+            layout_type: custom:grid-layout
+            layout:
+              grid-template-columns: repeat(3, auto) 1fr auto
+              grid-gap: 8px
+              padding: 0 24px
+              margin: 0
+            card_mod:
+              style: |
+                ha-card { background: none !important; box-shadow: none !important; border: none !important; }
+            cards:
+              # Week pill
+              - type: custom:button-card
+                entity: input_select.calendar_view_mode
+                show_icon: false
+                show_name: true
+                show_state: false
+                name: Week
+                tap_action:
+                  action: call-service
+                  service: script.toggle_week_view
+                styles:
+                  card:
+                    - border-radius: 20px
+                    - height: 38px
+                    - padding: 0 18px
+                    - box-shadow: none
+                    - font-size: 14px
+                    - font-weight: 600
+                    - cursor: pointer
+                    - background: |
+                        [[[
+                          return entity.state === 'week' ? '#4A7C59' : 'white';
+                        ]]]
+                    - border: |
+                        [[[
+                          return '1px solid ' + (entity.state === 'week' ? '#4A7C59' : '#E5E7EB');
+                        ]]]
+                  name:
+                    - color: |
+                        [[[
+                          return entity.state === 'week' ? 'white' : '#4B5563';
+                        ]]]
+
+              # Month pill
+              - type: custom:button-card
+                entity: input_select.calendar_view_mode
+                show_icon: false
+                show_name: true
+                show_state: false
+                name: Month
+                tap_action:
+                  action: call-service
+                  service: script.toggle_month_view
+                styles:
+                  card:
+                    - border-radius: 20px
+                    - height: 38px
+                    - padding: 0 18px
+                    - box-shadow: none
+                    - font-size: 14px
+                    - font-weight: 600
+                    - cursor: pointer
+                    - background: |
+                        [[[
+                          return entity.state === 'month' ? '#4A7C59' : 'white';
+                        ]]]
+                    - border: |
+                        [[[
+                          return '1px solid ' + (entity.state === 'month' ? '#4A7C59' : '#E5E7EB');
+                        ]]]
+                  name:
+                    - color: |
+                        [[[
+                          return entity.state === 'month' ? 'white' : '#4B5563';
+                        ]]]
+
+              # Plan Meals link
+              - type: custom:button-card
+                show_icon: false
+                show_name: true
+                show_state: false
+                name: Plan Meals
+                tap_action:
+                  action: navigate
+                  navigation_path: /the-countertop/meals
+                styles:
+                  card:
+                    - border-radius: 20px
+                    - height: 38px
+                    - padding: 0 18px
+                    - box-shadow: none
+                    - font-size: 14px
+                    - font-weight: 500
+                    - cursor: pointer
+                    - background: white
+                    - border: 1px solid #E5E7EB
+                  name:
+                    - color: '#6B7280'
+
+              # 1fr spacer (pushes Add Event to the right)
+              - type: custom:button-card
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - border: none
+                    - box-shadow: none
+                    - padding: 0
+                    - margin: 0
+                    - height: 0
+                    - min-height: 0
+                    - overflow: hidden
+
+              # + Add Event (right-aligned)
+              - type: custom:button-card
+                show_icon: false
+                show_name: false
+                show_state: false
+                tap_action:
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: Add Event
+                      size: normal
+                      content: !include /config/dashboards/popups/calendar_event_popup.yaml
+                styles:
+                  card:
+                    - border-radius: 20px
+                    - height: 38px
+                    - padding: 0 18px
+                    - box-shadow: none
+                    - background: white
+                    - border: 1px solid #4A7C59
+                    - cursor: pointer
+                  grid:
+                    - grid-template-areas: '"ae"'
+                    - grid-template-columns: 1fr
+                  custom_fields:
+                    ae:
+                      - display: flex
+                      - align-items: center
+                      - gap: 5px
+                      - white-space: nowrap
+                custom_fields:
+                  ae: |
+                    [[[
+                      return '<span style="font-size:14px;font-weight:600;color:#4A7C59">+ Add Event</span>';
+                    ]]]
+
+          # ── Week View (conditional) ──
+          - type: conditional
+            conditions:
+              - entity: input_select.calendar_view_mode
+                state: week
+            card:
+              type: custom:week-planner-card
+              days: 7
+              startingDay: monday
+              noCardBackground: false
+              showLocation: false
+              showDescription: false
+              showLegend: false
+              legendToggle: false
+              showNavigation: false
+              compact: false
+              updateInterval: 60
+              locale: en
+              timeFormat: "h:mm a"
+              _multiDayTimeFormat: "MMM d"
+              multiDayMode: single
+              texts:
+                fullDay: " "
+              columns:
+                extraLarge: 7
+                large: 7
+                medium: 7
+                small: 7
+                extraSmall: 7
+              calendars:
+                - entity: calendar.home_calendar
+                  color: "#4A7C59"
+                  name: Home
+                - entity: calendar.ben_personal
+                  color: "#6E8E4D"
+                  name: Ben
+                - entity: calendar.work_calendar
+                  color: "#8E7065"
+                  name: Work
+                - entity: calendar.birthdays_anniversaries
+                  color: "#C87456"
+                  name: Birthdays
+              card_mod:
+                style: |
+                  ha-card {
+                    font-size: 14px !important;
+                    padding: 12px 24px !important;
+                    background: white !important;
+                    border-radius: 16px !important;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+                    border: 1px solid #F3F4F6 !important;
+                    margin: 0 24px !important;
+                    max-height: calc(100vh - 210px) !important;
+                    overflow-y: auto !important;
+                  }
+                  .container .day {
+                    box-sizing: border-box;
+                    border-radius: 12px;
+                    padding: 8px;
+                  }
+                  .container .day .events .event {
+                    border-radius: 8px;
+                    margin-bottom: 4px;
+                    font-size: 13px;
+                  }
+                  .container .day .events .event .time {
+                    font-size: 10px !important;
+                    color: #9CA3AF !important;
+                    text-transform: uppercase;
+                    letter-spacing: 0.03em;
+                    margin-bottom: 2px !important;
+                  }
+                  .container .day .events .event .title {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    line-height: 1.25;
+                  }
+                  .container .day .date {
+                    display: flex !important;
+                    flex-direction: column-reverse !important;
+                    align-items: flex-start;
+                  }
+                  .container .day .date .text {
+                    display: block !important;
+                    font-size: 10px !important;
+                    font-weight: 600 !important;
+                    letter-spacing: 0.06em !important;
+                    text-transform: uppercase !important;
+                    color: #9CA3AF !important;
+                    margin-bottom: 2px !important;
+                  }
+                  .container .day .date .number {
+                    font-family: Fraunces, Georgia, serif !important;
+                    font-size: 22px !important;
+                    font-weight: 500 !important;
+                    color: #1F2937 !important;
+                  }
+                  .navigation .previous,
+                  .navigation .next {
+                    color: #4A7C59;
+                    cursor: pointer;
+                    padding: 4px 8px;
+                    border-radius: 8px;
+                  }
+                  .navigation .previous:hover,
+                  .navigation .next:hover { background-color: #E8F0EA; }
+                  .today {
+                    background-color: #f9f7f4 !important;
+                    border-radius: 12px;
+                  }
+                  .container .day.today .date .text {
+                    color: #C87456 !important;
+                  }
+                  .container .day.today .date .number {
+                    color: #C87456 !important;
+                    font-weight: 700 !important;
+                  }
+
+          # ── Month View (conditional) ──
+          - type: conditional
+            conditions:
+              - entity: input_select.calendar_view_mode
+                state: month
+            card:
+              type: custom:week-planner-card
+              days: 28
+              startingDay: monday
+              noCardBackground: false
+              showLocation: false
+              showDescription: false
+              showLegend: false
+              legendToggle: false
+              showNavigation: false
+              maxDayEvents: 5
+              updateInterval: 600
+              timeFormat: "h:mm a"
+              _multiDayTimeFormat: "MMM d"
+              multiDayMode: single
+              texts:
+                fullDay: " "
+              columns:
+                extraLarge: 7
+                large: 7
+                medium: 7
+                small: 7
+                extraSmall: 7
+              calendars:
+                - entity: calendar.home_calendar
+                  color: "#4A7C59"
+                  name: Home
+                - entity: calendar.ben_personal
+                  color: "#6E8E4D"
+                  name: Ben
+                - entity: calendar.work_calendar
+                  color: "#8E7065"
+                  name: Work
+                - entity: calendar.birthdays_anniversaries
+                  color: "#C87456"
+                  name: Birthdays
+              card_mod:
+                style: |
+                  ha-card {
+                    font-size: 14px !important;
+                    padding: 12px 24px !important;
+                    background: white !important;
+                    border-radius: 16px !important;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+                    border: 1px solid #F3F4F6 !important;
+                    margin: 0 24px !important;
+                    max-height: calc(100vh - 210px) !important;
+                    overflow-y: auto !important;
+                  }
+                  .container .day {
+                    box-sizing: border-box;
+                    border-radius: 12px;
+                    padding: 6px;
+                  }
+                  .container .day .events .event {
+                    border-radius: 6px;
+                    margin-bottom: 2px;
+                    font-size: 11px;
+                  }
+                  .container .day .events .event .time {
+                    font-size: 9px !important;
+                    color: #9CA3AF !important;
+                    text-transform: uppercase;
+                  }
+                  .container .day .events .event .title {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 1;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                  }
+                  .container .day .date .text {
+                    display: block !important;
+                    font-size: 9px !important;
+                    font-weight: 600 !important;
+                    letter-spacing: 0.05em !important;
+                    text-transform: uppercase !important;
+                    color: #9CA3AF !important;
+                  }
+                  .navigation .previous,
+                  .navigation .next {
+                    color: #4A7C59;
+                    cursor: pointer;
+                    padding: 4px 8px;
+                    border-radius: 8px;
+                  }
+                  .today {
+                    background-color: #f9f7f4 !important;
+                    border-radius: 12px;
+                  }
+                  .container .day.today .date .text {
+                    color: #C87456 !important;
+                  }
+                  .container .day.today .date .number {
+                    color: #C87456 !important;
+                    font-weight: 700;
+                  }
+
+      # ═══ ROW 2: Scene bar ═══
+      - !include ../scene_bar.yaml

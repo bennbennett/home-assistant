@@ -1,0 +1,166 @@
+type: vertical-stack
+card_mod:
+  style: |
+    ha-card {
+      border: none !important;
+      box-shadow: none !important;
+      background: none !important;
+    }
+cards:
+  # ── Header ──
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    triggers_update:
+      - light.dining_kitchen_zone
+      - light.kitchen
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 0 0 14px
+        - border-bottom: 1px solid #F3F4F6
+      grid:
+        - grid-template-areas: '"hdr_icon hdr_info"'
+        - grid-template-columns: auto 1fr
+        - column-gap: 14px
+      custom_fields:
+        hdr_icon:
+          - align-self: center
+        hdr_info:
+          - align-self: center
+    custom_fields:
+      hdr_icon: |
+        [[[
+          return '<div style="width:44px;height:44px;border-radius:11px;background:rgba(184,146,84,0.14);display:flex;align-items:center;justify-content:center;">'
+            + '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B89254" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z"/><path d="M6 17h12"/></svg>'
+            + '</div>';
+        ]]]
+      hdr_info: |
+        [[[
+          var ct = ['light.dining_kitchen_zone','light.kitchen'];
+          var on = 0;
+          for (var i = 0; i < ct.length; i++) { if (states[ct[i]] && states[ct[i]].state === 'on') on++; }
+          var sub = on === 0 ? 'All off' : on + ' of ' + ct.length + ' on';
+          return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937;">Kitchen & Dining</div>'
+            + '<div style="font-size:13px;color:#9CA3AF;margin-top:1px;">' + sub + '</div>';
+        ]]]
+
+  # ── Lights ──
+  - type: custom:mushroom-light-card
+    entity: light.dining_kitchen_zone
+    name: All Kitchen & Dining
+    show_brightness_control: true
+    use_light_color: false
+    layout: horizontal
+    card_mod:
+      style: |
+        ha-card {
+          --mushroom-accent-color: #D97706;
+          background: none; border: none; box-shadow: none;
+          border-bottom: 1px solid #F3F4F6; border-radius: 0;
+        }
+
+  - type: custom:mushroom-light-card
+    entity: light.kitchen
+    name: Kitchen
+    show_brightness_control: true
+    use_light_color: false
+    layout: horizontal
+    card_mod:
+      style: |
+        ha-card {
+          --mushroom-accent-color: #D97706;
+          background: none; border: none; box-shadow: none;
+          border-radius: 0;
+        }
+
+  # ── Roomba ──
+  - type: custom:button-card
+    entity: vacuum.roomba_mcroomba
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    triggers_update:
+      - vacuum.roomba_mcroomba
+    styles:
+      card:
+        - background: '#F9FAFB'
+        - border-radius: 12px
+        - border: 1px solid #F3F4F6
+        - box-shadow: none
+        - padding: 14px
+        - margin-top: 8px
+      grid:
+        - grid-template-areas: '"roomba_content"'
+        - grid-template-columns: 1fr
+    custom_fields:
+      roomba_content: |
+        [[[
+          var vac = states['vacuum.roomba_mcroomba'];
+          var st = vac ? vac.state : 'unavailable';
+          var batt = vac && vac.attributes && vac.attributes.battery_level != null ? vac.attributes.battery_level + '%' : '--';
+          var stLabel = st.charAt(0).toUpperCase() + st.slice(1);
+          return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
+            + '<div style="width:34px;height:34px;border-radius:9px;background:rgba(37,99,235,0.08);display:flex;align-items:center;justify-content:center;">'
+            + '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 12h.01"/></svg>'
+            + '</div>'
+            + '<div><div style="font-size:14px;font-weight:600;color:#1F2937;">Roomba</div>'
+            + '<div style="font-size:12px;color:#9CA3AF;">' + stLabel + ' \u00B7 ' + batt + ' battery</div></div>'
+            + '</div>';
+        ]]]
+
+  - type: grid
+    columns: 2
+    square: false
+    card_mod:
+      style: |
+        ha-card {
+          background: none !important; border: none !important;
+          box-shadow: none !important; padding: 0 !important;
+        }
+    cards:
+      - type: custom:button-card
+        name: Start
+        show_icon: false
+        tap_action:
+          action: call-service
+          service: vacuum.start
+          service_data:
+            entity_id: vacuum.roomba_mcroomba
+        styles:
+          card:
+            - height: 40px
+            - border-radius: 10px
+            - border: 1px solid #E5E7EB
+            - background: white
+            - box-shadow: none
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#6B7280'
+      - type: custom:button-card
+        name: Dock
+        show_icon: false
+        tap_action:
+          action: call-service
+          service: vacuum.return_to_base
+          service_data:
+            entity_id: vacuum.roomba_mcroomba
+        styles:
+          card:
+            - height: 40px
+            - border-radius: 10px
+            - border: 1px solid #E5E7EB
+            - background: white
+            - box-shadow: none
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#6B7280'

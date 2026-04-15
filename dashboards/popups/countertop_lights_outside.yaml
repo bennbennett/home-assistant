@@ -1,0 +1,107 @@
+type: vertical-stack
+card_mod:
+  style: |
+    ha-card {
+      border: none !important;
+      box-shadow: none !important;
+      background: none !important;
+    }
+cards:
+  # ── Header ──
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    triggers_update:
+      - light.outdoor_lights_dimmable
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 0 0 14px
+        - border-bottom: 1px solid #F3F4F6
+      grid:
+        - grid-template-areas: '"hdr_icon hdr_info"'
+        - grid-template-columns: auto 1fr
+        - column-gap: 14px
+      custom_fields:
+        hdr_icon:
+          - align-self: center
+        hdr_info:
+          - align-self: center
+    custom_fields:
+      hdr_icon: |
+        [[[
+          return '<div style="width:44px;height:44px;border-radius:11px;background:rgba(110,142,77,0.14);display:flex;align-items:center;justify-content:center;">'
+            + '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6E8E4D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 0 9z"/></svg>'
+            + '</div>';
+        ]]]
+      hdr_info: |
+        [[[
+          var isOn = states['light.outdoor_lights_dimmable'] && states['light.outdoor_lights_dimmable'].state === 'on';
+          var sub = isOn ? 'String lights on' : 'All off';
+          return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937;">Outside</div>'
+            + '<div style="font-size:13px;color:#9CA3AF;margin-top:1px;">' + sub + '</div>';
+        ]]]
+
+  # ── Lights ──
+  - type: custom:mushroom-light-card
+    entity: light.outdoor_lights_dimmable
+    name: String Lights
+    show_brightness_control: true
+    use_light_color: false
+    layout: horizontal
+    card_mod:
+      style: |
+        ha-card {
+          --mushroom-accent-color: #D97706;
+          background: none; border: none; box-shadow: none;
+          border-radius: 0;
+        }
+
+  # ── Info ──
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    triggers_update:
+      - binary_sensor.outside_door
+      - binary_sensor.door_sensor_shed
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 4px 0 0
+      grid:
+        - grid-template-areas: '"info_rows"'
+        - grid-template-columns: 1fr
+    custom_fields:
+      info_rows: |
+        [[[
+          var gate = states['binary_sensor.outside_door'];
+          var gateOpen = gate && gate.state === 'on';
+          var gateColor = gateOpen ? '#ef4444' : '#16A34A';
+          var gateText = gateOpen ? 'Open' : 'Closed';
+
+          var shed = states['binary_sensor.door_sensor_shed'];
+          var shedOpen = shed && shed.state === 'on';
+          var shedColor = shedOpen ? '#ef4444' : '#16A34A';
+          var shedText = shedOpen ? 'Open' : 'Closed';
+
+          var row = function(dotColor, label, val, valColor) {
+            return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F3F4F6;">'
+              + '<div style="width:8px;height:8px;border-radius:50%;background:' + dotColor + ';flex-shrink:0;"></div>'
+              + '<span style="font-size:14px;color:#6B7280;flex:1;">' + label + '</span>'
+              + '<span style="font-size:14px;font-weight:600;color:' + valColor + ';font-variant-numeric:tabular-nums;">' + val + '</span>'
+              + '</div>';
+          };
+
+          return row(gateColor, 'Outside Gate', gateText, gateColor)
+            + row(shedColor, 'Shed Door', shedText, shedColor).replace('border-bottom:1px solid #F3F4F6;','');
+        ]]]

@@ -1,0 +1,155 @@
+type: vertical-stack
+card_mod:
+  style: |
+    ha-card {
+      border: none !important;
+      box-shadow: none !important;
+      background: none !important;
+    }
+cards:
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 4px 4px 0 4px
+      grid:
+        - grid-template-areas: '"title close"'
+        - grid-template-columns: 1fr auto
+      custom_fields:
+        title:
+          - text-align: left
+          - align-self: center
+        close:
+          - justify-self: end
+          - align-self: center
+    custom_fields:
+      title: |
+        [[[
+          return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937;line-height:1.15;">Add to Shopping List</div>';
+        ]]]
+      close: |
+        [[[
+          return '<div onclick="(function(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();function f(n){for(var c of n.children||[]){if(c.tagName===\'WA-DIALOG\')return c;var r=f(c)||(c.shadowRoot&&f(c.shadowRoot));if(r)return r;}return null;}var d=f(document);if(d&&d.requestClose)d.requestClose(\'close\');})(event)" '
+            + 'onmousedown="(function(e){e.stopPropagation();})(event)" '
+            + 'ontouchstart="(function(e){e.stopPropagation();})(event)" '
+            + 'style="width:30px;height:30px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#6B7280;font-size:18px;font-weight:400;line-height:1;pointer-events:auto;">'
+            + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>'
+            + '</div>';
+        ]]]
+
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: minmax(0, 1fr) auto
+      grid-gap: 10px
+      margin: 10px 4px 0 4px
+    card_mod:
+      style: |
+        ha-card {
+          background: none !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+    cards:
+      - type: entities
+        show_header_toggle: false
+        entities:
+          - entity: input_text.add_to_list_item
+            name: ""
+        card_mod:
+          style:
+            .: |
+              ha-card {
+                background: none !important;
+                border: none !important;
+                box-shadow: none !important;
+                --mdc-text-field-fill-color: white;
+                --mdc-text-field-idle-line-color: transparent;
+                --mdc-text-field-hover-line-color: transparent;
+                --mdc-shape-small: 12px;
+                --mdc-text-field-outlined-idle-border-color: #E8E4DE;
+                --mdc-text-field-outlined-hover-border-color: #C87456;
+                --mdc-text-field-focused-outline-color: #C87456;
+                --mdc-text-field-ink-color: #1F2937;
+                --mdc-text-field-label-ink-color: transparent;
+                --mdc-typography-subtitle1-font-size: 15px;
+              }
+              #states {
+                padding: 0 !important;
+                border: none !important;
+              }
+              #states > * {
+                border-bottom: none !important;
+                box-shadow: none !important;
+              }
+            hui-input-text-entity-row:
+              $: |
+                state-badge {
+                  display: none !important;
+                }
+
+      - type: custom:button-card
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: none
+        styles:
+          card:
+            - height: 48px
+            - border: none
+            - border-radius: 14px
+            - background: '#4A7C59'
+            - box-shadow: none
+            - padding: 0
+          grid:
+            - grid-template-areas: '"add_btn"'
+            - grid-template-columns: 1fr
+          custom_fields:
+            add_btn:
+              - display: flex
+              - align-items: center
+              - justify-content: center
+              - width: 100%
+              - height: 100%
+              - pointer-events: auto
+        custom_fields:
+          add_btn: |
+            [[[
+              return '<div style="color:white;font-size:16px;font-weight:600;padding:0 22px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;" '
+                + 'onclick="(function(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();var r=document.querySelector(\'home-assistant\');if(r&&r.hass)r.hass.callService(\'script\',\'ct_add_to_shopping_list\',{});})(event)" '
+                + 'onmousedown="(function(e){e.stopPropagation();})(event)" '
+                + 'ontouchstart="(function(e){e.stopPropagation();})(event)">'
+                + 'Add</div>';
+            ]]]
+
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: navigate
+      navigation_path: /the-countertop/meals
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 8px 0 0
+      grid:
+        - grid-template-areas: '"link"'
+      custom_fields:
+        link:
+          - text-align: center
+    custom_fields:
+      link: |
+        [[[
+          return '<span style="font-size:15px;font-weight:500;color:#4A7C59;">View full list &rarr;</span>';
+        ]]]

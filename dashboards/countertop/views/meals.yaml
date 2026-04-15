@@ -1,0 +1,254 @@
+##############################################################################
+#  The Countertop — Meals View (Stage 5)                                    #
+#  Dinner pool cards + recipe browser                                      #
+##############################################################################
+title: Meals
+path: meals
+type: panel
+cards:
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 1fr
+      # Fix 2026-04-11: minmax(0, 1fr) instead of 1fr lets the row 1 track
+      # actually shrink below its min-content size, so the auto row (scene
+      # bar) stays pinned to the bottom of the viewport instead of being
+      # pushed offscreen by overflowing recipe-browser content.
+      grid-template-rows: minmax(0, 1fr) auto
+      height: 100vh
+      margin: 0
+      padding: 0
+    card_mod:
+      style: |
+        ha-card {
+          background: #fbfaf9 !important;
+        }
+    cards:
+      # ═══ ROW 1: Main content ═══
+      - type: vertical-stack
+        view_layout:
+          grid-row: 1
+        cards:
+          # ── Subview Header ──
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /the-countertop/home
+            card_mod:
+              style: |
+                ha-card:active { opacity: 0.7; }
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 16px 24px 12px
+              grid:
+                - grid-template-areas: '"sv_hdr"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                sv_hdr:
+                  - display: flex
+                  - align-items: center
+                  - gap: 14px
+            custom_fields:
+              sv_hdr: |
+                [[[
+                  return `<div style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  </div>
+                  <div style="font-family: 'Fraunces', Georgia, serif; font-size: 26px; font-weight: 400; color: #1F2937;">Plan Meals</div>`;
+                ]]]
+
+          # ── THIS WEEK label ──
+          - type: custom:button-card
+            show_icon: false
+            show_name: true
+            show_state: false
+            name: THIS WEEK
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 0 24px 8px
+              name:
+                - font-size: 12px
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.8px
+                - color: '#9CA3AF'
+                - justify-self: start
+
+          # ── Meal Cards Grid ──
+          - type: custom:button-card
+            entity: sensor.mealie_weekly_meal_plan
+            show_icon: false
+            show_name: false
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 0 24px 16px
+              grid:
+                - grid-template-areas: '"meals_grid"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                meals_grid:
+                  - width: 100%
+            custom_fields:
+              meals_grid: |
+                [[[
+                  const meals = entity && entity.attributes && entity.attributes.meals ? entity.attributes.meals : [];
+                  const today = new Date();
+                  const todayStr = today.toISOString().split('T')[0];
+
+                  // Dedup: last entry per date wins
+                  var mealByDate = {};
+                  for (var i = 0; i < meals.length; i++) {
+                    var m = meals[i];
+                    if (m.date) mealByDate[m.date] = m.recipe_name || '';
+                  }
+
+                  // Build Mon-Sun dates for current week
+                  const dow = today.getDay();
+                  const mondayOffset = dow === 0 ? -6 : 1 - dow;
+                  const monday = new Date(today);
+                  monday.setDate(today.getDate() + mondayOffset);
+                  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+                  const forkSvg = '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/>';
+                  const plusSvg = '<path d="M12 5v14"/><path d="M5 12h14"/>';
+
+                  var cards = '';
+
+                  for (var d = 0; d < 7; d++) {
+                    var slotDate = new Date(monday);
+                    slotDate.setDate(monday.getDate() + d);
+                    var dateStr = slotDate.toISOString().split('T')[0];
+                    var dayLabel = dayLabels[d];
+                    var name = mealByDate[dateStr];
+                    var hasName = name && name !== '__HA_CLEARED__';
+                    var isToday = dateStr === todayStr;
+                    var isDone = dateStr < todayStr;
+
+                    if (hasName) {
+                      var tileBg = 'rgba(74,124,89,0.08)';
+                      var tileStroke = '#4A7C59';
+                      var tagText = dayLabel;
+                      var tagStyle = 'background:#F3F4F6;color:#6B7280';
+                      var nameStyle = 'color:#1F2937';
+                      var cardBorder = '1px solid #E8E4DE';
+                      var cardBg = 'white';
+                      var opacity = '1';
+
+                      if (isToday) {
+                        tileBg = 'rgba(200,116,86,0.14)';
+                        tileStroke = '#C87456';
+                        tagStyle = 'background:#FCE9DE;color:#C87456';
+                        cardBorder = '1px solid #C87456';
+                        cardBg = '#FFF6F1';
+                      } else if (isDone) {
+                        tileStroke = '#9CA3AF';
+                        opacity = '0.5';
+                        nameStyle = 'color:#1F2937;text-decoration:line-through';
+                        tagStyle = 'background:#F3F4F6;color:#9CA3AF';
+                      }
+
+                      cards += '<div style="background:' + cardBg + ';border-radius:16px;border:' + cardBorder + ';box-shadow:0 1px 3px rgba(0,0,0,0.06);padding:18px 16px;text-align:center;opacity:' + opacity + '"><div style="width:48px;height:48px;border-radius:12px;background:' + tileBg + ';display:flex;align-items:center;justify-content:center;margin:0 auto 8px"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="' + tileStroke + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + forkSvg + '</svg></div><div style="font-size:14px;font-weight:600;' + nameStyle + ';margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + name + '</div><span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;padding:3px 8px;border-radius:6px;' + tagStyle + '">' + tagText + '</span></div>';
+                    } else {
+                      // Empty slot placeholder
+                      var placeholderBorder = isToday ? '2px dashed #C87456' : '2px dashed #D1D5DB';
+                      var labelColor = isToday ? '#C87456' : '#9CA3AF';
+                      var labelBg = isToday ? '#FFF6F1' : 'white';
+                      cards += '<div style="background:' + labelBg + ';border-radius:16px;border:' + placeholderBorder + ';padding:18px 16px;text-align:center"><div style="width:48px;height:48px;border-radius:12px;background:#F9FAFB;display:flex;align-items:center;justify-content:center;margin:0 auto 8px"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="' + labelColor + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + plusSvg + '</svg></div><div style="font-size:14px;font-weight:600;color:' + labelColor + ';margin-bottom:5px">Add Meal</div><span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;padding:3px 8px;border-radius:6px;background:#F3F4F6;color:' + labelColor + '">' + dayLabel + '</span></div>';
+                    }
+                  }
+
+                  return '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">' + cards + '</div>';
+                ]]]
+
+          # ── Recipe Browser label ──
+          - type: custom:button-card
+            show_icon: false
+            show_name: true
+            show_state: false
+            name: Recipe Browser
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 0 24px 4px
+              name:
+                - font-family: "'Fraunces', Georgia, serif"
+                - font-size: 19px
+                - font-weight: 400
+                - color: '#1F2937'
+                - justify-self: start
+
+          # ── Recipe Cards Grid ──
+          - type: custom:button-card
+            entity: sensor.mealie_recipe_browser
+            show_icon: false
+            show_name: false
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 0 24px 16px
+              grid:
+                - grid-template-areas: '"recipes"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                recipes:
+                  - width: 100%
+            custom_fields:
+              recipes: |
+                [[[
+                  const items = entity && entity.attributes && entity.attributes.items ? entity.attributes.items : [];
+                  const forkSvg = '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/>';
+                  const plusSvg = '<path d="M12 5v14"/><path d="M5 12h14"/>';
+
+                  var cards = '';
+                  var displayItems = items.slice(0, 5);
+
+                  for (var i = 0; i < displayItems.length; i++) {
+                    var recipe = displayItems[i];
+                    var name = recipe.name || 'Recipe';
+                    var time = recipe.total_time || '';
+                    var recipeId = recipe.recipe_id || '';
+                    var hasImage = recipe.image && recipe.image !== 'None' && recipeId;
+
+                    var imgHtml = '';
+                    if (hasImage) {
+                      imgHtml = '<div style="height:80px;background:#F3F4F6;border-radius:12px 12px 0 0;overflow:hidden"><img src="http://100.68.225.20:9925/api/media/recipes/' + recipeId + '/images/min-original.webp" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'"></div>';
+                    } else {
+                      imgHtml = '<div style="height:80px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;border-radius:12px 12px 0 0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + forkSvg + '</svg></div>';
+                    }
+
+                    cards += '<div style="background:white;border-radius:12px;border:1px solid #E8E4DE;box-shadow:0 1px 3px rgba(0,0,0,0.06);overflow:hidden">' + imgHtml + '<div style="padding:12px 14px"><div style="font-size:14px;font-weight:600;color:#1F2937;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + name + '</div><div style="font-size:12px;color:#9CA3AF">' + time + '</div></div></div>';
+                  }
+
+                  cards += '<div style="background:white;border-radius:12px;border:1px solid #E8E4DE;box-shadow:0 1px 3px rgba(0,0,0,0.06);overflow:hidden"><div style="height:80px;background:#F3F4F6;display:flex;align-items:center;justify-content:center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + plusSvg + '</svg></div><div style="padding:12px 14px"><div style="font-size:14px;font-weight:600;color:#9CA3AF;margin-bottom:3px">Add Recipe</div><div style="font-size:12px;color:transparent">&nbsp;</div></div></div>';
+
+                  return '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">' + cards + '</div>';
+                ]]]
+
+      # ═══ ROW 2: Scene bar ═══
+      - !include ../scene_bar.yaml

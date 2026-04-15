@@ -1,0 +1,176 @@
+type: vertical-stack
+cards:
+  # Current meal status for selected day
+  - type: custom:button-card
+    entity: sensor.mealie_weekly_meal_plan
+    show_icon: false
+    show_name: false
+    show_state: false
+    triggers_update:
+      - sensor.mealie_weekly_meal_plan
+      - input_select.meal_day_selector
+    styles:
+      card:
+        - background: none
+        - box-shadow: none
+        - border: none
+        - padding: 4px 0 12px 0
+      grid:
+        - grid-template-areas: '"status"'
+        - grid-template-columns: 1fr
+      custom_fields:
+        status:
+          - width: 100%
+    custom_fields:
+      status: |
+        [[[
+          const selectedDay = states['input_select.meal_day_selector'] ? states['input_select.meal_day_selector'].state : '';
+          const dayMap = { Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4, Saturday: 5, Sunday: 6 };
+          const dayIndex = dayMap[selectedDay] !== undefined ? dayMap[selectedDay] : 0;
+
+          const now = new Date();
+          const currentDay = now.getDay();
+          const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+          const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + mondayOffset);
+          const targetDate = new Date(monday);
+          targetDate.setDate(monday.getDate() + dayIndex);
+          const yr = targetDate.getFullYear();
+          const mo = String(targetDate.getMonth() + 1).padStart(2, '0');
+          const dy = String(targetDate.getDate()).padStart(2, '0');
+          const dateStr = yr + '-' + mo + '-' + dy;
+
+          let mealName = '';
+          const mealplan = states['sensor.mealie_weekly_meal_plan'];
+          if (mealplan && mealplan.attributes && mealplan.attributes.meals) {
+            const meals = mealplan.attributes.meals;
+            if (Array.isArray(meals)) {
+              for (const m of meals) {
+                if ((m.date || '') === dateStr) {
+                  mealName = m.recipe_name || '';
+                }
+              }
+            }
+          }
+
+          const isFilled = mealName.trim().length > 0;
+          const forkKnife = '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>';
+
+          if (isFilled) {
+            return '<div style="text-align:center;padding:8px 0;">'
+              + '<div style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:#F0FAF3;border:1px solid #BBD6C5;border-radius:10px;">'
+              + '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + forkKnife + '</svg>'
+              + '<span style="font-size:14px;font-weight:600;color:#374151;">' + mealName + '</span>'
+              + '</div>'
+              + '</div>';
+          } else {
+            return '<div style="text-align:center;padding:8px 0;">'
+              + '<div style="font-size:14px;color:#7c8493;">No dinner planned for ' + selectedDay + '</div>'
+              + '<div style="font-size:12px;color:#9CA3AF;margin-top:4px;">Pick a recipe from the list or browse below</div>'
+              + '</div>';
+          }
+        ]]]
+
+  # Recipe selection dropdown
+  - type: entities
+    show_header_toggle: false
+    entities:
+      - entity: input_select.recipe_selector
+        name: Recipe
+        icon: mdi:food
+
+  # Action buttons - Cancel, Clear, and Assign
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: repeat(3, max-content)
+      grid-gap: 8px
+      justify-content: center
+    card_mod:
+      style: |
+        ha-card { width: 100%; background: none; box-shadow: none; }
+    cards:
+      - type: custom:button-card
+        name: Cancel
+        icon: mdi:close
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.close_popup
+        styles:
+          card:
+            - border-radius: 12px
+            - padding: 8px 12px
+            - margin: 4px
+            - width: 140px
+            - background-color: rgb(243, 244, 246)
+          grid:
+            - grid-template-areas: '"i n"'
+            - grid-template-columns: min-content 1fr
+          icon:
+            - width: 20px
+            - height: 20px
+            - color: rgb(107, 114, 128)
+          name:
+            - color: rgb(107, 114, 128)
+            - font-size: 14px
+            - margin-left: 8px
+
+      - type: custom:button-card
+        name: Clear
+        icon: mdi:calendar-remove-outline
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.clear_meal_for_day
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - border-radius: 12px
+            - padding: 8px 12px
+            - margin: 4px
+            - width: 140px
+            - background-color: rgb(254, 226, 226)
+          grid:
+            - grid-template-areas: '"i n"'
+            - grid-template-columns: min-content 1fr
+          icon:
+            - width: 20px
+            - height: 20px
+            - color: rgb(220, 38, 38)
+          name:
+            - color: rgb(220, 38, 38)
+            - font-size: 14px
+            - margin-left: 8px
+
+      - type: custom:button-card
+        name: Assign
+        icon: mdi:calendar-plus
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.assign_meal_to_day
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - border-radius: 12px
+            - padding: 8px 12px
+            - margin: 4px
+            - width: 140px
+            - background-color: rgb(220, 252, 231)
+          grid:
+            - grid-template-areas: '"i n"'
+            - grid-template-columns: min-content 1fr
+          icon:
+            - width: 20px
+            - height: 20px
+            - color: rgb(22, 163, 74)
+          name:
+            - color: rgb(22, 163, 74)
+            - font-size: 14px
+            - margin-left: 8px

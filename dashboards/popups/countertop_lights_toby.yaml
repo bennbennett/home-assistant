@@ -1,0 +1,63 @@
+type: vertical-stack
+card_mod:
+  style: |
+    ha-card {
+      border: none !important;
+      box-shadow: none !important;
+      background: none !important;
+    }
+cards:
+  # ── Header ──
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    triggers_update:
+      - light.toby_s_room
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 0 0 14px
+        - border-bottom: 1px solid #F3F4F6
+      grid:
+        - grid-template-areas: '"hdr_icon hdr_info"'
+        - grid-template-columns: auto 1fr
+        - column-gap: 14px
+      custom_fields:
+        hdr_icon:
+          - align-self: center
+        hdr_info:
+          - align-self: center
+    custom_fields:
+      hdr_icon: |
+        [[[
+          return '<div style="width:44px;height:44px;border-radius:11px;background:rgba(154,107,71,0.14);display:flex;align-items:center;justify-content:center;">'
+            + '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9A6B47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="3" fill="none"/><circle cx="8" cy="8" r="1.5" fill="#9A6B47" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="#9A6B47" stroke="none"/><circle cx="16" cy="16" r="1.5" fill="#9A6B47" stroke="none"/></svg>'
+            + '</div>';
+        ]]]
+      hdr_info: |
+        [[[
+          var isOn = states['light.toby_s_room'] && states['light.toby_s_room'].state === 'on';
+          var sub = isOn ? 'Light on' : 'All off';
+          return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937;">Toby\u2019s Room</div>'
+            + '<div style="font-size:13px;color:#9CA3AF;margin-top:1px;">' + sub + '</div>';
+        ]]]
+
+  # ── Lights ──
+  - type: custom:mushroom-light-card
+    entity: light.toby_s_room
+    name: Room Lights
+    show_brightness_control: true
+    use_light_color: false
+    layout: horizontal
+    card_mod:
+      style: |
+        ha-card {
+          --mushroom-accent-color: #D97706;
+          background: none; border: none; box-shadow: none;
+          border-radius: 0;
+        }

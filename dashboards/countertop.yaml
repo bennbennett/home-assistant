@@ -1,0 +1,19 @@
+##############################################################################
+#                         The Countertop Dashboard                          #
+#  Kitchen fridge iPad — hub-and-spoke, 5 views, max depth 1               #
+##############################################################################
+title: The Countertop
+
+kiosk_mode:
+  kiosk: true
+
+resources: !include resources.yaml
+
+button_card_templates: !include countertop/button_card_templates.yaml
+
+views:
+  - !include countertop/views/home.yaml
+  - !include countertop/views/lights.yaml
+  - !include countertop/views/calendar.yaml
+  - !include countertop/views/toby.yaml
+  - !include countertop/views/meals.yaml

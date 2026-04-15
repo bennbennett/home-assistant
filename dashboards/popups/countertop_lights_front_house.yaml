@@ -1,0 +1,202 @@
+type: vertical-stack
+card_mod:
+  style: |
+    ha-card {
+      border: none !important;
+      box-shadow: none !important;
+      background: none !important;
+    }
+cards:
+  # ── Header ──
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    triggers_update:
+      - light.front_house
+      - light.living_room_color
+      - light.extended_color_light_1
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 0 0 14px
+        - border-bottom: 1px solid #F3F4F6
+      grid:
+        - grid-template-areas: '"hdr_icon hdr_info"'
+        - grid-template-columns: auto 1fr
+        - column-gap: 14px
+      custom_fields:
+        hdr_icon:
+          - align-self: center
+        hdr_info:
+          - align-self: center
+    custom_fields:
+      hdr_icon: |
+        [[[
+          return '<div style="width:44px;height:44px;border-radius:11px;background:rgba(200,116,86,0.14);display:flex;align-items:center;justify-content:center;">'
+            + '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C87456" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
+            + '</div>';
+        ]]]
+      hdr_info: |
+        [[[
+          var ct = ['light.front_house','light.living_room_color','light.extended_color_light_1'];
+          var on = 0;
+          for (var i = 0; i < ct.length; i++) { if (states[ct[i]] && states[ct[i]].state === 'on') on++; }
+          var sub = on === 0 ? 'All off' : on + ' of ' + ct.length + ' on';
+          return '<div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#1F2937;">Front House</div>'
+            + '<div style="font-size:13px;color:#9CA3AF;margin-top:1px;">' + sub + '</div>';
+        ]]]
+
+  # ── Lights ──
+  - type: custom:mushroom-light-card
+    entity: light.front_house
+    name: All Lights
+    show_brightness_control: true
+    use_light_color: false
+    layout: horizontal
+    card_mod:
+      style: |
+        ha-card {
+          --mushroom-accent-color: #D97706;
+          background: none; border: none; box-shadow: none;
+          border-bottom: 1px solid #F3F4F6; border-radius: 0;
+        }
+
+  - type: custom:mushroom-light-card
+    entity: light.living_room_color
+    name: Living Room Lamp
+    show_brightness_control: true
+    use_light_color: false
+    layout: horizontal
+    card_mod:
+      style: |
+        ha-card {
+          --mushroom-accent-color: #D97706;
+          background: none; border: none; box-shadow: none;
+          border-bottom: 1px solid #F3F4F6; border-radius: 0;
+        }
+
+  - type: custom:mushroom-light-card
+    entity: light.extended_color_light_1
+    name: Bookshelf Light
+    show_brightness_control: true
+    use_light_color: false
+    layout: horizontal
+    card_mod:
+      style: |
+        ha-card {
+          --mushroom-accent-color: #D97706;
+          background: none; border: none; box-shadow: none;
+          border-radius: 0;
+        }
+
+  # ── Scenes ──
+  - type: grid
+    columns: 3
+    square: false
+    card_mod:
+      style: |
+        ha-card {
+          background: none !important; border: none !important;
+          box-shadow: none !important; padding: 8px 0 4px !important;
+        }
+    cards:
+      - type: custom:button-card
+        name: Relax
+        show_icon: false
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.front_house_relax
+        card_mod:
+          style: |
+            ha-card:active { transform: scale(0.95); background: #FFF6F1 !important; border-color: #C87456 !important; }
+        styles:
+          card:
+            - height: 44px
+            - border-radius: 11px
+            - border: 1px solid #E5E7EB
+            - background: white
+            - box-shadow: none
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#6B7280'
+      - type: custom:button-card
+        name: Energize
+        show_icon: false
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.front_house_energize
+        card_mod:
+          style: |
+            ha-card:active { transform: scale(0.95); background: #FFF6F1 !important; border-color: #C87456 !important; }
+        styles:
+          card:
+            - height: 44px
+            - border-radius: 11px
+            - border: 1px solid #E5E7EB
+            - background: white
+            - box-shadow: none
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#6B7280'
+      - type: custom:button-card
+        name: Night
+        show_icon: false
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.front_house_nightlight
+        card_mod:
+          style: |
+            ha-card:active { transform: scale(0.95); background: #FFF6F1 !important; border-color: #C87456 !important; }
+        styles:
+          card:
+            - height: 44px
+            - border-radius: 11px
+            - border: 1px solid #E5E7EB
+            - background: white
+            - box-shadow: none
+          name:
+            - font-size: 14px
+            - font-weight: 600
+            - color: '#6B7280'
+
+  # ── Info ──
+  - type: custom:button-card
+    entity: sensor.living_room_temp_temperature
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 4px 0 0
+      grid:
+        - grid-template-areas: '"info_row"'
+        - grid-template-columns: 1fr
+    custom_fields:
+      info_row: |
+        [[[
+          var ts = states['sensor.living_room_temp_temperature'];
+          var temp = ts && ts.state !== 'unavailable' ? parseFloat(ts.state).toFixed(1) : '--';
+          return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;">'
+            + '<div style="width:8px;height:8px;border-radius:50%;background:#9CA3AF;flex-shrink:0;"></div>'
+            + '<span style="font-size:14px;color:#6B7280;flex:1;">Temperature</span>'
+            + '<span style="font-size:14px;font-weight:600;color:#1F2937;font-variant-numeric:tabular-nums;">' + temp + '\u00B0F</span>'
+            + '</div>';
+        ]]]
