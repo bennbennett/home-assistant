@@ -55,6 +55,27 @@
     target:
       entity_id: input_boolean.calendar_event_created
   mode: single
+- id: countertop_kitchen_timer_finished_alert
+  alias: Countertop Kitchen Timer Finished Alert
+  description: Sends an audible alert to the mounted iPad when the kitchen timer finishes
+  triggers:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.kitchen_timer
+  conditions: []
+  actions:
+  - action: notify.mobile_app_ipad
+    data:
+      title: Kitchen Timer
+      message: Kitchen timer finished
+      data:
+        push:
+          sound:
+            name: default
+            critical: 1
+            volume: 1.0
+  mode: single
 - id: fp2_front_house_off_after_5m_no_presence
   alias: FP2 Front House Dim to 20% After 10m No Presence
   description: 'At 10m of no presence (16:00–23:00): if not already dimmed and brightness
@@ -473,7 +494,7 @@
   mode: single
 - id: 3d_printer_print_complete_notification
   alias: 3D Printer - Notify When Print Complete
-  description: Send notification to Pixel 7 when a 3D print finishes
+  description: Send notification to Pixel 10 when a 3D print finishes
   triggers:
   - platform: state
     entity_id: sensor.centauri_carbon_print_status
@@ -510,6 +531,10 @@
   - platform: state
     entity_id: sensor.centauri_carbon_print_status
     to: leveling
+  - platform: state
+    entity_id: sensor.centauri_carbon_print_status
+    from: unavailable
+    to: printing
   conditions: []
   actions:
   - action: light.turn_on
@@ -577,28 +602,26 @@
   description: "Syncs Mealie shopping list to Google Keep"
   mode: single
   triggers:
-  - trigger: time_pattern
-    minutes: "/20"
   - trigger: state
     entity_id: input_button.sync_shopping_list
   conditions:
   - condition: not
     conditions:
     - condition: state
-      entity_id: todo.mealie_shopping_list
+      entity_id: todo.mealie_weekly_groceries
       state: unavailable
   actions:
   - action: todo.get_items
     target:
       entity_id:
-      - todo.mealie_shopping_list
+      - todo.mealie_weekly_groceries
       - todo.google_keep_shopping_list
     data:
       status:
       - needs_action
     response_variable: all_items
   - variables:
-      mealie_items: "{{ all_items['todo.mealie_shopping_list']['items'] | map(attribute='summary') | list }}"
+      mealie_items: "{{ all_items['todo.mealie_weekly_groceries']['items'] | map(attribute='summary') | list }}"
       keep_items: "{{ all_items['todo.google_keep_shopping_list']['items'] | map(attribute='summary') | list }}"
       items_to_add: "{{ mealie_items | reject('in', keep_items) | list }}"
   - repeat:
@@ -615,3 +638,165 @@
     data:
       title: "Shopping List Updated"
       message: "Added {{ items_to_add | length }} items from Mealie"
+
+- id: mealie_fetch_recipes
+  alias: "Mealie: Fetch Recipe List"
+  description: "Periodically fetches recipes from Mealie and fires event for template sensor"
+  triggers:
+    - platform: homeassistant
+      event: start
+    - platform: time_pattern
+      hours: "/1"
+  conditions: []
+  actions:
+    - action: mealie.get_recipes
+      data:
+        config_entry_id: "01KF57HBNBY4RWWRGH5PJKBF1C"
+        result_limit: 100
+      response_variable: mealie_response
+    - event: mealie_recipes_updated
+      event_data:
+        recipes: >
+          {% set ns = namespace(items=[]) %}
+          {% for r in mealie_response['recipes']['items'] | default([]) %}
+            {% set ns.items = ns.items + [{
+              'name': r.name | default('') | string,
+              'slug': r.slug | default('') | string,
+              'recipe_id': (r.recipe_id | default(r['id'] | default(''))) | string,
+              'total_time': r.total_time | default('') | string,
+              'image': r.image | default('') | string,
+              'description': r.description | default('') | string
+            }] %}
+          {% endfor %}
+          {{ ns.items }}
+  mode: single
+
+- id: mealie_fetch_mealplan
+  alias: "Mealie: Fetch Weekly Meal Plan"
+  description: "Fetches the weekly meal plan from Mealie"
+  triggers:
+    - platform: homeassistant
+      event: start
+    - platform: time_pattern
+      minutes: "/30"
+    - platform: event
+      event_type: mealie_mealplan_refresh
+  conditions: []
+  actions:
+    - variables:
+        start_date: "{{ (now() - timedelta(days=now().weekday())).strftime('%Y-%m-%d') }}"
+        end_date: "{{ (now() - timedelta(days=now().weekday()) + timedelta(days=6)).strftime('%Y-%m-%d') }}"
+    - action: mealie.get_mealplan
+      data:
+        config_entry_id: "01KF57HBNBY4RWWRGH5PJKBF1C"
+        start_date: "{{ start_date }}"
+        end_date: "{{ end_date }}"
+      response_variable: mealplan_response
+    - event: mealie_mealplan_updated
+      event_data:
+        meals: >
+          {% set ns = namespace(items=[]) %}
+          {% for m in mealplan_response['mealplan'] | default([]) %}
+            {% set raw_title = (m.title | default('', true) | string | trim) %}
+            {% set ns.items = ns.items + [{
+              'date': m.mealplan_date | string,
+              'title': '' if raw_title == '__HA_CLEARED__' else raw_title,
+              'recipe_name': m.recipe.name if m.recipe else '',
+              'recipe_slug': m.recipe.slug if m.recipe else ''
+            }] %}
+          {% endfor %}
+          {{ ns.items }}
+  mode: single
+
+- id: home_hub_fetch_upcoming_events
+  alias: "Home Hub: Fetch Upcoming Calendar Events"
+  description: "Fetches the next 48h of events from family calendars for the Right Now landing page"
+  triggers:
+    - platform: homeassistant
+      event: start
+    - platform: time_pattern
+      minutes: "/5"
+    - platform: event
+      event_type: home_hub_events_refresh
+  conditions: []
+  actions:
+    - variables:
+        start_dt: "{{ now().isoformat() }}"
+        end_dt: "{{ (now() + timedelta(days=7)).isoformat() }}"
+        today_iso: "{{ now().strftime('%Y-%m-%d') }}"
+        tomorrow_iso: "{{ (now() + timedelta(days=1)).strftime('%Y-%m-%d') }}"
+    - action: calendar.get_events
+      target:
+        entity_id:
+          - calendar.home_calendar
+          - calendar.ben_personal
+          - calendar.work_calendar
+          - calendar.birthdays_anniversaries
+      data:
+        start_date_time: "{{ start_dt }}"
+        end_date_time: "{{ end_dt }}"
+      response_variable: events_response
+    - event: home_hub_events_updated
+      event_data:
+        events: >
+          {% set ns = namespace(items=[]) %}
+          {% for cal_id, cal_data in events_response.items() %}
+            {% set cal_short = cal_id.replace('calendar.', '') %}
+            {% for ev in cal_data.events | default([]) %}
+              {% set start_raw = ev.start | string %}
+              {% set end_raw = ev.end | default('') | string %}
+              {# Detect Outlook-style all-day: timed events that span midnight to midnight #}
+              {% set is_google_all_day = (start_raw | length == 10) %}
+              {% set is_outlook_all_day = ('T00:00:00' in start_raw) and ('T00:00:00' in end_raw) %}
+              {% set is_all_day = is_google_all_day or is_outlook_all_day %}
+              {# Normalize start/end to YYYY-MM-DD for all-day events so consumers don't have to parse #}
+              {% if is_all_day %}
+                {% set start_str = start_raw[:10] %}
+                {% set end_str = end_raw[:10] if end_raw else '' %}
+              {% else %}
+                {% set start_str = start_raw %}
+                {% set end_str = end_raw %}
+              {% endif %}
+              {% set include_event = true %}
+              {% if is_all_day %}
+                {# Skip all-day events whose end date is past (Google end is exclusive) #}
+                {% if end_str and end_str <= today_iso %}
+                  {% set include_event = false %}
+                {% endif %}
+              {% endif %}
+              {% if include_event %}
+                {% set ns.items = ns.items + [{
+                  'summary': ev.summary | default('') | string,
+                  'start': start_str,
+                  'end': end_str,
+                  'all_day': is_all_day,
+                  'calendar': cal_short
+                }] %}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+          {{ (ns.items | sort(attribute='start'))[:24] }}
+  mode: single
+
+- id: mealie_sync_recipe_selector
+  alias: "Mealie: Sync Recipe Selector Options"
+  description: "Updates input_select.recipe_selector options from Mealie recipe list"
+  triggers:
+    - platform: event
+      event_type: mealie_recipes_updated
+    - platform: homeassistant
+      event: start
+  conditions: []
+  actions:
+    - delay: "00:00:05"
+    - variables:
+        recipes: "{{ state_attr('sensor.mealie_recipe_browser', 'items') | default([]) }}"
+        recipe_names: "{{ recipes | map(attribute='name') | sort | list }}"
+    - condition: template
+      value_template: "{{ recipe_names | length > 0 }}"
+    - action: input_select.set_options
+      target:
+        entity_id: input_select.recipe_selector
+      data:
+        options: "{{ recipe_names }}"
+  mode: single

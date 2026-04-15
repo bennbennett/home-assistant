@@ -9,6 +9,8 @@ frontend:
   themes: !include_dir_merge_named themes
   extra_module_url:
     - /hacsfiles/lovelace-card-mod/card-mod.js
+    - /local/kiosk-mode/kiosk-mode.js  # Re-enabled 2026-04-07 — Phase 1 cleanup
+    - /local/home-hub-fonts.js?v=15  # Phase 3 — Fraunces serif loader (bump ?v= to bust iPad cache; v15 = center middle child (not whole stack) for lights/toby)
 
 # Dashboard configurations
 lovelace:
@@ -38,6 +40,22 @@ lovelace:
       filename: dashboards/mobile-redesign-v2.yaml
       require_admin: false  # Available to all users
 
+    home-hub:  # Modern iPad dashboard with collapsible sidebar
+      mode: yaml
+      title: Home Hub
+      icon: mdi:view-dashboard-variant
+      show_in_sidebar: true
+      filename: dashboards/home-hub.yaml
+      require_admin: false
+
+    the-countertop:  # Kitchen fridge iPad — hub-and-spoke, 5 views
+      mode: yaml
+      title: The Countertop
+      icon: mdi:countertop
+      show_in_sidebar: true
+      filename: dashboards/countertop.yaml
+      require_admin: false
+
 # Mobile app configuration
 mobile_app:
 
@@ -62,10 +80,106 @@ browser_mod:
 adaptive_lighting: !include adaptive_lighting.yaml
 
 template:
+  # Mealie Recipe List - populated by automation calling mealie.get_recipes
+  - trigger:
+      - platform: event
+        event_type: mealie_recipes_updated
+      - platform: homeassistant
+        event: start
+    sensor:
+      - name: "Mealie Recipe Browser"
+        unique_id: mealie_recipe_browser
+        state: "{{ trigger.event.data.recipes | default([]) | length if trigger.event is defined else 0 }}"
+        unit_of_measurement: "recipes"
+        attributes:
+          items: "{{ trigger.event.data.recipes | default([]) if trigger.event is defined else [] }}"
+          last_updated: "{{ now().isoformat() }}"
+
+  # Mealie Weekly Meal Plan - populated by automation calling mealie.get_mealplan
+  - trigger:
+      - platform: event
+        event_type: mealie_mealplan_updated
+      - platform: homeassistant
+        event: start
+    sensor:
+      - name: "Mealie Weekly Meal Plan"
+        unique_id: mealie_weekly_mealplan
+        state: "{{ trigger.event.data.meals | default([]) | length if trigger.event is defined else 0 }}"
+        unit_of_measurement: "meals"
+        attributes:
+          meals: "{{ trigger.event.data.meals | default([]) if trigger.event is defined else [] }}"
+          last_updated: "{{ now().isoformat() }}"
+
   - sensor:
       - name: "Current Month"
         state: "{{ now().strftime('%B %Y') }}"
         icon: mdi:calendar-month
+
+  # Live time/date/greeting sensors for the Home Hub Right Now landing page.
+  # Updates every 30 seconds via time_pattern trigger so the dashboard clock
+  # stays fresh without browser-side polling.
+  - trigger:
+      - platform: time_pattern
+        seconds: "/30"
+      - platform: homeassistant
+        event: start
+    sensor:
+      - name: "Live Time"
+        unique_id: live_time
+        state: "{{ now().strftime('%-I:%M') }}"
+        attributes:
+          ampm: "{{ now().strftime('%p') }}"
+      - name: "Live Date Long"
+        unique_id: live_date_long
+        state: "{{ now().strftime('%A, %B %-d') }}"
+      - name: "Live Greeting"
+        unique_id: live_greeting
+        state: >
+          {% set h = now().hour %}
+          {% if h < 5 %}Up late
+          {% elif h < 12 %}Good morning
+          {% elif h < 17 %}Good afternoon
+          {% elif h < 21 %}Good evening
+          {% else %}Good night{% endif %}
+
+  # Upcoming events sensor — populated by `home_hub_fetch_upcoming_events`
+  # automation in automations.yaml. Stores next 48h of events from the family
+  # calendars for the Right Now landing page.
+  - trigger:
+      - platform: event
+        event_type: home_hub_events_updated
+    sensor:
+      - name: "Home Hub Upcoming Events"
+        unique_id: home_hub_upcoming_events
+        state: "{{ trigger.event.data.events | default([]) | length }}"
+        attributes:
+          events: "{{ trigger.event.data.events | default([]) }}"
+          last_updated: "{{ now().isoformat() }}"
+
+  # Today's forecast high/low for the Countertop home header.
+  # PirateWeather exposes forecasts via the weather.get_forecasts service
+  # (HA 2026.3 removed templow/temperature attributes from the weather entity).
+  - trigger:
+      - platform: time_pattern
+        minutes: "/15"
+      - platform: homeassistant
+        event: start
+    action:
+      - service: weather.get_forecasts
+        target:
+          entity_id: weather.pirateweather
+        data:
+          type: daily
+        response_variable: fc
+    sensor:
+      - name: "Today High Temp"
+        unique_id: today_high_temp
+        state: "{{ fc['weather.pirateweather'].forecast[0].temperature | round(0) }}"
+        unit_of_measurement: "°F"
+      - name: "Today Low Temp"
+        unique_id: today_low_temp
+        state: "{{ fc['weather.pirateweather'].forecast[0].templow | round(0) }}"
+        unit_of_measurement: "°F"
   - binary_sensor:
       - name: "Outside Door"
         unique_id: outside_door_combined
@@ -123,6 +237,39 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 group: !include groups.yaml
 
+############################################################
+# REST commands (Mealie API)
+rest_command:
+  mealie_add_recipe_ingredients:
+    url: "http://100.68.225.20:9925/api/households/shopping/lists/fc3de051-fb82-44f8-8b07-6f410d8d1166/recipe/{{ recipe_id }}"
+    method: POST
+    headers:
+      Authorization: !secret mealie_token_header
+    content_type: "application/json"
+
+  # Fix 2026-04-11: Direct Mealie mealplan creation using slug-based UUID lookup.
+  # The HA mealie.get_recipes integration doesn't populate recipe_id in its
+  # response variable, so the assign_meal_to_day script can't look up the UUID.
+  # This rest_command bypasses the HA integration entirely: the assign script
+  # first calls Mealie's /api/recipes/{slug} to get the UUID, then passes it here.
+  # Uses the slug from sensor.mealie_recipe_browser (which IS populated).
+  mealie_create_mealplan:
+    url: "http://100.68.225.20:9925/api/households/mealplans"
+    method: POST
+    headers:
+      Authorization: !secret mealie_token_header
+    content_type: "application/json"
+    payload: '{"date": "{{ date }}", "entry_type": "{{ entry_type }}", "recipe_id": "{{ recipe_id }}"}'
+
+# Shell command for meal assignment — bypasses the broken mealie.set_mealplan
+# HA integration by calling Mealie's API directly with slug→UUID lookup.
+# Fix 2026-04-11: mealie.get_recipes doesn't populate recipe_id in its response,
+# so mealie.set_mealplan can't be called with a UUID. This shell script reads
+# the token from secrets.yaml, resolves slug→UUID via Mealie API, then POSTs
+# the mealplan entry directly.
+shell_command:
+  mealie_assign_meal: '/config/scripts/assign_meal.sh "{{ slug }}" "{{ date }}"'
+
 # KP405 Dimmer Fix - DEPRECATED: Migrated to template: section above (Dec 2025)
 # light: !include lights.yaml
 
@@ -175,6 +322,20 @@ input_boolean:
     name: Show Description Field
     initial: false
     icon: mdi:text
+
+  # Toby's Corner — Season Toggles (manage which checklists show)
+  season_school:
+    name: School Season
+    initial: true
+    icon: mdi:book-open-variant
+  season_swimming:
+    name: Swimming Season
+    initial: true
+    icon: mdi:swim
+  season_hockey:
+    name: Hockey Season
+    initial: false
+    icon: mdi:hockey-puck
 
   # Device Filter Views
   device_filter_all:
@@ -496,6 +657,12 @@ input_boolean:
     initial: false
     icon: mdi:lightbulb-auto
 
+  # Home Hub Dashboard - Sidebar State
+  sidebar_collapsed:
+    name: Sidebar Collapsed
+    initial: false
+    icon: mdi:menu
+
 ############################################################
 #                   INPUT DATETIME                          #
 ############################################################
@@ -539,10 +706,27 @@ input_text:
     initial: "Click the button to pick an activity!"
     max: 200
 
+  toby_new_activity:
+    name: New Activity
+    initial: ""
+    max: 100
+
   selected_recipe_id:
     name: Selected Recipe ID
     max: 100
     icon: mdi:food
+
+  recipe_import_url:
+    name: Recipe Import URL
+    initial: ""
+    max: 255
+    icon: mdi:link-plus
+
+  add_to_list_item:
+    name: Shopping List Item
+    initial: ""
+    max: 100
+    icon: mdi:cart-plus
 
 ############################################################
 #                   INPUT BUTTON                            #
@@ -556,6 +740,39 @@ input_button:
 #                   INPUT SELECT                            #
 ############################################################
 input_select:
+  calendar_view_mode:
+    name: Calendar View Mode
+    options:
+      - week
+      - month
+    initial: week
+    icon: mdi:calendar
+
+  toby_activity_selector:
+    name: Toby Activity
+    options:
+      - RC Cars
+      - Read a Book
+      - Build Lego
+      - Board Games
+      - Make a Movie
+      - Marbles
+      - Toy Cars
+      - Draw
+    icon: mdi:dice-multiple
+
+  countertop_active_scene:
+    name: Countertop Active Scene
+    options:
+      - none
+      - Relax
+      - All Off
+      - Bright
+      - Morning
+      - Good Night
+    initial: none
+    icon: mdi:lightbulb-on
+
   calendar_selector:
     name: Calendar Selector
     options:
@@ -575,6 +792,14 @@ input_select:
       - Sunday
     icon: mdi:calendar
 
+  recipe_selector:
+    name: Recipe
+    options:
+      - Traditional Czech Řízek
+      - Mushroom Bourguignon
+      - Spaghetti Puttanesca (Spaghetti With Capers and Olives)
+    icon: mdi:food
+
 ############################################################
 #                   INPUT NUMBER                            #
 ############################################################
@@ -588,3 +813,11 @@ input_number:
     icon: mdi:border-inside
     min: 0
     max: 6
+
+############################################################
+#                   TIMER                                   #
+############################################################
+timer:
+  kitchen_timer:
+    name: Kitchen Timer
+    icon: mdi:timer

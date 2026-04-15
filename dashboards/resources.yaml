@@ -14,5 +14,9 @@
   type: module
 - url: /hacsfiles/calendar-card-pro/calendar-card-pro.js
   type: module
+- url: /hacsfiles/simple-timer-card/simple-timer-card.js
+  type: module
+- url: /hacsfiles/circular-timer-card/circular-timer-card.js
+  type: module
 - url: /hacsfiles/custom-header/custom-header.js
   type: module

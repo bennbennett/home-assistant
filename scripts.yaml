@@ -1,41 +1,52 @@
 toby_random_activity:
   alias: "Pick Random Activity for Toby"
-  description: "Randomly selects an activity from the list"
+  description: "Randomly selects an activity from the input_select options"
   sequence:
-    - service: input_select.select_option
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.toby_activity_result
+      data:
+        value: >
+          {% set activities = state_attr('input_select.toby_activity_selector', 'options') | default([]) %}
+          {{ activities | random if activities | length > 0 else 'Add some activities first!' }}
+
+toby_add_activity:
+  alias: "Add Activity to Toby's List"
+  description: "Adds a new activity from input_text to the activity selector options"
+  sequence:
+    - condition: template
+      value_template: "{{ states('input_text.toby_new_activity') | trim | length > 0 }}"
+    - service: input_select.set_options
       target:
         entity_id: input_select.toby_activity_selector
       data:
-        option: >
-          {% set activities = [
-            'RC Cars',
-            'Toy Cars',
-            'Marbles',
-            'Read',
-            '1-Player Board Games',
-            'Make a Movie',
-            'Build Lego Set',
-            'Lego'
-          ] %}
-          {{ activities | random }}
+        options: >
+          {% set current = state_attr('input_select.toby_activity_selector', 'options') | default([]) %}
+          {% set new_item = states('input_text.toby_new_activity') | trim %}
+          {{ (current + [new_item]) | unique | list }}
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.toby_new_activity
+      data:
+        value: ""
 
 toggle_week_view:
+  alias: "Switch to Week View"
   sequence:
-    - action: input_boolean.turn_on
+    - action: input_select.select_option
       target:
-        entity_id: input_boolean.calendar_week_view
-    - action: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.calendar_month_view
+        entity_id: input_select.calendar_view_mode
+      data:
+        option: week
 
 toggle_month_view:
+  alias: "Switch to Month View"
   sequence:
-    - action: input_boolean.turn_on
+    - action: input_select.select_option
       target:
-        entity_id: input_boolean.calendar_month_view
-    - action: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.calendar_week_view
+        entity_id: input_select.calendar_view_mode
+      data:
+        option: month
 
 toggle_device_filter_all:
   sequence:
@@ -410,28 +421,342 @@ open_calendar_event_popup:
 
 assign_meal_to_day:
   alias: "Assign Meal to Day"
-  description: "Assigns a recipe to the selected day via Mealie"
-  fields:
-    recipe_id:
-      description: "Mealie recipe ID"
-      example: "abc123"
-    recipe_name:
-      description: "Recipe name for notification"
-      example: "Spaghetti Carbonara"
+  description: "Assigns the selected recipe to the selected day via Mealie"
   sequence:
+    - variables:
+        selected_day: "{{ states('input_select.meal_day_selector') }}"
+        selected_recipe: "{{ states('input_select.recipe_selector') }}"
+        recipes: "{{ state_attr('sensor.mealie_recipe_browser', 'items') | default([]) }}"
+        # Look up recipe SLUG from sensor (slug is populated; recipe_id is not
+        # due to a field-name mismatch in the HA mealie.get_recipes integration)
+        recipe_slug: "{{ (recipes | selectattr('name', 'eq', selected_recipe) | map(attribute='slug') | list | first) | default('') }}"
+        # Calculate date from day name (Python weekday: Mon=0 ... Sun=6)
+        days_map:
+          "Monday": 0
+          "Tuesday": 1
+          "Wednesday": 2
+          "Thursday": 3
+          "Friday": 4
+          "Saturday": 5
+          "Sunday": 6
+        target_dow: "{{ days_map[selected_day] }}"
+        current_monday: "{{ (now() - timedelta(days=now().weekday())).strftime('%Y-%m-%d') }}"
+        target_date: "{{ (as_datetime(current_monday) + timedelta(days=target_dow | int)).strftime('%Y-%m-%d') }}"
+    # Fix 2026-04-11: Use shell_command instead of mealie.set_mealplan because
+    # mealie.get_recipes doesn't populate recipe_id. The shell script resolves
+    # slug→UUID via Mealie's API directly, then POSTs the mealplan entry.
+    - condition: template
+      value_template: "{{ recipe_slug | trim | length > 0 }}"
+    - action: shell_command.mealie_assign_meal
+      data:
+        slug: "{{ recipe_slug | trim }}"
+        date: "{{ target_date }}"
+    - event: mealie_mealplan_refresh
+  mode: single
+
+clear_meal_for_day:
+  alias: "Clear Meal for Day"
+  description: "Clears the selected day dinner entry in Mealie"
+  sequence:
+    - variables:
+        selected_day: "{{ states('input_select.meal_day_selector') }}"
+        days_map:
+          "Monday": 0
+          "Tuesday": 1
+          "Wednesday": 2
+          "Thursday": 3
+          "Friday": 4
+          "Saturday": 5
+          "Sunday": 6
+        target_dow: "{{ days_map[selected_day] }}"
+        current_monday: "{{ (now() - timedelta(days=now().weekday())).strftime('%Y-%m-%d') }}"
+        target_date: "{{ (as_datetime(current_monday) + timedelta(days=target_dow | int)).strftime('%Y-%m-%d') }}"
     - action: mealie.set_mealplan
       data:
-        date: >-
-          {% set days = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6} %}
-          {% set selected = states('input_select.meal_day_selector') %}
-          {% set today_dow = now().weekday() %}
-          {% set target_dow = days[selected] %}
-          {% set diff = (target_dow - today_dow) % 7 %}
-          {{ (now() + timedelta(days=diff)).strftime('%Y-%m-%d') }}
+        config_entry_id: "01KF57HBNBY4RWWRGH5PJKBF1C"
+        note_title: "__HA_CLEARED__"
+        note_text: "auto-clear"
         entry_type: dinner
-        recipe_id: "{{ recipe_id }}"
-    - action: browser_mod.close_popup
+        date: "{{ target_date }}"
+    - event: mealie_mealplan_refresh
+  mode: single
+
+import_recipe_from_url:
+  alias: "Import Recipe from URL"
+  description: "Imports a recipe into Mealie from a URL"
+  sequence:
+    - variables:
+        url: "{{ states('input_text.recipe_import_url') | trim }}"
+    - condition: template
+      value_template: "{{ url | length > 0 }}"
+    - action: mealie.import_recipe
+      data:
+        config_entry_id: "01KF57HBNBY4RWWRGH5PJKBF1C"
+        url: "{{ url }}"
+        include_tags: true
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.recipe_import_url
+      data:
+        value: ""
+    - event: mealie_recipes_refresh
+  mode: single
+
+clear_weekly_groceries:
+  alias: "Clear Weekly Groceries"
+  description: "Removes all items from the Weekly Groceries list"
+  sequence:
+    - action: todo.get_items
+      target:
+        entity_id: todo.mealie_weekly_groceries
+      data:
+        status:
+          - needs_action
+          - completed
+      response_variable: weekly_grocery_items
+    - variables:
+        items_to_remove: "{{ weekly_grocery_items['todo.mealie_weekly_groceries']['items'] | map(attribute='summary') | reject('equalto', none) | list }}"
+    - repeat:
+        for_each: "{{ items_to_remove }}"
+        sequence:
+          - action: todo.remove_item
+            target:
+              entity_id: todo.mealie_weekly_groceries
+            data:
+              item: "{{ repeat.item }}"
+  mode: single
+
+########################################################################
+# Generate grocery list from assigned meals
+# Clears existing list, then adds each assigned recipe's ingredients
+# via Mealie's native recipe-to-shopping-list endpoint.
+########################################################################
+generate_groceries_for_mealplan:
+  alias: "Generate Groceries for Meal Plan"
+  sequence:
+    # Clear existing grocery list first
+    - service: script.clear_weekly_groceries
+
+    # Wait for clear to complete
+    - delay: "00:00:02"
+
+    # For each unique assigned recipe, add its ingredients
+    - repeat:
+        for_each: >
+          {% set meals = state_attr('sensor.mealie_weekly_meal_plan', 'meals') | default([]) %}
+          {% set ns = namespace(by_date={}, slugs=[]) %}
+          {% for m in meals %}
+            {% set ns.by_date = dict(ns.by_date, **{m.date: m}) %}
+          {% endfor %}
+          {% for m in ns.by_date.values() %}
+            {% if m.recipe_name and m.recipe_name | trim != '' and m.recipe_slug not in ns.slugs %}
+              {% set ns.slugs = ns.slugs + [m.recipe_slug] %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.slugs }}
+        sequence:
+          - variables:
+              slug: "{{ repeat.item }}"
+              rid: >
+                {{ (state_attr('sensor.mealie_recipe_browser', 'items') | default([])
+                    | selectattr('slug', 'eq', slug)
+                    | map(attribute='recipe_id')
+                    | list | first) | default('') }}
+          - condition: template
+            value_template: "{{ rid != '' }}"
+          - service: rest_command.mealie_add_recipe_ingredients
+            data:
+              recipe_id: "{{ rid }}"
+  mode: single
+
+########################################################################
+# Pick day and assign — wrapper for day picker popup buttons
+# Accepts day_name as input, sets the selector, runs assignment.
+# Used by inline JS-defined cards where fire-dom-event doesn't work.
+########################################################################
+ring_iphone:
+  alias: "Ring iPhone"
+  sequence:
+    - action: notify.mobile_app_iphone_4
+      data:
+        message: "Find My iPhone"
+        data:
+          push:
+            sound:
+              name: default
+              critical: 1
+              volume: 1.0
+
+ring_pixel_10:
+  alias: "Ring Pixel 10"
+  sequence:
     - action: notify.mobile_app_pixel_10
       data:
-        title: "Meal Planned"
-        message: "{{ recipe_name }} set for {{ states('input_select.meal_day_selector') }}"
+        message: "Find My Phone"
+        data:
+          ttl: 0
+          priority: high
+          channel: alarm_stream
+
+ring_small_ipad:
+  alias: "Ring Small iPad"
+  sequence:
+    - action: notify.mobile_app_benjamins_ipad
+      data:
+        message: "Find My iPad"
+        data:
+          push:
+            sound:
+              name: default
+              critical: 1
+              volume: 1.0
+
+ring_big_ipad:
+  alias: "Ring Big iPad"
+  sequence:
+    - action: notify.mobile_app_ipad
+      data:
+        message: "Find My iPad"
+        data:
+          push:
+            sound:
+              name: default
+              critical: 1
+              volume: 1.0
+
+pick_day_and_assign:
+  alias: "Pick Day and Assign Meal"
+  fields:
+    day_name:
+      description: "Day of the week (e.g., Monday)"
+      example: "Monday"
+  sequence:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.meal_day_selector
+      data:
+        option: "{{ day_name }}"
+    - service: script.assign_meal_to_day
+  mode: single
+
+countertop_assign_meal_to_tonight:
+  alias: "Countertop Assign Meal to Tonight"
+  description: "Assigns a selected recipe to today's dinner slot from the Countertop popup"
+  fields:
+    recipe_name:
+      description: "Recipe name to assign"
+      example: "Pizza"
+  sequence:
+    - variables:
+        selected_recipe: "{{ recipe_name | default(states('input_select.recipe_selector')) | trim }}"
+        today_name: "{{ now().strftime('%A') }}"
+        recipe_options: "{{ state_attr('sensor.mealie_recipe_browser', 'items') | default([]) | map(attribute='name') | list }}"
+    - condition: template
+      value_template: "{{ selected_recipe | length > 0 and selected_recipe in recipe_options }}"
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.meal_day_selector
+      data:
+        option: "{{ today_name }}"
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.recipe_selector
+      data:
+        option: "{{ selected_recipe }}"
+    - service: script.assign_meal_to_day
+  mode: single
+
+############################################################
+# Countertop — Assign Recipe by Index
+############################################################
+countertop_assign_recipe_by_index:
+  alias: "Countertop Assign Recipe by Index"
+  description: "Resolves a recipe name from sensor index and delegates to assign_meal_to_tonight"
+  fields:
+    index:
+      description: "Index into mealie_recipe_browser items (0-5)"
+      example: "0"
+  sequence:
+    - variables:
+        items: "{{ state_attr('sensor.mealie_recipe_browser', 'items') | default([]) }}"
+        recipe_name: >-
+          {{ items[index | int].name | default('')
+             if index | int < items | length else '' }}
+    - condition: template
+      value_template: "{{ recipe_name | length > 0 }}"
+    - service: script.countertop_assign_meal_to_tonight
+      data:
+        recipe_name: "{{ recipe_name }}"
+  mode: single
+
+############################################################
+# Countertop — Add to Shopping List
+############################################################
+ct_add_to_shopping_list:
+  alias: "Add to Shopping List (Countertop)"
+  description: "Adds the text from input_text.add_to_list_item to Google Keep shopping list, then clears the input"
+  sequence:
+    - condition: template
+      value_template: "{{ states('input_text.add_to_list_item') | trim | length > 0 }}"
+    - action: todo.add_item
+      target:
+        entity_id: todo.google_keep_shopping_list
+      data:
+        item: "{{ states('input_text.add_to_list_item') }}"
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.add_to_list_item
+      data:
+        value: ""
+  mode: single
+
+############################################################
+# Countertop — Activate Scene (sets active-scene helper + triggers scene/script)
+############################################################
+ct_activate_scene:
+  alias: "Activate Countertop Scene"
+  description: "Records the active scene name and triggers the appropriate scene/script"
+  fields:
+    scene_name:
+      description: "Scene label (Relax, All Off, Bright, Morning, Good Night)"
+      example: "Bright"
+  sequence:
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.countertop_active_scene
+      data:
+        option: "{{ scene_name }}"
+    - choose:
+        - conditions: "{{ scene_name == 'Relax' }}"
+          sequence:
+            - action: scene.turn_on
+              target:
+                entity_id: scene.front_house_relax
+        - conditions: "{{ scene_name == 'All Off' }}"
+          sequence:
+            - action: light.turn_off
+              target:
+                entity_id:
+                  - light.living_room
+                  - light.front_house
+                  - light.kitchen
+                  - light.master_bedroom
+                  - light.toby_s_room
+                  - light.outdoor_lights_dimmable
+        - conditions: "{{ scene_name == 'Bright' }}"
+          sequence:
+            - action: scene.turn_on
+              target:
+                entity_id: scene.front_house_concentrate
+        - conditions: "{{ scene_name == 'Morning' }}"
+          sequence:
+            - action: script.turn_on
+              target:
+                entity_id: script.good_morning_sequence
+        - conditions: "{{ scene_name == 'Good Night' }}"
+          sequence:
+            - action: script.turn_on
+              target:
+                entity_id: script.good_night_sequence
+  mode: single
+
