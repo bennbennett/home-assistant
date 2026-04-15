@@ -2,6 +2,38 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 14, 2026 — Countertop Mockup Polish: Timer, Scene Bar, Popups, Calendar, I'm Bored]
+
+Closed out the visual fidelity gaps against the mockup. Full QA comparison of 13 live iPad screenshots vs 13 mockup renders, then targeted fixes for every non-Mealie issue. Also discovered the Web Awesome text-field underline mechanism and the correct dialog-close primitive for HA 2026.3.
+
+### Fixed
+- **Timer popup ring now renders as a proper full circle** with the countdown or "Ready" text centered inside. Earlier attempts to override circle `r/cx/cy` via CSS enlarged the visual ring but left the JS-computed `stroke-dasharray` calibrated to the original `r=28`, so only ~34% of the ring drew (the "semi-circle" bug). Fixed by switching to CSS `zoom: 2.8` on the SVG, which scales layout and visuals together so internal coordinates stay aligned with the card's dasharray math
+- **Close X buttons now work on Shopping and all four Toby checklist popups** (Manage, School, Swimming, Hockey). `browser_mod.close_popup` even with `browser_id: 'THIS'` requires a registered browser — unreliable. The correct primitive for HA 2026.3 is walking to the `wa-dialog` element and calling `requestClose('close')` on it
+- **Calendar week view now shows day-of-week labels** (YESTERDAY / TODAY / TOMORROW / day names) above the date numbers. Previous CSS had `.date .text { display: none }`. Removed the duplicate "TODAY" `::after` content since the native `.text` element now shows "Today" on today's column. Date numbers styled Fraunces 22px
+- **Toby "I'm Bored" section renders as one unified card** (Pick Something button → input row → activity pills). Previously three separate cards with visible seams because the middle `custom:layout-card` didn't render `ha-card` consistently. Wrapped all three in `custom:vertical-stack-in-card`
+- **Toby input row now appears above the activity pills** (matching mockup) instead of below
+- **Dark horizontal underline under both text inputs eliminated.** The line was a `::after` pseudo-element on the `.text-field` div inside `wa-input`'s shadow DOM — Web Awesome's default focus indicator. MDC-era CSS variables don't reach it. Fixed by adding `.text-field::before, .text-field::after { display:none !important; content:none !important; }` to the existing wa-input shadow-DOM patcher in `home-hub-fonts.js`
+
+### Added
+- **`input_select.countertop_active_scene` helper** with options `none / Relax / All Off / Bright / Morning / Good Night`. Powers the scene bar's active-state indicator
+- **`script.ct_activate_scene`** accepting a `scene_name` field. Sets the active-scene helper and fans out via `choose` to the correct scene/script/light service
+- **Scene bar active-scene visual state.** `ct_scene_chip` template now reads the helper and applies terracotta text/icon/border + peach background to the matching chip. `triggers_update` includes the helper so chips re-render instantly on change
+
+### Changed
+- **Scene bar chips now all call `script.ct_activate_scene`** instead of individual scene.turn_on / light.turn_off / script.turn_on services. Keeps the active-scene helper in sync with every tap
+- **Removed `icon: mdi:plus-circle`** from `input_text.toby_new_activity` so the default entity-row icon no longer renders next to the input
+- **`home-hub-fonts.js` bumped to `?v=14`** in `extra_module_url`
+
+### Known Issues (deferred)
+- **Dinner popup meal assignment from iPad tap still does not commit.** Pre-existing from Phase 6, explicitly deferred to a separate Mealie-focused session
+- **Front House popup temperature row shows `--°F`** — `sensor.living_room_temp_temperature` is `unavailable` (Zigbee sensor offline or battery). Template correctly handles the unavailable state; this is a hardware issue
+
+### Technical Discoveries
+- **`zoom` beats `transform: scale()` for SVGs with JS-computed dasharrays.** `transform: scale()` resizes visuals but the layout box stays small and dasharray math calibrated to natural coordinates ends up covering only a fraction of the visible circumference. `zoom` scales layout and visuals together
+- **HA 2026.3 `wa-dialog` closes via `requestClose('close')`.** Inline onclick handlers should walk the DOM to find the dialog and call its method directly, not rely on `browser_mod.close_popup` which requires a registered browser
+- **`custom:vertical-stack-in-card` (HACS) unifies multi-card sections.** Wraps children in a single container and suppresses their individual `ha-card` chrome. Inner cards should explicitly set `background: none; border: none; box-shadow: none`
+- **`extra_module_url` version bumps require an HA restart, not just `reload_core_config`.** The frontend only re-evaluates `extra_module_url` at bootstrap
+
 ## [April 13, 2026 — Countertop Lights YAML Implementation + Bug Fixes]
 
 Implemented the ring-centered Lights view mockup as live YAML. Added per-room control popups with split tap zones (ring toggles, card opens popup). Fixed calendar agenda bugs and shopping list iPad touch issues.

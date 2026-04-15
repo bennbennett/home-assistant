@@ -30,6 +30,7 @@
 | 10 | [Patterns](10-patterns.md) | Reusable solutions (templates, popup patterns) |
 | 11 | [Home Hub Sidebar Debugging](11-home-hub-sidebar-debugging.md) | **MOSTLY RESOLVED** - Sidebar layout working; weather content alignment pending |
 | 12 | [Countertop Live Remediation (Apr 11, 2026)](12-countertop-live-remediation-2026-04-11.md) | Codex session log: Phase 4 interaction remediation on `/Volumes/config` live. 7/8 tasks complete; dinner popup still broken |
+| 13 | [Countertop Mockup Polish (Apr 14, 2026)](13-countertop-mockup-polish-2026-04-14.md) | QA pass + fidelity fixes: timer ring centering, scene bar active state, close-X buttons, calendar day labels, I'm Bored unified card, wa-input underline removed |
 
 ## System Summary
 
@@ -82,4 +83,4 @@ home-assistant/
 ```
 
 ---
-*Last updated: April 2026*
+*Last updated: April 14, 2026*
