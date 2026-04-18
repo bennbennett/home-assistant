@@ -50,37 +50,32 @@
 
 ## File Locations
 
-### Local (this repository)
+**Single repo** (dev assets + HA config unified). HA Git Pull add-on syncs from GitHub to `/config` on the server.
+
 ```
 home-assistant/
-├── CLAUDE.md          # Quick reference (start here)
-├── .env               # Credentials
-├── docs/              # This documentation
-├── tools/             # Helper scripts
-├── examples/          # Code snippets
-└── history/           # Logs and changelog
+├── CLAUDE.md                # Quick reference (start here)
+├── .env                     # Credentials (not tracked)
+├── configuration.yaml       # Main HA config
+├── automations.yaml         # All automations
+├── scripts.yaml             # All scripts
+├── dashboards/
+│   ├── home-hub.yaml        # Home Hub root
+│   ├── home-hub/            # Home Hub templates & views
+│   ├── countertop.yaml      # Countertop root
+│   ├── countertop/          # Countertop templates & views
+│   ├── popups/              # All popup YAML partials
+│   └── tablet.yaml          # iPad dashboard
+├── www/
+│   ├── home-hub-fonts.js    # Fraunces loader + shadow DOM patchers (v15)
+│   └── kiosk-mode/          # Kiosk mode JS (hides HA chrome)
+├── docs/                    # This documentation
+├── tools/                   # Helper scripts
+├── examples/                # Mockups and debugging screenshots
+└── history/                 # Logs and changelog
 ```
 
-### Home Assistant Config (via Samba)
-```
-/Volumes/config/
-├── automations.yaml         # Automations
-├── configuration.yaml       # Main config
-├── adaptive_lighting.yaml   # Color temp settings
-├── lights.yaml              # Light templates
-├── dashboards/              # Dashboard files
-│   ├── tablet.yaml          # Original iPad dashboard
-│   ├── home-hub.yaml        # Home Hub dashboard (sidebar)
-│   ├── home-hub/            # Home Hub templates & views
-│   ├── countertop.yaml      # Countertop kitchen iPad dashboard
-│   ├── countertop/          # Countertop templates & views
-│   ├── views/rooms.yaml
-│   └── button_card_templates.yaml
-├── www/
-│   ├── kiosk-mode/          # Kiosk mode JS (hides HA chrome)
-│   └── home-hub-fonts.js    # Fraunces serif loader + animation keyframes + hourly-weather warm patcher + Countertop vertical centering + input field shadow DOM patcher
-└── .storage/                # Integration configs
-```
+Deploy: edit locally, `git push`, Git Pull syncs to HA, restart HA for config changes.
 
 ---
-*Last updated: April 14, 2026*
+*Last updated: April 17, 2026*

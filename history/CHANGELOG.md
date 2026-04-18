@@ -2,6 +2,30 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 15-17, 2026 — Countertop QA Polish + Repo Unification]
+
+Playwright-based QA comparing all 5 Countertop views to the mockup. Fixed 5 P0/P1 visual gaps. Then cleaned up 3 months of uncommitted HA config (6 logical commits, 63 files), unified two competing git repos into a single working copy, and set up the Git Pull add-on for push-to-deploy.
+
+### Fixed
+- **Lights and Toby views no longer center the header along with the content.** Restructured both views from 2-row grid (1fr/auto) to 3-row grid (auto/1fr/auto) so the header pins to top while room cards/checklists center vertically. Updated `home-hub-fonts.js` patcher to center the middle child (row 2) instead of the entire vertical-stack
+- **Home weather row now shows high/low temperatures** (`60° H:69° L:53°`). Added trigger-based template sensors `sensor.today_high_temp` and `sensor.today_low_temp` that call `weather.get_forecasts` every 15 minutes (PirateWeather dropped templow/temperature attributes in HA 2026.3)
+- **Calendar week view navigation bar removed** (`showNavigation: false`) — the `← · → April` row wasn't in the mockup
+- **Calendar day-header order flipped** to match mockup: label on top (YESTERDAY/TODAY/THURSDAY/...), number below. CSS `flex-direction: column-reverse` on `.container .day .date`
+
+### Changed
+- **`home-hub-fonts.js` bumped to `?v=15`** — patcher now targets `gridRoot.children[1]` (the middle grid row) instead of checking for `HUI-VERTICAL-STACK-CARD` as first child
+- **Repository unified.** Previously two local git repos (`/Volumes/config/` and `/Users/bbennett/.../home-assistant/`) both tracked the same GitHub remote, causing merge conflicts. Committed all pending /Volumes/config work (6 logical commits, 63 files), stripped `.git` from /Volumes/config, and made the local project dir the single canonical working copy
+- **`.gitignore` tightened.** Added `custom_components/`, `www/community/`, `.cache/`, `.mealie_token`, `screenshots/`. Dropped untracked file count from 2,727 to 0
+
+### Added
+- **`sensor.today_high_temp` / `sensor.today_low_temp`** template sensors in `configuration.yaml`. Call `weather.get_forecasts` (daily type) on PirateWeather every 15 min + on HA start
+- **Git Pull add-on** configured for deploy workflow. Edit locally, `git push`, Git Pull syncs to `/config`, restart HA when needed. Auto-restart disabled (HA 2026.3 config validator has a false-positive on `triggers` key format)
+
+### Known Issues (deferred to P2)
+- Calendar day labels show YESTERDAY/TODAY/TOMORROW + full day names instead of 3-letter abbreviations (MON/TUE/WED). Would require patching the `week-planner-card` component
+- Most Lights rooms show no temperature (climate sensors returning unavailable, not a layout issue)
+- Scene bar active-state indicator untested after HA restart (may need a scene tap to initialize `input_select.countertop_active_scene`)
+
 ## [April 14, 2026 — Countertop Mockup Polish: Timer, Scene Bar, Popups, Calendar, I'm Bored]
 
 Closed out the visual fidelity gaps against the mockup. Full QA comparison of 13 live iPad screenshots vs 13 mockup renders, then targeted fixes for every non-Mealie issue. Also discovered the Web Awesome text-field underline mechanism and the correct dialog-close primitive for HA 2026.3.

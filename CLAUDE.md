@@ -8,7 +8,7 @@ Personal smart home setup (~650 entities) across 4 dashboards on HA 2026.3.0.
 |------|-------|
 | **HA URL** | `http://192.168.68.114:8123` (same home & remote via bennett-server Tailscale subnet route) |
 | **Credentials** | `. .env` loads `$HASS_URL` and `$HASS_TOKEN` |
-| **Config access** | Samba mount at `/Volumes/config/` — `open "smb://192.168.68.114/config"` |
+| **Config access** | Edit locally, push to GitHub. HA Git Pull add-on syncs. Samba at `/Volumes/config/` for debugging. |
 | **Home server** | `/Users/bbennett/Documents/25_PERSONAL-Environment/home-server` (GMKtec — runs Mealie, media, etc.) |
 | **Phone** | Pixel 10 (`notify.mobile_app_pixel_10`) |
 | **Mealie** | `http://100.68.225.20:9925` (Tailscale — hosted on home server) |
@@ -18,10 +18,10 @@ Personal smart home setup (~650 entities) across 4 dashboards on HA 2026.3.0.
 
 | Dashboard | Default URL | Config root |
 |-----------|------------|-------------|
-| Home Hub | `/home-hub/right-now` | `/Volumes/config/dashboards/home-hub/` |
-| Countertop | `/the-countertop/home` | `/Volumes/config/dashboards/countertop/` |
-| iPad | `/lovelace/ipad` | `/Volumes/config/dashboards/tablet.yaml` |
-| Mobile | `/mobile-dashboard/home` | `/Volumes/config/dashboards/mobile-redesign-v2.yaml` |
+| Home Hub | `/home-hub/right-now` | `dashboards/home-hub/` |
+| Countertop | `/the-countertop/home` | `dashboards/countertop/` |
+| iPad | `/lovelace/ipad` | `dashboards/tablet.yaml` |
+| Mobile | `/mobile-dashboard/home` | `dashboards/mobile-redesign-v2.yaml` |
 
 ## Commands
 
@@ -48,32 +48,32 @@ ls /Volumes/config/ 2>/dev/null || open "smb://192.168.68.114/config"
 
 ## Where Things Live
 
-**Local repo:**
+**Single repo** at `/Users/bbennett/Documents/25_PERSONAL-Environment/home-assistant` (GitHub: `bennbennett/home-assistant`). Contains both HA config AND dev assets. HA Git Pull add-on syncs from GitHub to `/config` on the server.
+
 ```
 home-assistant/
 ├── .env                        # HASS_URL, HASS_TOKEN, MEALIE_TOKEN, MEALIE_URL
+├── configuration.yaml          # Main config (entities, extra_module_url, shell_commands)
+├── automations.yaml            # All automations
+├── scripts.yaml                # All scripts
+├── dashboards/
+│   ├── home-hub.yaml           # Home Hub root (kiosk_mode config)
+│   ├── home-hub/               # Templates, views, decluttering_templates
+│   ├── countertop.yaml         # Countertop root
+│   ├── countertop/             # Templates, views, scene_bar
+│   ├── popups/                 # All popup YAML partials
+│   └── tablet.yaml             # iPad dashboard
+├── www/
+│   ├── home-hub-fonts.js       # Fraunces loader + JS shadow DOM patchers
+│   └── kiosk-mode/kiosk-mode.js # Hides HA chrome (manual install, not HACS)
+├── scripts/assign_meal.sh      # Mealie slug→UUID mealplan assignment
 ├── tools/                      # hass-setup.sh, generate_grocery_list.py, import_recipe_pdf.py
 ├── docs/INDEX.md               # Documentation navigation
-├── examples/mockup/            # Design mockups (rooms.png, calendar.png, etc.)
+├── examples/mockup/            # Design mockups
 └── history/                    # Session logs
 ```
 
-**HA config (Samba — `/Volumes/config/`):**
-
-| Path | Purpose |
-|------|---------|
-| `configuration.yaml` | Main config (entities, extra_module_url, shell_commands) |
-| `automations.yaml` | All automations |
-| `scripts.yaml` | All scripts |
-| `dashboards/home-hub.yaml` | Home Hub root (kiosk_mode config) |
-| `dashboards/home-hub/` | Templates, views, decluttering_templates |
-| `dashboards/countertop.yaml` | Countertop root |
-| `dashboards/countertop/` | Templates, views, scene_bar |
-| `dashboards/popups/` | All popup YAML partials |
-| `dashboards/tablet.yaml` | iPad dashboard |
-| `www/home-hub-fonts.js` | Fraunces loader + JS shadow DOM patchers |
-| `www/kiosk-mode/kiosk-mode.js` | Hides HA chrome (manual install, not HACS) |
-| `scripts/assign_meal.sh` | Mealie slug→UUID mealplan assignment |
+**Deploy workflow:** Edit locally → `git push` → HA Git Pull add-on syncs → restart HA from Settings when needed. Samba mount (`/Volumes/config/`) is still available for direct debugging but is NOT the primary editing interface.
 
 **Related project:** Home server config lives at `/Users/bbennett/Documents/25_PERSONAL-Environment/home-server` — the GMKtec box that runs Mealie, media services, and other self-hosted infrastructure. Refer to that repo when debugging Mealie connectivity, server-side scripts, or Docker services.
 
@@ -134,4 +134,4 @@ ALWAYS invoke matching skills as your FIRST action:
 
 See `docs/INDEX.md` for detailed documentation. See `README.md` for additional API examples.
 
-Last tidy review: 2026-04-13 -- if 30+ days stale, suggest running /claude-md-creator tidy
+Last tidy review: 2026-04-17 -- if 30+ days stale, suggest running /claude-md-creator tidy
