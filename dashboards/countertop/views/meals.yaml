@@ -153,7 +153,7 @@ cards:
                             option: Monday
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -222,7 +222,7 @@ cards:
                             option: Tuesday
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -291,7 +291,7 @@ cards:
                             option: Wednesday
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -360,7 +360,7 @@ cards:
                             option: Thursday
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -429,7 +429,7 @@ cards:
                             option: Friday
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -498,7 +498,7 @@ cards:
                             option: Saturday
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -567,7 +567,7 @@ cards:
                             option: Sunday
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -665,7 +665,7 @@ cards:
                             index: 0
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -717,7 +717,7 @@ cards:
                             index: 1
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -769,7 +769,7 @@ cards:
                             index: 2
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -821,7 +821,7 @@ cards:
                             index: 3
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -873,7 +873,7 @@ cards:
                             index: 4
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -925,7 +925,7 @@ cards:
                             index: 5
                         - service: browser_mod.delay
                           data:
-                            time: 200
+                            time: 500
                         - service: browser_mod.popup
                           data:
                             title: ''
