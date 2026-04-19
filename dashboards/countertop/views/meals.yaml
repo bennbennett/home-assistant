@@ -151,6 +151,9 @@ cards:
                           data:
                             entity_id: input_select.meal_day_selector
                             option: Monday
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -217,6 +220,9 @@ cards:
                           data:
                             entity_id: input_select.meal_day_selector
                             option: Tuesday
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -283,6 +289,9 @@ cards:
                           data:
                             entity_id: input_select.meal_day_selector
                             option: Wednesday
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -349,6 +358,9 @@ cards:
                           data:
                             entity_id: input_select.meal_day_selector
                             option: Thursday
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -415,6 +427,9 @@ cards:
                           data:
                             entity_id: input_select.meal_day_selector
                             option: Friday
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -481,6 +496,9 @@ cards:
                           data:
                             entity_id: input_select.meal_day_selector
                             option: Saturday
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -547,6 +565,9 @@ cards:
                           data:
                             entity_id: input_select.meal_day_selector
                             option: Sunday
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -642,6 +663,9 @@ cards:
                         - service: script.ct_set_recipe_selector_by_index
                           data:
                             index: 0
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -691,6 +715,9 @@ cards:
                         - service: script.ct_set_recipe_selector_by_index
                           data:
                             index: 1
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -740,6 +767,9 @@ cards:
                         - service: script.ct_set_recipe_selector_by_index
                           data:
                             index: 2
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -789,6 +819,9 @@ cards:
                         - service: script.ct_set_recipe_selector_by_index
                           data:
                             index: 3
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -838,6 +871,9 @@ cards:
                         - service: script.ct_set_recipe_selector_by_index
                           data:
                             index: 4
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
@@ -887,6 +923,9 @@ cards:
                         - service: script.ct_set_recipe_selector_by_index
                           data:
                             index: 5
+                        - service: browser_mod.delay
+                          data:
+                            time: 200
                         - service: browser_mod.popup
                           data:
                             title: ''
