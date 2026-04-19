@@ -57,7 +57,8 @@
   mode: single
 - id: countertop_kitchen_timer_finished_alert
   alias: Countertop Kitchen Timer Finished Alert
-  description: Sends an audible alert to the mounted iPad when the kitchen timer finishes
+  description: Plays the Time Timer alert on the mounted iPad (via browser_mod) and
+    sends a backup iOS push in case the iPad isn't actively displaying HA.
   triggers:
   - platform: event
     event_type: timer.finished
@@ -65,6 +66,21 @@
       entity_id: timer.kitchen_timer
   conditions: []
   actions:
+  # Primary: play the WAV on every registered browser_mod client. The kitchen
+  # iPad's Countertop dashboard is the intended target; if the audio element
+  # plays on another device, the push below covers that case.
+  # The sound file lives at /config/www/sounds/timer_end.wav → /local/ URL.
+  - action: browser_mod.javascript
+    data:
+      code: |
+        (() => {
+          const url = '/local/sounds/timer_end.wav?v=1';
+          const a = new Audio(url);
+          a.volume = 1.0;
+          a.play().catch((e) => console.warn('timer sound blocked:', e));
+        })();
+  # Backup: iOS push notification with default critical sound, in case the
+  # iPad is locked or the HA frontend isn't the foreground app.
   - action: notify.mobile_app_ipad
     data:
       title: Kitchen Timer
