@@ -17,22 +17,20 @@ card_mod:
       background: none !important;
     }
 cards:
-  # ── Title: "DAY, Apr 24" ──
-  # Uses sensor.mealie_weekly_meal_plan as entity so button-card's reactive
-  # bindings are consistent with the banner/pill cards below. Day name is
-  # read from states[] (not entity.state) — in browser_mod popups the
-  # per-card `entity` binding is unreliable and can resolve to the popup's
-  # first-mentioned entity instead of the card's own config.entity.
+  # ── Title: "DAY, Apr 24" — rendered server-side via Jinja ──
+  # The title, banner, and Remove-Meal pill all read input_select state.
+  # Using button-card [[[ ]]] templates caused a race: the popup's content
+  # evaluated before HA's input_select.select_option propagated to the
+  # browser's hass.states, so the title would show the *previous* day.
+  # Jinja runs server-side at the moment of the browser_mod.popup service
+  # call — after the sequence's earlier input_select.select_option has
+  # committed — so the value is always current.
   - type: custom:button-card
-    entity: sensor.mealie_weekly_meal_plan
     show_icon: false
     show_name: false
     show_state: false
     tap_action:
       action: none
-    triggers_update:
-      - input_select.meal_day_selector
-      - sensor.mealie_weekly_meal_plan
     styles:
       card:
         - background: none
@@ -45,37 +43,21 @@ cards:
         title:
           - text-align: left
     custom_fields:
-      title: |
-        [[[
-          const daySel = states['input_select.meal_day_selector'];
-          const day = (daySel && daySel.state) ? daySel.state : 'Pick a day';
-          const dayMap = { Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4, Saturday: 5, Sunday: 6 };
-          const dayIdx = dayMap[day];
-          let sub = '';
-          if (dayIdx !== undefined) {
-            const now = new Date();
-            const curDow = now.getDay();
-            const monOff = curDow === 0 ? -6 : 1 - curDow;
-            const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + monOff);
-            const target = new Date(mon);
-            target.setDate(mon.getDate() + dayIdx);
-            const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-            sub = monthNames[target.getMonth()] + ' ' + target.getDate();
-          }
-          return '<div style="font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:400;color:#1F2937;line-height:1.15;">' + day + (sub ? '<span style="color:#9CA3AF;font-weight:400;">, ' + sub + '</span>' : '') + '</div>';
-        ]]]
+      title: >-
+        {% set day = states('input_select.meal_day_selector') %}
+        {% set days_map = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6} %}
+        {% set day_idx = days_map.get(day, 0) %}
+        {% set monday = (now() - timedelta(days=now().weekday())).date() %}
+        {% set target = monday + timedelta(days=day_idx) %}
+        <div style="font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:400;color:#1F2937;line-height:1.15;">{{ day }}<span style="color:#9CA3AF;font-weight:400;">, {{ target.strftime('%b %-d') }}</span></div>
 
-  # ── Current meal banner ──
+  # ── Current meal banner — rendered server-side via Jinja ──
   - type: custom:button-card
-    entity: sensor.mealie_weekly_meal_plan
     show_icon: false
     show_name: false
     show_state: false
     tap_action:
       action: none
-    triggers_update:
-      - sensor.mealie_weekly_meal_plan
-      - input_select.meal_day_selector
     styles:
       card:
         - background: white
@@ -90,29 +72,23 @@ cards:
         summary:
           - text-align: left
     custom_fields:
-      summary: |
-        [[[
-          const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
-          const dayState = states['input_select.meal_day_selector'];
-          const day = (dayState && dayState.state) ? dayState.state : '';
-          const dayMap = { Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4, Saturday: 5, Sunday: 6 };
-          const dayIdx = dayMap[day];
-          if (dayIdx === undefined) return '<div style="color:#9CA3AF;font-size:14px;">No day selected</div>';
-          const now = new Date();
-          const curDow = now.getDay();
-          const monOff = curDow === 0 ? -6 : 1 - curDow;
-          const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + monOff);
-          const target = new Date(mon);
-          target.setDate(mon.getDate() + dayIdx);
-          const dateStr = target.getFullYear() + '-' + String(target.getMonth()+1).padStart(2,'0') + '-' + String(target.getDate()).padStart(2,'0');
-          const todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
-          const isToday = dateStr === todayStr;
-          const match = meals.find(m => m && m.date === dateStr && m.recipe_name);
-          if (match) {
-            return '<div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:' + (isToday ? '#C87456' : '#6B7280') + ';margin-bottom:6px;">' + (isToday ? 'Tonight' : 'Planned') + '</div><div style="font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:400;color:#1F2937;line-height:1.2;">' + match.recipe_name + '</div>';
-          }
-          return '<div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:6px;">Not planned</div><div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#9CA3AF;line-height:1.2;font-style:italic;">Pick a recipe below</div>';
-        ]]]
+      summary: >-
+        {% set day = states('input_select.meal_day_selector') %}
+        {% set days_map = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6} %}
+        {% set day_idx = days_map.get(day, 0) %}
+        {% set monday = (now() - timedelta(days=now().weekday())).date() %}
+        {% set target = monday + timedelta(days=day_idx) %}
+        {% set target_str = target.strftime('%Y-%m-%d') %}
+        {% set today_str = now().strftime('%Y-%m-%d') %}
+        {% set is_today = target_str == today_str %}
+        {% set meals = state_attr('sensor.mealie_weekly_meal_plan', 'meals') or [] %}
+        {% set ns = namespace(match='') %}
+        {% for m in meals %}{% if m.date == target_str and m.recipe_name %}{% set ns.match = m.recipe_name %}{% endif %}{% endfor %}
+        {% if ns.match %}
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:{{ '#C87456' if is_today else '#6B7280' }};margin-bottom:6px;">{{ 'Tonight' if is_today else 'Planned' }}</div><div style="font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:400;color:#1F2937;line-height:1.2;">{{ ns.match }}</div>
+        {% else %}
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:6px;">Not planned</div><div style="font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:400;color:#9CA3AF;line-height:1.2;font-style:italic;">Pick a recipe below</div>
+        {% endif %}
 
   # ── Recipe picker: 2x3 grid ──
   - type: custom:layout-card
@@ -352,10 +328,6 @@ cards:
 
   # ── Remove Meal pill (visible only if the selected day has an assignment) ──
   - type: custom:button-card
-    entity: sensor.mealie_weekly_meal_plan
-    triggers_update:
-      - sensor.mealie_weekly_meal_plan
-      - input_select.meal_day_selector
     show_icon: false
     show_name: false
     show_state: false
@@ -373,34 +345,21 @@ cards:
         - border: none
         - box-shadow: none
         - padding: 14px 4px 4px 4px
-        - display: |
-            [[[
-              const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
-              const dayState = states['input_select.meal_day_selector'];
-              const day = (dayState && dayState.state) ? dayState.state : '';
-              const dayMap = { Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4, Saturday: 5, Sunday: 6 };
-              const dayIdx = dayMap[day];
-              if (dayIdx === undefined) return 'none';
-              const now = new Date();
-              const curDow = now.getDay();
-              const monOff = curDow === 0 ? -6 : 1 - curDow;
-              const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + monOff);
-              const target = new Date(mon);
-              target.setDate(mon.getDate() + dayIdx);
-              const dateStr = target.getFullYear() + '-' + String(target.getMonth()+1).padStart(2,'0') + '-' + String(target.getDate()).padStart(2,'0');
-              const hasIt = meals.find(m => m && m.date === dateStr && m.recipe_name);
-              return hasIt ? 'block' : 'none';
-            ]]]
+        - display: >-
+            {% set day = states('input_select.meal_day_selector') %}
+            {% set days_map = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6} %}
+            {% set day_idx = days_map.get(day, 0) %}
+            {% set monday = (now() - timedelta(days=now().weekday())).date() %}
+            {% set target_str = (monday + timedelta(days=day_idx)).strftime('%Y-%m-%d') %}
+            {% set meals = state_attr('sensor.mealie_weekly_meal_plan', 'meals') or [] %}
+            {% set ns = namespace(has=false) %}
+            {% for m in meals %}{% if m.date == target_str and m.recipe_name %}{% set ns.has = true %}{% endif %}{% endfor %}
+            {{ 'block' if ns.has else 'none' }}
       grid:
         - grid-template-areas: '"pill"'
       custom_fields:
         pill:
           - text-align: center
     custom_fields:
-      pill: |
-        [[[
-          return '<div style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:#FEF2F2;border:1px solid #FECACA;border-radius:24px;color:#B91C1C;font-size:14px;font-weight:600;">'
-            + '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'
-            + '<span>Remove Meal</span>'
-            + '</div>';
-        ]]]
+      pill: >-
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:#FEF2F2;border:1px solid #FECACA;border-radius:24px;color:#B91C1C;font-size:14px;font-weight:600;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Remove Meal</span></div>

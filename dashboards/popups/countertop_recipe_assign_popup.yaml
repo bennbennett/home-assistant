@@ -16,20 +16,17 @@ card_mod:
       background: none !important;
     }
 cards:
-  # ── Title + recipe name ──
-  # Same pattern as countertop_day_slot_popup: entity is the
-  # weekly_meal_plan sensor so button-card's reactive bindings match the
-  # day-cards below; the recipe name comes from states[] (not entity.state).
+  # ── Title + recipe name — rendered server-side via Jinja ──
+  # Jinja runs at browser_mod.popup service-call time, after the
+  # sequence's ct_set_recipe_selector_by_index has committed, so the
+  # recipe name is always fresh. See countertop_day_slot_popup for the
+  # rationale.
   - type: custom:button-card
-    entity: sensor.mealie_weekly_meal_plan
     show_icon: false
     show_name: false
     show_state: false
     tap_action:
       action: none
-    triggers_update:
-      - input_select.recipe_selector
-      - sensor.mealie_weekly_meal_plan
     styles:
       card:
         - background: none
@@ -42,13 +39,9 @@ cards:
         title:
           - text-align: left
     custom_fields:
-      title: |
-        [[[
-          const recipeSel = states['input_select.recipe_selector'];
-          const recipe = (recipeSel && recipeSel.state) ? recipeSel.state : 'Recipe';
-          return '<div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:4px;">Assign to…</div>'
-            + '<div style="font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:400;color:#1F2937;line-height:1.2;">' + recipe + '</div>';
-        ]]]
+      title: >-
+        {% set recipe = states('input_select.recipe_selector') %}
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:4px;">Assign to…</div><div style="font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:400;color:#1F2937;line-height:1.2;">{{ recipe }}</div>
 
   # ── 7-day grid: 4 top row, 3 bottom row via 4-column grid with last row offset ──
   - type: custom:layout-card
