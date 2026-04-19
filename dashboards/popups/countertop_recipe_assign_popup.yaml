@@ -1,0 +1,404 @@
+##############################################################################
+#  Countertop — Recipe-First Assign Popup                                    #
+#  Opens when a recipe card in the Meals view Recipe Browser is tapped.      #
+#  Shows the recipe name and a grid of 7 day buttons. Tap a day to replace   #
+#  that day's dinner with this recipe.                                       #
+#                                                                            #
+#  The recipe is passed in via input_select.recipe_selector — the caller     #
+#  MUST set that selector before opening this popup.                         #
+##############################################################################
+type: vertical-stack
+card_mod:
+  style: |
+    ha-card {
+      border: none !important;
+      box-shadow: none !important;
+      background: none !important;
+    }
+cards:
+  # ── Title + recipe name ──
+  - type: custom:button-card
+    entity: input_select.recipe_selector
+    show_icon: false
+    show_name: false
+    show_state: false
+    tap_action:
+      action: none
+    triggers_update:
+      - input_select.recipe_selector
+    styles:
+      card:
+        - background: none
+        - border: none
+        - box-shadow: none
+        - padding: 4px 4px 0 4px
+      grid:
+        - grid-template-areas: '"title"'
+      custom_fields:
+        title:
+          - text-align: left
+    custom_fields:
+      title: |
+        [[[
+          const recipe = (entity && entity.state) ? entity.state : 'Recipe';
+          return '<div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:4px;">Assign to…</div>'
+            + '<div style="font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:400;color:#1F2937;line-height:1.2;">' + recipe + '</div>';
+        ]]]
+
+  # ── 7-day grid: 4 top row, 3 bottom row via 4-column grid with last row offset ──
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 1fr 1fr
+      grid-gap: 10px
+      margin: 14px 4px 0 4px
+    cards:
+      - type: custom:button-card
+        entity: sensor.mealie_weekly_meal_plan
+        triggers_update:
+          - sensor.mealie_weekly_meal_plan
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.assign_meal_to_day
+                  data:
+                    day_name: Monday
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px 16px
+            - box-shadow: none
+          grid:
+            - grid-template-areas: '"lbl"'
+          custom_fields:
+            lbl:
+              - width: 100%
+        custom_fields:
+          lbl: |
+            [[[
+              const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
+              const now = new Date();
+              const curDow = now.getDay();
+              const monOff = curDow === 0 ? -6 : 1 - curDow;
+              const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + monOff);
+              const tgt = new Date(mon); tgt.setDate(mon.getDate() + 0);
+              const ds = tgt.getFullYear() + '-' + String(tgt.getMonth()+1).padStart(2,'0') + '-' + String(tgt.getDate()).padStart(2,'0');
+              const match = meals.find(m => m && m.date === ds && m.recipe_name);
+              const sub = match ? match.recipe_name : 'Open';
+              const subColor = match ? '#9CA3AF' : '#4A7C59';
+              return '<div style="display:flex;justify-content:space-between;align-items:center;">'
+                + '<div>'
+                + '<div style="font-size:16px;font-weight:600;color:#1F2937;">Mon ' + tgt.getDate() + '</div>'
+                + '<div style="font-size:12px;color:' + subColor + ';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">' + sub + '</div>'
+                + '</div>'
+                + '</div>';
+            ]]]
+
+      - type: custom:button-card
+        entity: sensor.mealie_weekly_meal_plan
+        triggers_update:
+          - sensor.mealie_weekly_meal_plan
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.assign_meal_to_day
+                  data:
+                    day_name: Tuesday
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px 16px
+            - box-shadow: none
+          grid:
+            - grid-template-areas: '"lbl"'
+          custom_fields:
+            lbl:
+              - width: 100%
+        custom_fields:
+          lbl: |
+            [[[
+              const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
+              const now = new Date();
+              const curDow = now.getDay();
+              const monOff = curDow === 0 ? -6 : 1 - curDow;
+              const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + monOff);
+              const tgt = new Date(mon); tgt.setDate(mon.getDate() + 1);
+              const ds = tgt.getFullYear() + '-' + String(tgt.getMonth()+1).padStart(2,'0') + '-' + String(tgt.getDate()).padStart(2,'0');
+              const match = meals.find(m => m && m.date === ds && m.recipe_name);
+              const sub = match ? match.recipe_name : 'Open';
+              const subColor = match ? '#9CA3AF' : '#4A7C59';
+              return '<div style="display:flex;justify-content:space-between;align-items:center;">'
+                + '<div>'
+                + '<div style="font-size:16px;font-weight:600;color:#1F2937;">Tue ' + tgt.getDate() + '</div>'
+                + '<div style="font-size:12px;color:' + subColor + ';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">' + sub + '</div>'
+                + '</div>'
+                + '</div>';
+            ]]]
+
+      - type: custom:button-card
+        entity: sensor.mealie_weekly_meal_plan
+        triggers_update:
+          - sensor.mealie_weekly_meal_plan
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.assign_meal_to_day
+                  data:
+                    day_name: Wednesday
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px 16px
+            - box-shadow: none
+          grid:
+            - grid-template-areas: '"lbl"'
+          custom_fields:
+            lbl:
+              - width: 100%
+        custom_fields:
+          lbl: |
+            [[[
+              const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
+              const now = new Date();
+              const curDow = now.getDay();
+              const monOff = curDow === 0 ? -6 : 1 - curDow;
+              const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + monOff);
+              const tgt = new Date(mon); tgt.setDate(mon.getDate() + 2);
+              const ds = tgt.getFullYear() + '-' + String(tgt.getMonth()+1).padStart(2,'0') + '-' + String(tgt.getDate()).padStart(2,'0');
+              const match = meals.find(m => m && m.date === ds && m.recipe_name);
+              const sub = match ? match.recipe_name : 'Open';
+              const subColor = match ? '#9CA3AF' : '#4A7C59';
+              return '<div style="display:flex;justify-content:space-between;align-items:center;">'
+                + '<div>'
+                + '<div style="font-size:16px;font-weight:600;color:#1F2937;">Wed ' + tgt.getDate() + '</div>'
+                + '<div style="font-size:12px;color:' + subColor + ';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">' + sub + '</div>'
+                + '</div>'
+                + '</div>';
+            ]]]
+
+      - type: custom:button-card
+        entity: sensor.mealie_weekly_meal_plan
+        triggers_update:
+          - sensor.mealie_weekly_meal_plan
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.assign_meal_to_day
+                  data:
+                    day_name: Thursday
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px 16px
+            - box-shadow: none
+          grid:
+            - grid-template-areas: '"lbl"'
+          custom_fields:
+            lbl:
+              - width: 100%
+        custom_fields:
+          lbl: |
+            [[[
+              const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
+              const now = new Date();
+              const curDow = now.getDay();
+              const monOff = curDow === 0 ? -6 : 1 - curDow;
+              const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + monOff);
+              const tgt = new Date(mon); tgt.setDate(mon.getDate() + 3);
+              const ds = tgt.getFullYear() + '-' + String(tgt.getMonth()+1).padStart(2,'0') + '-' + String(tgt.getDate()).padStart(2,'0');
+              const match = meals.find(m => m && m.date === ds && m.recipe_name);
+              const sub = match ? match.recipe_name : 'Open';
+              const subColor = match ? '#9CA3AF' : '#4A7C59';
+              return '<div style="display:flex;justify-content:space-between;align-items:center;">'
+                + '<div>'
+                + '<div style="font-size:16px;font-weight:600;color:#1F2937;">Thu ' + tgt.getDate() + '</div>'
+                + '<div style="font-size:12px;color:' + subColor + ';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">' + sub + '</div>'
+                + '</div>'
+                + '</div>';
+            ]]]
+
+      - type: custom:button-card
+        entity: sensor.mealie_weekly_meal_plan
+        triggers_update:
+          - sensor.mealie_weekly_meal_plan
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.assign_meal_to_day
+                  data:
+                    day_name: Friday
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px 16px
+            - box-shadow: none
+          grid:
+            - grid-template-areas: '"lbl"'
+          custom_fields:
+            lbl:
+              - width: 100%
+        custom_fields:
+          lbl: |
+            [[[
+              const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
+              const now = new Date();
+              const curDow = now.getDay();
+              const monOff = curDow === 0 ? -6 : 1 - curDow;
+              const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + monOff);
+              const tgt = new Date(mon); tgt.setDate(mon.getDate() + 4);
+              const ds = tgt.getFullYear() + '-' + String(tgt.getMonth()+1).padStart(2,'0') + '-' + String(tgt.getDate()).padStart(2,'0');
+              const match = meals.find(m => m && m.date === ds && m.recipe_name);
+              const sub = match ? match.recipe_name : 'Open';
+              const subColor = match ? '#9CA3AF' : '#4A7C59';
+              return '<div style="display:flex;justify-content:space-between;align-items:center;">'
+                + '<div>'
+                + '<div style="font-size:16px;font-weight:600;color:#1F2937;">Fri ' + tgt.getDate() + '</div>'
+                + '<div style="font-size:12px;color:' + subColor + ';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">' + sub + '</div>'
+                + '</div>'
+                + '</div>';
+            ]]]
+
+      - type: custom:button-card
+        entity: sensor.mealie_weekly_meal_plan
+        triggers_update:
+          - sensor.mealie_weekly_meal_plan
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.assign_meal_to_day
+                  data:
+                    day_name: Saturday
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px 16px
+            - box-shadow: none
+          grid:
+            - grid-template-areas: '"lbl"'
+          custom_fields:
+            lbl:
+              - width: 100%
+        custom_fields:
+          lbl: |
+            [[[
+              const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
+              const now = new Date();
+              const curDow = now.getDay();
+              const monOff = curDow === 0 ? -6 : 1 - curDow;
+              const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + monOff);
+              const tgt = new Date(mon); tgt.setDate(mon.getDate() + 5);
+              const ds = tgt.getFullYear() + '-' + String(tgt.getMonth()+1).padStart(2,'0') + '-' + String(tgt.getDate()).padStart(2,'0');
+              const match = meals.find(m => m && m.date === ds && m.recipe_name);
+              const sub = match ? match.recipe_name : 'Open';
+              const subColor = match ? '#9CA3AF' : '#4A7C59';
+              return '<div style="display:flex;justify-content:space-between;align-items:center;">'
+                + '<div>'
+                + '<div style="font-size:16px;font-weight:600;color:#1F2937;">Sat ' + tgt.getDate() + '</div>'
+                + '<div style="font-size:12px;color:' + subColor + ';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">' + sub + '</div>'
+                + '</div>'
+                + '</div>';
+            ]]]
+
+      - type: custom:button-card
+        entity: sensor.mealie_weekly_meal_plan
+        triggers_update:
+          - sensor.mealie_weekly_meal_plan
+        show_icon: false
+        show_name: false
+        show_state: false
+        tap_action:
+          action: fire-dom-event
+          browser_mod:
+            service: browser_mod.sequence
+            data:
+              sequence:
+                - service: script.assign_meal_to_day
+                  data:
+                    day_name: Sunday
+                - service: browser_mod.close_popup
+        styles:
+          card:
+            - background: '#F9FAFB'
+            - border: 1px solid '#E8E4DE'
+            - border-radius: 14px
+            - padding: 14px 16px
+            - box-shadow: none
+          grid:
+            - grid-template-areas: '"lbl"'
+          custom_fields:
+            lbl:
+              - width: 100%
+        custom_fields:
+          lbl: |
+            [[[
+              const meals = (entity && entity.attributes && Array.isArray(entity.attributes.meals)) ? entity.attributes.meals : [];
+              const now = new Date();
+              const curDow = now.getDay();
+              const monOff = curDow === 0 ? -6 : 1 - curDow;
+              const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + monOff);
+              const tgt = new Date(mon); tgt.setDate(mon.getDate() + 6);
+              const ds = tgt.getFullYear() + '-' + String(tgt.getMonth()+1).padStart(2,'0') + '-' + String(tgt.getDate()).padStart(2,'0');
+              const match = meals.find(m => m && m.date === ds && m.recipe_name);
+              const sub = match ? match.recipe_name : 'Open';
+              const subColor = match ? '#9CA3AF' : '#4A7C59';
+              return '<div style="display:flex;justify-content:space-between;align-items:center;">'
+                + '<div>'
+                + '<div style="font-size:16px;font-weight:600;color:#1F2937;">Sun ' + tgt.getDate() + '</div>'
+                + '<div style="font-size:12px;color:' + subColor + ';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">' + sub + '</div>'
+                + '</div>'
+                + '</div>';
+            ]]]

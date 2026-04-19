@@ -697,10 +697,9 @@
         meals: >
           {% set ns = namespace(items=[]) %}
           {% for m in mealplan_response['mealplan'] | default([]) %}
-            {% set raw_title = (m.title | default('', true) | string | trim) %}
             {% set ns.items = ns.items + [{
               'date': m.mealplan_date | string,
-              'title': '' if raw_title == '__HA_CLEARED__' else raw_title,
+              'title': m.title | default('', true) | string | trim,
               'recipe_name': m.recipe.name if m.recipe else '',
               'recipe_slug': m.recipe.slug if m.recipe else ''
             }] %}

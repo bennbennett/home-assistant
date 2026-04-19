@@ -421,16 +421,29 @@ open_calendar_event_popup:
 
 assign_meal_to_day:
   alias: "Assign Meal to Day"
-  description: "Assigns the selected recipe to the selected day via Mealie"
+  description: "Assigns a recipe to a day of the current week via Mealie. Accepts explicit day_name + recipe fields; falls back to the input_select helpers for callers that pre-populate them."
+  fields:
+    day_name:
+      description: "Day of the week (Monday..Sunday). Optional; falls back to input_select.meal_day_selector."
+      example: "Friday"
+    recipe_name:
+      description: "Recipe display name. Optional; falls back to input_select.recipe_selector. Ignored if recipe_slug is provided."
+      example: "Pressure Cooker Spicy Pork Shoulder"
+    recipe_slug:
+      description: "Recipe slug. Optional; skips the name→slug lookup when provided."
+      example: "pressure-cooker-spicy-pork-shoulder"
   sequence:
     - variables:
-        selected_day: "{{ states('input_select.meal_day_selector') }}"
-        selected_recipe: "{{ states('input_select.recipe_selector') }}"
+        selected_day: "{{ day_name | default(states('input_select.meal_day_selector'), true) }}"
+        selected_recipe: "{{ recipe_name | default(states('input_select.recipe_selector'), true) }}"
         recipes: "{{ state_attr('sensor.mealie_recipe_browser', 'items') | default([]) }}"
-        # Look up recipe SLUG from sensor (slug is populated; recipe_id is not
-        # due to a field-name mismatch in the HA mealie.get_recipes integration)
-        recipe_slug: "{{ (recipes | selectattr('name', 'eq', selected_recipe) | map(attribute='slug') | list | first) | default('') }}"
-        # Calculate date from day name (Python weekday: Mon=0 ... Sun=6)
+        # Prefer an explicit slug; otherwise look one up by name.
+        resolved_slug: >-
+          {% if recipe_slug is defined and recipe_slug %}
+            {{ recipe_slug }}
+          {% else %}
+            {{ (recipes | selectattr('name', 'eq', selected_recipe) | map(attribute='slug') | list | first) | default('') }}
+          {% endif %}
         days_map:
           "Monday": 0
           "Tuesday": 1
@@ -442,24 +455,25 @@ assign_meal_to_day:
         target_dow: "{{ days_map[selected_day] }}"
         current_monday: "{{ (now() - timedelta(days=now().weekday())).strftime('%Y-%m-%d') }}"
         target_date: "{{ (as_datetime(current_monday) + timedelta(days=target_dow | int)).strftime('%Y-%m-%d') }}"
-    # Fix 2026-04-11: Use shell_command instead of mealie.set_mealplan because
-    # mealie.get_recipes doesn't populate recipe_id. The shell script resolves
-    # slug→UUID via Mealie's API directly, then POSTs the mealplan entry.
     - condition: template
-      value_template: "{{ recipe_slug | trim | length > 0 }}"
+      value_template: "{{ resolved_slug | trim | length > 0 }}"
     - action: shell_command.mealie_assign_meal
       data:
-        slug: "{{ recipe_slug | trim }}"
+        slug: "{{ resolved_slug | trim }}"
         date: "{{ target_date }}"
     - event: mealie_mealplan_refresh
   mode: single
 
 clear_meal_for_day:
   alias: "Clear Meal for Day"
-  description: "Clears the selected day dinner entry in Mealie"
+  description: "Deletes the dinner mealplan entry for a day of the current week in Mealie."
+  fields:
+    day_name:
+      description: "Day of the week (Monday..Sunday). Optional; falls back to input_select.meal_day_selector."
+      example: "Friday"
   sequence:
     - variables:
-        selected_day: "{{ states('input_select.meal_day_selector') }}"
+        selected_day: "{{ day_name | default(states('input_select.meal_day_selector'), true) }}"
         days_map:
           "Monday": 0
           "Tuesday": 1
@@ -471,12 +485,8 @@ clear_meal_for_day:
         target_dow: "{{ days_map[selected_day] }}"
         current_monday: "{{ (now() - timedelta(days=now().weekday())).strftime('%Y-%m-%d') }}"
         target_date: "{{ (as_datetime(current_monday) + timedelta(days=target_dow | int)).strftime('%Y-%m-%d') }}"
-    - action: mealie.set_mealplan
+    - action: shell_command.mealie_clear_meal
       data:
-        config_entry_id: "01KF57HBNBY4RWWRGH5PJKBF1C"
-        note_title: "__HA_CLEARED__"
-        note_text: "auto-clear"
-        entry_type: dinner
         date: "{{ target_date }}"
     - event: mealie_mealplan_refresh
   mode: single
@@ -667,11 +677,11 @@ countertop_assign_meal_to_tonight:
   mode: single
 
 ############################################################
-# Countertop — Assign Recipe by Index
+# Countertop — Assign Recipe by Index (to today)
 ############################################################
 countertop_assign_recipe_by_index:
   alias: "Countertop Assign Recipe by Index"
-  description: "Resolves a recipe name from sensor index and delegates to assign_meal_to_tonight"
+  description: "Resolves a recipe name from sensor index and assigns to tonight"
   fields:
     index:
       description: "Index into mealie_recipe_browser items (0-5)"
@@ -687,6 +697,60 @@ countertop_assign_recipe_by_index:
     - service: script.countertop_assign_meal_to_tonight
       data:
         recipe_name: "{{ recipe_name }}"
+  mode: single
+
+############################################################
+# Countertop — Set recipe selector by sensor index. Used by
+# the Meals view recipe cards to prime the recipe_selector
+# before countertop_recipe_assign_popup opens.
+############################################################
+ct_set_recipe_selector_by_index:
+  alias: "Countertop Set Recipe Selector by Index"
+  description: "Sets input_select.recipe_selector to the recipe at the given sensor index"
+  fields:
+    index:
+      description: "Index into mealie_recipe_browser items (0-5)"
+      example: "0"
+  sequence:
+    - variables:
+        items: "{{ state_attr('sensor.mealie_recipe_browser', 'items') | default([]) }}"
+        idx: "{{ index | int }}"
+        recipe_name: >-
+          {{ items[idx].name | default('') if idx < items | length else '' }}
+    - condition: template
+      value_template: "{{ recipe_name | length > 0 }}"
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.recipe_selector
+      data:
+        option: "{{ recipe_name }}"
+  mode: single
+
+############################################################
+# Countertop — Assign Recipe by Index to the currently
+# selected day (input_select.meal_day_selector). Used by
+# countertop_day_slot_popup's recipe cards.
+############################################################
+ct_assign_recipe_by_index_to_selected_day:
+  alias: "Countertop Assign Recipe by Index to Selected Day"
+  description: "Looks up recipe slug from sensor index and assigns to input_select.meal_day_selector"
+  fields:
+    index:
+      description: "Index into mealie_recipe_browser items (0-5)"
+      example: "0"
+  sequence:
+    - variables:
+        items: "{{ state_attr('sensor.mealie_recipe_browser', 'items') | default([]) }}"
+        idx: "{{ index | int }}"
+        slug: >-
+          {{ items[idx].slug | default('') if idx < items | length else '' }}
+        day_name: "{{ states('input_select.meal_day_selector') }}"
+    - condition: template
+      value_template: "{{ slug | length > 0 and day_name | length > 0 }}"
+    - service: script.assign_meal_to_day
+      data:
+        day_name: "{{ day_name }}"
+        recipe_slug: "{{ slug }}"
   mode: single
 
 ############################################################

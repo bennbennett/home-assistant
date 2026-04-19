@@ -261,14 +261,12 @@ rest_command:
     content_type: "application/json"
     payload: '{"date": "{{ date }}", "entry_type": "{{ entry_type }}", "recipe_id": "{{ recipe_id }}"}'
 
-# Shell command for meal assignment — bypasses the broken mealie.set_mealplan
-# HA integration by calling Mealie's API directly with slug→UUID lookup.
-# Fix 2026-04-11: mealie.get_recipes doesn't populate recipe_id in its response,
-# so mealie.set_mealplan can't be called with a UUID. This shell script reads
-# the token from secrets.yaml, resolves slug→UUID via Mealie API, then POSTs
-# the mealplan entry directly.
+# Shell commands for meal assign + clear. Both talk to Mealie's REST API
+# directly with delete-before-write semantics so the mealplan stays at one
+# entry per date — see scripts/assign_meal.sh for the rationale.
 shell_command:
   mealie_assign_meal: '/config/scripts/assign_meal.sh "{{ slug }}" "{{ date }}"'
+  mealie_clear_meal: '/config/scripts/clear_meal.sh "{{ date }}"'
 
 # KP405 Dimmer Fix - DEPRECATED: Migrated to template: section above (Dec 2025)
 # light: !include lights.yaml
