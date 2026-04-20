@@ -24,29 +24,29 @@ You should see: `{"message": "API running."}`
 After loading the environment, you can use the helper script:
 
 ```bash
-./hass-setup.sh test      # Test connection
-./hass-setup.sh summary   # Get entity summary
-./hass-setup.sh states    # Get all states
+./tools/hass-setup.sh test      # Test connection
+./tools/hass-setup.sh summary   # Get entity summary
+./tools/hass-setup.sh states    # Get all states
 ```
 
 ### Alternative: Load Everything at Once
 This will load the environment AND test the connection:
 ```bash
-cd /Users/bbennett/Documents/25_PERSONAL-Environment/home-assistant && source .env && export HASS_URL HASS_TOKEN && ./hass-setup.sh test
+cd /Users/bbennett/Documents/25_PERSONAL-Environment/home-assistant && source .env && export HASS_URL HASS_TOKEN && ./tools/hass-setup.sh test
 ```
 
 ## What's Included
 
 - **`.env`** - Your Home Assistant credentials and configuration
-- **`hass-setup.sh`** - Helper script that loads environment variables and provides useful functions
+- **`tools/hass-setup.sh`** - Helper script that loads environment variables and provides useful functions
 - **`README.md`** - This file
 
 ## Configuration Details
 
-- **Home Assistant URL:** http://100.116.131.121:8123 (Tailscale)
+- **Home Assistant URL:** http://192.168.68.114:8123 (local LAN) / http://100.116.131.121:8123 (Tailscale, from anywhere)
 - **Token Name:** Claude MCP
 - **Location:** Home (America/Los_Angeles)
-- **Version:** 2025.7.1
+- **Version:** 2026.4.3
 
 ## Helper Script Usage
 
@@ -54,29 +54,29 @@ After sourcing the setup script, you can use these commands:
 
 ### Test Connection
 ```bash
-./hass-setup.sh test
+./tools/hass-setup.sh test
 ```
 
 ### Get Entity Summary
 ```bash
-./hass-setup.sh summary
+./tools/hass-setup.sh summary
 ```
 
 ### Get All States
 ```bash
-./hass-setup.sh states
+./tools/hass-setup.sh states
 # Or with filter:
-./hass-setup.sh states "light"
+./tools/hass-setup.sh states "light"
 ```
 
 ### Get Specific Entity
 ```bash
-./hass-setup.sh entity light.living_room
+./tools/hass-setup.sh entity light.living_room
 ```
 
 ### Call a Service
 ```bash
-./hass-setup.sh service light turn_on '{"entity_id": "light.living_room"}'
+./tools/hass-setup.sh service light turn_on '{"entity_id": "light.living_room"}'
 ```
 
 ## Environment Variables
@@ -138,7 +138,7 @@ Your token is stored in `.env` and has the following details:
 - **Name in Home Assistant:** Claude MCP
 
 If you need to create a new token:
-1. Go to http://192.168.68.108:8123
+1. Go to http://192.168.68.114:8123 (or the Tailscale URL if you're remote)
 2. Click your profile (bottom left)
 3. Scroll to "Long-Lived Access Tokens"
 4. Create a new token
@@ -153,7 +153,7 @@ This usually means the environment variables aren't properly exported:
 3. Verify they're set: `echo $HASS_TOKEN`
 
 ### Helper Script Errors
-If `./hass-setup.sh` commands fail:
+If `./tools/hass-setup.sh` commands fail:
 1. The script loads `.env` automatically, but may not export variables to your current shell
 2. Use the direct API commands shown below instead
 3. Or explicitly source and export: `source .env && export HASS_URL HASS_TOKEN`
@@ -181,4 +181,4 @@ If `./hass-setup.sh` commands fail:
 - [Home Assistant Service Calls](https://www.home-assistant.io/docs/scripts/service-calls/)
 
 ---
-*Configuration saved on 2025-11-13*
+*Last updated: 2026-04-19*

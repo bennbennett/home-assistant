@@ -1,5 +1,5 @@
 # Home Assistant Documentation & Reference
-*Last Updated: February 23, 2026 at 09:10 AM*
+*Last Updated: April 19, 2026*
 
 ## Quick Start for Claude Code
 
@@ -101,7 +101,7 @@ open "smb://192.168.68.114/config"
 - **URL:** http://192.168.68.114:8123
 - **Token Name:** Claude MCP
 - **Token:** Stored in `.env` file (expires 2073)
-- **Version:** Home Assistant 2025.7.1
+- **Version:** Home Assistant 2026.4.3
 - **Location:** Home (America/Los Angeles)
 - **Time Zone:** America/Los_Angeles
 

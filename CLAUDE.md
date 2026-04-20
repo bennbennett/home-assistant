@@ -25,7 +25,7 @@
 | **iPad Dashboard** | `/lovelace/ipad` (tablet-dashboard) |
 | **Home Hub Dashboard** | `/home-hub/rooms` (home-hub) |
 | **Mobile Dashboard** | `/mobile-dashboard/home` (mobile-dashboard) |
-| **HA Version** | 2026.3.0 |
+| **HA Version** | 2026.4.3 |
 
 ## Remote Access (Away from Home)
 

@@ -2,6 +2,41 @@
 
 All notable changes to the Home Assistant configuration.
 
+## [April 19, 2026]
+
+### Fixed
+- **Mealie mealplan accumulation — delete-before-insert** (`scripts/assign_meal.sh`, `scripts/clear_meal.sh`, `configuration.yaml`, `scripts.yaml`, `automations.yaml`)
+  - Re-assigning a meal used to stack a new row in Mealie every time (Mealie's `POST /households/mealplans` is always an append), so the HA sensor ended up with multiple entries per date and the popup UI picked whichever one Mealie happened to return first. Net effect: the dinner card looked "stuck" on an old meal.
+  - `scripts/assign_meal.sh` now `GET`s existing dinner entries for the target date, `DELETE`s each one, then `POST`s the new one. One row per date, always.
+  - New `scripts/clear_meal.sh` (plus `shell_command.mealie_clear_meal`) replaces the old `__HA_CLEARED__` sentinel-note pattern with a real delete, so `script.clear_meal_for_day` actually empties the date instead of appending a hidden marker.
+  - `script.assign_meal_to_day` and `script.clear_meal_for_day` now accept explicit `day_name` / `recipe_name` / `recipe_slug` fields, so dashboard cards can pass them directly without round-tripping through `input_select` helpers (the old round-trip was prone to races).
+  - `mealie_fetch_mealplan` automation no longer needs the `__HA_CLEARED__` pass-through — sentinels can't exist anymore.
+
+### Added
+- **Countertop Meals view — fully clickable** (`dashboards/countertop/views/meals.yaml`, `dashboards/popups/countertop_day_slot_popup.yaml`, `dashboards/popups/countertop_recipe_assign_popup.yaml`, `scripts.yaml`)
+  - The 7-day grid and recipe browser were previously a read-only HTML render inside a single non-clickable `button-card` custom field. Rebuilt as real `button-card`s with live tap targets.
+  - Tap a day → opens `countertop_day_slot_popup` with the day name, current meal (or "Not planned"), 6 recipe cards for quick-assign, and a "Remove Meal" pill that only appears when the day has an assignment.
+  - Tap a recipe in the Recipe Browser → opens `countertop_recipe_assign_popup` with "Assign to..." and 7 day buttons, each showing the day's current meal inline so you can see what you'd be replacing.
+  - Each tap_action sequence includes an 800ms `browser_mod.delay` between the `input_select.select_option` and the `browser_mod.popup` call so the state change lands in `hass.states` before the popup's JS templates evaluate.
+  - New helper scripts: `script.ct_set_recipe_selector_by_index` (primes the recipe selector from a sensor index before the recipe-assign popup opens) and `script.ct_assign_recipe_by_index_to_selected_day` (day-slot popup tap target).
+
+- **Countertop Shopping List flow — one popup for generate / review / send** (`dashboards/countertop/views/meals.yaml`, `dashboards/popups/grocery_list_popup.yaml`, `dashboards/home-hub/decluttering_templates.yaml`)
+  - The Countertop header pill now says "Shopping List" and opens the shared `grocery_list_popup` instead of firing `script.generate_groceries_for_mealplan` directly with no visible review step.
+  - The popup has a new **Generate** button (4th action, amber) that calls the generate script without closing the popup — so the refreshed list is immediately reviewable.
+  - Full flow inside the one popup: review/edit the `todo-list` → tap **Generate** to refresh from the meal plan if needed → check items / edit / swipe delete → tap **Send to Keep** when ready. `Send to Keep` triggers `input_button.sync_shopping_list` → the existing `mealie_google_keep_shopping_list_sync` automation (manual-only, no auto-push).
+  - Popup bumped from `size: normal` to `size: wide`; 4 buttons at 140px each need ~600px and normal caps at ~500px, so "Send to Keep" was previously clipped offscreen. Both Countertop and Home Hub callers updated.
+
+- **Kitchen timer alert sound — Time Timer WAV on the iPad** (`automations.yaml`, `www/sounds/timer_end.wav`)
+  - `countertop_kitchen_timer_finished_alert` now plays `/local/sounds/timer_end.wav` (Time Timer's signature alert, 370 KB 16-bit mono 48 kHz) via `browser_mod.javascript` on registered browsers, so the kitchen iPad actually makes the right sound when the timer ends.
+  - iOS push notification to iPad kept as a backup for when the HA frontend isn't foregrounded.
+
+### Changed
+- **home-server/CLAUDE.md** (separate repo, on disk only) — removed stale references to HA's Tailscale daemon being offline (it came back up after a restart on 2026-04-19). Added a "Subnet collision" caveat explaining that when a Tailscale client is on a foreign LAN that also uses `192.168.68.0/24` (hotel Wi-Fi, second site), the OS routes `.114` locally and the subnet-route through bennett-server is silently shadowed — use `100.116.131.121` (HA's direct Tailscale IP) as the fallback.
+
+### For contributors
+- Decision log: tried to switch the Countertop popup templates to server-side Jinja (commit `62ae23b`) to eliminate the stale-state race entirely — HA does not recursively render Jinja inside `browser_mod.popup.content`, so `{% %}` appeared literally in the popup. Reverted (`b5f8198`) to the known-working `[[[ ]]]` pattern with `states[]` global lookups and an 800ms propagation delay.
+- The shared `grocery_list_popup.yaml` is included by both the Countertop (`/the-countertop/meals`) and the Home Hub (`home_hub_meals_main` in `decluttering_templates.yaml`). Changes propagate to both — which is why the Home Hub gets the new **Generate** button for free.
+
 ## [March 2, 2026]
 
 ### Fixed
