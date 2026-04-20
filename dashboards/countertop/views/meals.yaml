@@ -3,7 +3,7 @@
 #  Weekly meal planner with clickable day cards + recipe browser.            #
 #  - Tap a day card  → countertop_day_slot_popup (recipe picker)             #
 #  - Tap a recipe    → countertop_recipe_assign_popup (day picker)           #
-#  - Generate pill   → script.generate_groceries_for_mealplan                #
+#  - Shopping List   → grocery_list_popup (review/edit + Generate + Send)    #
 ##############################################################################
 title: Meals
 path: meals
@@ -73,13 +73,20 @@ cards:
                       <div style="font-family: 'Fraunces', Georgia, serif; font-size: 26px; font-weight: 400; color: #1F2937;">Plan Meals</div>`;
                     ]]]
 
+              # Shopping List pill — opens the shared grocery-list popup
+              # (generate / review / send to Google Keep all live inside).
               - type: custom:button-card
                 show_icon: false
                 show_name: false
                 show_state: false
                 tap_action:
-                  action: call-service
-                  service: script.generate_groceries_for_mealplan
+                  action: fire-dom-event
+                  browser_mod:
+                    service: browser_mod.popup
+                    data:
+                      title: ''
+                      size: normal
+                      content: !include /config/dashboards/popups/grocery_list_popup.yaml
                 styles:
                   card:
                     - background: '#4A7C59'
@@ -100,7 +107,7 @@ cards:
                   pill: |
                     [[[
                       return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-                        <span style="font-size: 14px; font-weight: 600; color: white; letter-spacing: 0.2px;">Generate Shopping List</span>`;
+                        <span style="font-size: 14px; font-weight: 600; color: white; letter-spacing: 0.2px;">Shopping List</span>`;
                     ]]]
 
           # ── THIS WEEK label ──
