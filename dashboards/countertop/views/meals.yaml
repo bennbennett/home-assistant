@@ -85,7 +85,9 @@ cards:
                     service: browser_mod.popup
                     data:
                       title: ''
-                      size: normal
+                      # wide, not normal — 4 action buttons at 140px each
+                      # (Close/Clear All/Generate/Send to Keep) need ~600px
+                      size: wide
                       content: !include /config/dashboards/popups/grocery_list_popup.yaml
                 styles:
                   card:
